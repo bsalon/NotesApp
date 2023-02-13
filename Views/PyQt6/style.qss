@@ -1,0 +1,141 @@
+QWidget#toolbar_container {
+    background-color: #ffc957;
+    border: 1px solid black;
+}
+
+QWidget#todays_notes_container {
+    background-color: #f1f6be;
+    border: 1px solid black;
+}
+
+QWidget#tabs_content_container {
+    background-color: #f1f6be;
+    border: 1px solid black;
+}
+
+QWidget#panel_row {
+    background-color: #d7eb5a;
+}
+
+
+QTabWidget:pane {
+    background-color: #f1f6be;
+    border: 1px solid black;
+}
+
+QTabBar::tab {
+    background: #f1f6be;
+    border: 1px solid black;
+    border-top-left-radius: 4px;
+    border-top-right-radius: 4px;
+    padding: 8px;
+} 
+
+QTabBar::tab:selected { 
+  background: #d7eb5a;
+  margin-bottom: -2px;
+}
+
+
+QListWidget#todays_notes_list { 
+    background-color: #f1f6be;
+    border: 1px solid black;
+}
+
+
+QProgressBar#loading_bar {
+    min-height: 24px;
+    max-height: 24px;
+    border-radius: 12px;
+    border: 1px solid black;
+}
+
+QProgressBar#loading_bar::chunk {
+    border-radius: 6px;
+    background-color: #92d36e;
+}
+
+
+QToolButton#today_notes_icon_button {
+    background-color: #ffc957;
+    border-style: outset;
+    border-width: 0px;
+    font-weight: normal;
+}
+
+QToolButton#today_notes_icon_button:hover {
+    font-weight: bold;
+    background-color: #efb947;
+}
+
+QToolButton#toolbar_icon_button {
+    background-color: #ffc957;
+    border-style: outset;
+    border-width: 0px;
+    font-weight: normal;
+}
+
+QToolButton#toolbar_icon_button:hover {
+    font-weight: bold;
+    background-color: #efb947;
+}
+
+
+QLabel#text_link {
+    color: #006ce5;
+    background-color: #ffc957;
+    border-style: outset;
+    border-width: 0px;
+}
+
+QLabel#text_link:hover {
+    color: #a65ee3;
+}
+
+QLabel#todays_notes_header {
+    background-color: #d7eb5a;
+    font-weight: bold;
+    border: 1px solid black;
+}
+
+QLabel#panel_time_header {
+    font-weight: bold;
+}
+
+
+QTextEdit#panel_note_name {
+    border: none;
+    background-color: #f1f6be;
+}
+
+
+QScrollBar:vertical {
+    border: none;
+    background: white;
+    width:5px;
+    margin: 0px 0px 0px 0px;
+}
+
+QScrollBar::handle:vertical {
+    border: 1px solid black;
+    background: qlineargradient(x1:0, y1:0, x2:1, y2:0,
+    stop: 0 #d7eb5a, stop: 0.5 #d7eb5a, stop: 1 #d7eb5a);
+    min-height: 0px;
+}
+
+QScrollBar::add-line:vertical {
+    background: qlineargradient(x1:0, y1:0, x2:1, y2:0,
+    stop: 0 #d7eb5a, stop: 0.5 #d7eb5a, stop: 1 #d7eb5a);
+    height: 0px;
+    subcontrol-position: bottom;
+    subcontrol-origin: margin;
+}
+
+QScrollBar::sub-line:vertical {
+    background: qlineargradient(x1:0, y1:0, x2:1, y2:0,
+    stop: 0 #d7eb5a, stop: 0.5 #d7eb5a, stop: 1 #d7eb5a);
+    height: 0px;
+    subcontrol-position: top;
+    subcontrol-origin: margin;
+}
+
