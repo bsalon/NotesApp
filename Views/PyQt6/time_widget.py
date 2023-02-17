@@ -6,8 +6,8 @@ from PySide6 import QtCore, QtWidgets, QtGui
 
 
 class TimeWidget(QtWidgets.QWidget):
-    def __init__(self):
-        super().__init__()
+    def __init__(self, *args, **kwargs):
+        super(TimeWidget, self).__init__(*args, **kwargs)
 
         layout = QtWidgets.QVBoxLayout()
         

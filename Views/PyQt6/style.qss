@@ -17,6 +17,37 @@ QWidget#panel_row {
     background-color: #d7eb5a;
 }
 
+QWidget#search_container
+{
+    border: 1px solid black;
+    border-radius: 12px;
+    background-color: white;
+}
+
+QHeaderView::section {
+    background-color: #d7eb5a;
+}
+
+QTableView {
+    background-color: #e9f29b;
+    color: black;
+}
+
+QTableView::item {
+    color: black;
+}
+
+QTableView::item:focus {
+    color: black;
+    background-color: #e9f29b;
+    selection-background-color: #e9f29b;
+}
+
+QTableView::item:selected {
+    color: black;
+    background-color: #d7eb5a;            
+}
+
 
 QTabWidget:pane {
     background-color: #f1f6be;
@@ -100,6 +131,13 @@ QLabel#todays_notes_header {
 
 QLabel#panel_time_header {
     font-weight: bold;
+}
+
+
+QLineEdit#search_bar
+{
+    border: none;
+    background-color: white;
 }
 
 

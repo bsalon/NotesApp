@@ -2,10 +2,15 @@ import sys
 import random
 
 import loading_bar
+import common_table_view
+import searchbar_with_icon
 import time_widget
 import todays_notes_row_widget
+import toggle_switch_button
 
 from PySide6 import QtCore, QtWidgets, QtGui
+
+# Index -> Controller.Index() getAllNotes() -- set todays notes and the table of notes
 
 
 
@@ -37,17 +42,7 @@ class MainWindow(QtWidgets.QWidget):
             self.layout.setRowStretch(r, 1)
         for c in range(8):
             self.layout.setColumnStretch(c, 1)
-
-        # self.hello = ["Hallo Welt", "Hei maailma", "Hola Mundo", "Привет мир"]
-        # self.button = QtWidgets.QPushButton("Click me!")
-        # self.text = QtWidgets.QLabel("Hello World", alignment=QtCore.Qt.AlignCenter)
-        # self.layout.addWidget(self.text)
-        # self.layout.addWidget(self.button)
-        # self.button.clicked.connect(self.magic)
-
         self.setLayout(self.layout)
-
-
 
 
     @QtCore.Slot()
@@ -61,7 +56,6 @@ class MainWindow(QtWidgets.QWidget):
         self.todays_notes_pane_visible = not self.todays_notes_pane_visible
 
 
-
     def __init_toolbar_layout(self):
         col = 0
 
@@ -71,6 +65,7 @@ class MainWindow(QtWidgets.QWidget):
         self.today_notes_icon_button.setText("Today's notes")
         self.today_notes_icon_button.setToolButtonStyle(QtGui.Qt.ToolButtonTextUnderIcon)
         self.today_notes_icon_button.setIcon(self.icon)
+        self.today_notes_icon_button.setIconSize(QtCore.QSize(28, 28))
         self.today_notes_icon_button.setObjectName("today_notes_icon_button")
         self.toolbar_layout.addWidget(self.today_notes_icon_button, 0, col, 0, 4, alignment=QtGui.Qt.AlignCenter)
         self.today_notes_icon_button.clicked.connect(self.toggle_todays_notes_pane)
@@ -107,6 +102,7 @@ class MainWindow(QtWidgets.QWidget):
         self.icon2.addFile("/home/benjaminsalon/diplom/NotesApp/Views/PyQt6/icons/AddIcon.png")
         self.add_icon_button = QtWidgets.QToolButton()
         self.add_icon_button.setIcon(self.icon2)
+        self.add_icon_button.setIconSize(QtCore.QSize(28, 28))
         self.add_icon_button.setObjectName("toolbar_icon_button")
         self.toolbar_layout.addWidget(self.add_icon_button, 0, col, 0, 2, alignment=QtGui.Qt.AlignCenter)
         col += 2
@@ -115,6 +111,7 @@ class MainWindow(QtWidgets.QWidget):
         self.icon3.addFile("/home/benjaminsalon/diplom/NotesApp/Views/PyQt6/icons/EditIcon.png")
         self.edit_icon_button = QtWidgets.QToolButton()
         self.edit_icon_button.setIcon(self.icon3)
+        self.edit_icon_button.setIconSize(QtCore.QSize(28, 28))
         self.edit_icon_button.setObjectName("toolbar_icon_button")
         self.toolbar_layout.addWidget(self.edit_icon_button, 0, col, 0, 2, alignment=QtGui.Qt.AlignCenter)
         col += 2
@@ -123,6 +120,7 @@ class MainWindow(QtWidgets.QWidget):
         self.icon4.addFile("/home/benjaminsalon/diplom/NotesApp/Views/PyQt6/icons/DeleteIcon.png")
         self.delete_icon_button = QtWidgets.QToolButton()
         self.delete_icon_button.setIcon(self.icon4)
+        self.delete_icon_button.setIconSize(QtCore.QSize(28, 28))
         self.delete_icon_button.setObjectName("toolbar_icon_button")
         self.toolbar_layout.addWidget(self.delete_icon_button, 0, col, 0, 2, alignment=QtGui.Qt.AlignCenter)
         col += 2
@@ -133,9 +131,9 @@ class MainWindow(QtWidgets.QWidget):
 
         self.icon5 = QtGui.QIcon()
         self.icon5.addFile("/home/benjaminsalon/diplom/NotesApp/Views/PyQt6/icons/SettingsIcon.png")
-        
         self.settings_dropdown_button = QtWidgets.QToolButton()
         self.settings_dropdown_button.setIcon(self.icon5)
+        self.settings_dropdown_button.setIconSize(QtCore.QSize(28, 28))
         self.settings_dropdown_button.setObjectName("toolbar_icon_button")
         self.toolbar_layout.addWidget(self.settings_dropdown_button, 0, col, 0, 2, alignment=QtGui.Qt.AlignRight)
         col += 2
@@ -157,7 +155,7 @@ class MainWindow(QtWidgets.QWidget):
         self.todays_notes_layout.addWidget(self.todays_notes_header)
 
         self.todays_notes_list = QtWidgets.QListWidget(objectName="todays_notes_list")
-        for i in range(50):
+        for i in range(30):
             item = QtWidgets.QListWidgetItem(self.todays_notes_list)
             self.todays_notes_list.addItem(item)
 
@@ -170,44 +168,192 @@ class MainWindow(QtWidgets.QWidget):
         # TODO - set the sizing right -> Data will come from Controller.Index(View(Model))
 
     
-
     def __init_tabs_content_layout(self):
         self.tabs = QtWidgets.QTabWidget(objectName="tabs")
 
+        self.notes_tab_widget = QtWidgets.QWidget(objectName="notes_tab")
+        self.__init_notes_tab()
+        self.categories_tab_widget = QtWidgets.QWidget(objectName="categories_tab")
+        self.__init_categories_tab()
+        self.tags_tab_widget = QtWidgets.QWidget(objectName="tags_tab")
+        self.__init_tags_tab()
+        self.filters_tab_widget = QtWidgets.QWidget(objectName="filters_tab")
+        self.__init_filters_tab()
 
-        self.test_label = QtWidgets.QLabel("Bad boys bad boys whatchagonnadu when they Bad boys bad boys whatchagonnadu when theyBad boys bad boys whatchagonnadu when theyBad boys bad boys whatchagonnadu when theBad boys bad boys whatchagonnadu when theyBad boys bad boys whatchagonnadu when theyBad boys bad boys whatchagonnadu when theyBad boys bad boys whatchagonnadu when theyBad boys bad boys whatchagonnadu when theyy")
-        self.test_label.setWordWrap(True)
-
-        widget = QtWidgets.QWidget(objectName="notes_tab")
-        layout = QtWidgets.QGridLayout(widget)
-        layout.addWidget(self.test_label)
-
-        self.tabs.addTab(widget, "Notes")
-        self.tabs.addTab(QtWidgets.QWidget(), "Categories")
-        self.tabs.addTab(QtWidgets.QWidget(), "Tags")
-        self.tabs.addTab(QtWidgets.QWidget(), "Fast filters")
-        
+        self.tabs.addTab(self.notes_tab_widget, "Notes")
+        self.tabs.addTab(self.categories_tab_widget, "Categories")
+        self.tabs.addTab(self.tags_tab_widget, "Tags")
+        self.tabs.addTab(self.filters_tab_widget, "Fast filters")
         self.tabs_content_layout.addWidget(self.tabs)
-
-        # self.tab_content = get_notes_tab_content()
-        pass
-
 
 
     def __init_notes_tab(self):
-        pass
+        self.notes_tab_layout = QtWidgets.QGridLayout(self.notes_tab_widget)
+
+        self.notes_tab_filtering_container_widget = QtWidgets.QWidget(objectName="filtering_container")
+        self.notes_tab_filtering_layout = QtWidgets.QGridLayout(self.notes_tab_filtering_container_widget)
+        self.notes_tab_filtering_layout.setContentsMargins(0, 0, 0, 0)
+
+        self.notes_tab_searchbar = searchbar_with_icon.SearchBarWithIcon(objectName="search_container")
+        
+        self.notes_filter_button = QtWidgets.QPushButton("Filter")
+        self.notes_filter_button.clicked.connect(lambda: self.__set_basic_text_filtering(
+            self.notes_tab_table.filter_proxy_model,
+            self.notes_tab_searchbar.searchbar)
+        )
+
+        self.notes_advanced_filter_button = QtWidgets.QPushButton("Advanced filter")
+
+        self.notes_toggle_switch_label = QtWidgets.QLabel("Table view")
+
+        self.notes_toggle_switch_button = toggle_switch_button.ToggleSwitchButton()
+        
+        self.notes_tab_filtering_layout.addWidget(self.notes_tab_searchbar, 0, 0, 0, 4)
+        self.notes_tab_filtering_layout.addWidget(self.notes_filter_button, 0, 4, 0, 1)
+        self.notes_tab_filtering_layout.addWidget(self.notes_advanced_filter_button, 0, 5, 0, 1)
+        
+        self.notes_toggle_layout = QtWidgets.QHBoxLayout()
+        self.notes_toggle_layout.addStretch()
+        self.notes_toggle_layout.addWidget(self.notes_toggle_switch_label)
+        self.notes_toggle_layout.addWidget(self.notes_toggle_switch_button)
+        self.notes_tab_filtering_layout.addLayout(self.notes_toggle_layout, 0, 6, 0, 2)
+
+        self.notes_tab_table = common_table_view.CommonTableView(
+            ["Name", "Time", "Text"],
+            [
+                ["Note name", "12.8.2023", "This text belongs to this note"],
+                ["Note name", "12.8.2023", "This text belongs to this note"],
+                ["Note text", "12.8.2023", "Another text a bit shorter"],
+                ["Short note", "13.8.2023", "Very short text"],
+                ["Note", "14.8.2023", "This text is a medium length text"],
+                ["Note name", "12.8.2023", "This text belongs to this note"],
+                ["Note text", "12.8.2023", "Another text a bit shorter"],
+                ["Short note", "13.8.2023", "Very short text"],
+                ["Note", "14.8.2023", "This text is a medium length text"],
+                ["Note text", "12.8.2023", "Another text a bit shorter"],
+                ["Short note", "13.8.2023", "Very short text"],
+                ["Note", "14.8.2023", "This text is a medium length text"],
+                ["Note name", "12.8.2023", "This text belongs to this note"],
+                ["Note text", "12.8.2023", "Another text a bit shorter"],
+                ["Short note", "13.8.2023", "Very short text"],
+                ["Note", "14.8.2023", "This text is a medium length text"],
+            ]
+        )
+
+        self.notes_tab_layout.addWidget(self.notes_tab_filtering_container_widget)
+        self.notes_tab_layout.addWidget(self.notes_tab_table)
+        
 
 
     def __init_categories_tab(self):
-        pass
+        self.categories_tab_layout = QtWidgets.QGridLayout(self.categories_tab_widget)
+        self.categories_tab_searchbar = searchbar_with_icon.SearchBarWithIcon(objectName="search_container")
+        self.categories_filter_button = QtWidgets.QPushButton("Filter")
+        self.categories_filter_button.clicked.connect(lambda: self.__set_basic_text_filtering(
+            self.categories_tab_table.filter_proxy_model,
+            self.categories_tab_searchbar.searchbar)
+        )
+        self.categories_tab_table = common_table_view.CommonTableView(
+            ["Name", "Description"],
+            [
+                ["Note name", "This text belongs to this note"],
+                ["Note name", "This text belongs to this note"],
+                ["Note text", "Another text a bit shorter"],
+                ["Short note", "Very short text"],
+                ["Note", "This text is a medium length text"],
+                ["Note name", "This text belongs to this note"],
+                ["Note text", "Another text a bit shorter"],
+                ["Short note", "Very short text"],
+                ["Note", "This text is a medium length text"],
+                ["Note text", "Another text a bit shorter"],
+                ["Short note", "Very short text"],
+                ["Note", "This text is a medium length text"],
+                ["Note name", "This text belongs to this note"],
+                ["Note text", "Another text a bit shorter"],
+                ["Short note", "Very short text"],
+                ["Note", "This text is a medium length text"],
+            ]
+        )
+        self.categories_tab_layout.setColumnStretch(0, 1)
+        self.categories_tab_layout.setColumnStretch(2, 1)
+        
+        self.categories_tab_layout.addWidget(self.categories_tab_searchbar, 0, 0)
+        self.categories_tab_layout.addWidget(self.categories_filter_button, 0, 1)
+        self.categories_tab_layout.addWidget(QtWidgets.QWidget(), 0, 2)
+        self.categories_tab_layout.addWidget(self.categories_tab_table, 1, 0, 1, 3)
 
 
     def __init_tags_tab(self):
-        pass
+        self.tags_tab_layout = QtWidgets.QGridLayout(self.tags_tab_widget)
+        self.tags_tab_searchbar = searchbar_with_icon.SearchBarWithIcon(objectName="search_container")
+        self.tags_filter_button = QtWidgets.QPushButton("Filter")
+        self.tags_filter_button.clicked.connect(lambda: self.__set_basic_text_filtering(
+            self.tags_tab_table.filter_proxy_model,
+            self.tags_tab_searchbar.searchbar)
+        )
+        self.tags_tab_table = common_table_view.CommonTableView(
+            ["Name", "Description"],
+            [
+                ["Default tag", "Just a default note tag"],
+                ["Expense", "This note will cost me money"],
+                ["Food", "Anything what you can eat"],
+                ["Entertainment", "Anything fun"],
+                ["Shopping", "Shopping of any kind"],
+            ]
+        )
+        self.tags_tab_layout.setColumnStretch(0, 1)
+        self.tags_tab_layout.setColumnStretch(2, 1)
+        
+        self.tags_tab_layout.addWidget(self.tags_tab_searchbar, 0, 0)
+        self.tags_tab_layout.addWidget(self.tags_filter_button, 0, 1)
+        self.tags_tab_layout.addWidget(QtWidgets.QWidget(), 0, 2)
+        self.tags_tab_layout.addWidget(self.tags_tab_table, 1, 0, 1, 3)
 
 
-    def __init_fast_filters_tab(self):
-        pass
+    def __init_filters_tab(self):
+        self.filters_tab_layout = QtWidgets.QGridLayout(self.filters_tab_widget)
+        self.filters_tab_searchbar = searchbar_with_icon.SearchBarWithIcon(objectName="search_container")
+        self.filters_filter_button = QtWidgets.QPushButton("Filter")
+        self.filters_filter_button.clicked.connect(lambda: self.__set_basic_text_filtering(
+            self.filters_tab_table.filter_proxy_model,
+            self.filters_tab_searchbar.searchbar)
+        )
+        self.filters_tab_table = common_table_view.CommonTableView(
+            ["Name", "Time", "Text"],
+            [
+                ["Note name", "12.8.2023", "This text belongs to this note"],
+                ["Note name", "12.8.2023", "This text belongs to this note"],
+                ["Note text", "12.8.2023", "Another text a bit shorter"],
+                ["Short note", "13.8.2023", "Very short text"],
+                ["Note", "14.8.2023", "This text is a medium length text"],
+                ["Note name", "12.8.2023", "This text belongs to this note"],
+                ["Note text", "12.8.2023", "Another text a bit shorter"],
+                ["Short note", "13.8.2023", "Very short text"],
+                ["Note", "14.8.2023", "This text is a medium length text"],
+                ["Note text", "12.8.2023", "Another text a bit shorter"],
+                ["Short note", "13.8.2023", "Very short text"],
+                ["Note", "14.8.2023", "This text is a medium length text"],
+                ["Note name", "12.8.2023", "This text belongs to this note"],
+                ["Note text", "12.8.2023", "Another text a bit shorter"],
+                ["Short note", "13.8.2023", "Very short text"],
+                ["Note", "14.8.2023", "This text is a medium length text"],
+            ]
+        )
+        self.filters_tab_layout.setColumnStretch(0, 1)
+        self.filters_tab_layout.setColumnStretch(2, 1)
+        
+        self.filters_tab_layout.addWidget(self.filters_tab_searchbar, 0, 0)
+        self.filters_tab_layout.addWidget(self.filters_filter_button, 0, 1)
+        self.filters_tab_layout.addWidget(QtWidgets.QWidget(), 0, 2)
+        self.filters_tab_layout.addWidget(self.filters_tab_table, 1, 0, 1, 3)
+
+
+    @QtCore.Slot()
+    def __set_basic_text_filtering(self, model, searchbar):
+        # You can choose the type of search by connecting to a different slot here.
+        # see https://doc.qt.io/qt-5/qsortfilterproxymodel.html#public-slots
+        # self.searchbar.textChanged.connect(self.proxy_model.setFilterFixedString)
+        model.setFilterFixedString(searchbar.text())
 
 
 
