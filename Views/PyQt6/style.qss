@@ -134,6 +134,11 @@ QLabel#panel_time_header {
 }
 
 
+QDialog#dialog {
+    background: #d7eb5a;
+}
+
+
 QLineEdit#search_bar
 {
     border: none;

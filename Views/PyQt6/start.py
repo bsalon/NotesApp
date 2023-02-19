@@ -7,6 +7,8 @@ import searchbar_with_icon
 import time_widget
 import todays_notes_row_widget
 import toggle_switch_button
+from dialogs import note_dialog, tag_dialog, category_dialog, filter_dialog
+
 
 from PySide6 import QtCore, QtWidgets, QtGui
 
@@ -59,6 +61,7 @@ class MainWindow(QtWidgets.QWidget):
     def __init_toolbar_layout(self):
         col = 0
 
+        # Today's notes icon button
         self.icon = QtGui.QIcon()
         self.icon.addFile("/home/benjaminsalon/diplom/NotesApp/Views/PyQt6/icons/TodaysNotesIcon.png")
         self.today_notes_icon_button = QtWidgets.QToolButton()
@@ -98,46 +101,55 @@ class MainWindow(QtWidgets.QWidget):
         self.toolbar_layout.addWidget(self.time_widget, 0, col, 0, 6)
         col += 6
 
-        self.icon2 = QtGui.QIcon()
-        self.icon2.addFile("/home/benjaminsalon/diplom/NotesApp/Views/PyQt6/icons/AddIcon.png")
+        # Add icon button
+        self.add_icon = QtGui.QIcon()
+        self.add_icon.addFile("/home/benjaminsalon/diplom/NotesApp/Views/PyQt6/icons/AddIcon.png")
         self.add_icon_button = QtWidgets.QToolButton()
-        self.add_icon_button.setIcon(self.icon2)
+        self.add_icon_button.setIcon(self.add_icon)
         self.add_icon_button.setIconSize(QtCore.QSize(28, 28))
         self.add_icon_button.setObjectName("toolbar_icon_button")
+        self.add_icon_button.clicked(self.add_item) # FIXME: Use controller (selected tab)
         self.toolbar_layout.addWidget(self.add_icon_button, 0, col, 0, 2, alignment=QtGui.Qt.AlignCenter)
         col += 2
         
-        self.icon3 = QtGui.QIcon()
-        self.icon3.addFile("/home/benjaminsalon/diplom/NotesApp/Views/PyQt6/icons/EditIcon.png")
+        # Edit icon button
+        self.edit_icon = QtGui.QIcon()
+        self.edit_icon.addFile("/home/benjaminsalon/diplom/NotesApp/Views/PyQt6/icons/EditIcon.png")
         self.edit_icon_button = QtWidgets.QToolButton()
-        self.edit_icon_button.setIcon(self.icon3)
+        self.edit_icon_button.setIcon(self.edit_icon)
         self.edit_icon_button.setIconSize(QtCore.QSize(28, 28))
         self.edit_icon_button.setObjectName("toolbar_icon_button")
+        self.edit_icon_button.clicked(self.edit_item) # FIXME: Use controller (selected tab, selected item)
         self.toolbar_layout.addWidget(self.edit_icon_button, 0, col, 0, 2, alignment=QtGui.Qt.AlignCenter)
         col += 2
         
-        self.icon4 = QtGui.QIcon()
-        self.icon4.addFile("/home/benjaminsalon/diplom/NotesApp/Views/PyQt6/icons/DeleteIcon.png")
+        # Delete icon button
+        self.delete_icon = QtGui.QIcon()
+        self.delete_icon.addFile("/home/benjaminsalon/diplom/NotesApp/Views/PyQt6/icons/DeleteIcon.png")
         self.delete_icon_button = QtWidgets.QToolButton()
-        self.delete_icon_button.setIcon(self.icon4)
+        self.delete_icon_button.setIcon(self.delete_icon)
         self.delete_icon_button.setIconSize(QtCore.QSize(28, 28))
         self.delete_icon_button.setObjectName("toolbar_icon_button")
+        self.delete_icon_button.clicked(self.delete_items) # FIXME: Use controller (selected tab, selected items)
         self.toolbar_layout.addWidget(self.delete_icon_button, 0, col, 0, 2, alignment=QtGui.Qt.AlignCenter)
         col += 2
 
+        # FIXME: working loading bar
         self.loading_bar = loading_bar.LoadingBarWidget(barObjectName="loading_bar")
         self.toolbar_layout.addWidget(self.loading_bar, 0, col, 0, 5)
         col += 5
 
-        self.icon5 = QtGui.QIcon()
-        self.icon5.addFile("/home/benjaminsalon/diplom/NotesApp/Views/PyQt6/icons/SettingsIcon.png")
+        # Settings icon button
+        self.settings_icon = QtGui.QIcon()
+        self.settings_icon.addFile("/home/benjaminsalon/diplom/NotesApp/Views/PyQt6/icons/SettingsIcon.png")
         self.settings_dropdown_button = QtWidgets.QToolButton()
-        self.settings_dropdown_button.setIcon(self.icon5)
+        self.settings_dropdown_button.setIcon(self.settings_icon)
         self.settings_dropdown_button.setIconSize(QtCore.QSize(28, 28))
         self.settings_dropdown_button.setObjectName("toolbar_icon_button")
         self.toolbar_layout.addWidget(self.settings_dropdown_button, 0, col, 0, 2, alignment=QtGui.Qt.AlignRight)
         col += 2
 
+        # Stretch time widget more than other widgets
         for c in range(col):
             self.toolbar_layout.setColumnStretch(c, 1)
         for time_col in range(14, 19):
@@ -318,6 +330,7 @@ class MainWindow(QtWidgets.QWidget):
             self.filters_tab_table.filter_proxy_model,
             self.filters_tab_searchbar.searchbar)
         )
+        # FIXME: Use Controller
         self.filters_tab_table = common_table_view.CommonTableView(
             ["Name", "Time", "Text"],
             [
@@ -347,6 +360,22 @@ class MainWindow(QtWidgets.QWidget):
         self.filters_tab_layout.addWidget(QtWidgets.QWidget(), 0, 2)
         self.filters_tab_layout.addWidget(self.filters_tab_table, 1, 0, 1, 3)
 
+    
+    @QtCore.Slot()
+    def add_item(self):
+        popup = note_dialog.NoteDialog()
+        popup.show()
+
+    
+    @QtCore.Slot()
+    def edit_item(self):
+        pass
+
+    
+    @QtCore.Slot()
+    def delete_item(self):
+        pass
+    
 
     @QtCore.Slot()
     def __set_basic_text_filtering(self, model, searchbar):
