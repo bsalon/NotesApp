@@ -1,3 +1,6 @@
+import Database
+
+
 class BaseService:
     def __init__(self, service_model, *args, **kwargs):
         self.model = service_model
@@ -16,5 +19,8 @@ class BaseService:
 
 
     def paginate(self, page, size):
-        return model.select().paginate(page, size)
+        return self.model.select().paginate(page, size)
 
+
+    def get_all(self):
+        return self.model.select()

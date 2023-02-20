@@ -27,7 +27,7 @@ class TodaysNotesRowWidget(QtWidgets.QWidget):
         # print(f"{text_rect.height()} -> {size_hint.height()}")
         # print("")
         
-        adjusted_height = text_rect_size // (size_hint.width() + 10)
+        adjusted_height = text_rect_size // size_hint.width()
 
         # size = text_W x text_H
         # 
@@ -37,7 +37,7 @@ class TodaysNotesRowWidget(QtWidgets.QWidget):
         #
         # size / hint_W = new_hint_H 
 
-        note_name_text.setMinimumSize(QtCore.QSize(size_hint.width(), adjusted_height - 10))
+        note_name_text.setMinimumSize(QtCore.QSize(size_hint.width(), adjusted_height + 5))
 
         note_name_text.setAlignment(QtCore.Qt.AlignCenter)
         note_name_text.setReadOnly(True)

@@ -1,14 +1,19 @@
 import sys
 import random
 
+from datetime import datetime
+
+from Controllers import NoteController
+
 import loading_bar
 import common_table_view
+import pagination_widget
 import searchbar_with_icon
 import time_widget
 import todays_notes_row_widget
 import toggle_switch_button
-from dialogs import note_dialog, tag_dialog, category_dialog, filter_dialog
 
+from dialogs import note_dialog, tag_dialog, category_dialog, filter_dialog, collapsable_tree_dialog
 
 from PySide6 import QtCore, QtWidgets, QtGui
 
@@ -17,9 +22,18 @@ from PySide6 import QtCore, QtWidgets, QtGui
 
 
 class MainWindow(QtWidgets.QWidget):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+    def __init__(self, note_controller, *args, **kwargs):
+        super(MainWindow, self).__init__(*args, **kwargs)
+        self.note_controller = note_controller
 
+        # FIXME: use controllers
+        controller_notes = [note for note in note_controller.get_notes()]
+        self.table_notes = [(note.name, note.priority, note.time.strftime("%d/%m/%Y %H:%M"), note.text) for note in controller_notes]
+        self.today_notes = [(note.time.strftime("%H:%M"), note.name) for note in controller_notes if note.time.date() == datetime.today().date()]
+        #self.tags = [[str(note.name), str(note.priority), str(note.time), str(note.text)] for note in note_controller.get_notes()]
+        #self.categories = [[str(note.name), str(note.priority), str(note.time), str(note.text)] for note in note_controller.get_notes()]
+        #self.filters = [[str(note.name), str(note.priority), str(note.time), str(note.text)] for note in note_controller.get_notes()]
+        
         # 15 rows : 8 columns
         self.layout = QtWidgets.QGridLayout()
         self.layout.setContentsMargins(0, 0, 0, 0)
@@ -45,6 +59,7 @@ class MainWindow(QtWidgets.QWidget):
         for c in range(8):
             self.layout.setColumnStretch(c, 1)
         self.setLayout(self.layout)
+
 
 
     @QtCore.Slot()
@@ -108,7 +123,7 @@ class MainWindow(QtWidgets.QWidget):
         self.add_icon_button.setIcon(self.add_icon)
         self.add_icon_button.setIconSize(QtCore.QSize(28, 28))
         self.add_icon_button.setObjectName("toolbar_icon_button")
-        self.add_icon_button.clicked(self.add_item) # FIXME: Use controller (selected tab)
+        self.add_icon_button.clicked.connect(self.add_item) # FIXME: Use controller (selected tab)
         self.toolbar_layout.addWidget(self.add_icon_button, 0, col, 0, 2, alignment=QtGui.Qt.AlignCenter)
         col += 2
         
@@ -119,7 +134,8 @@ class MainWindow(QtWidgets.QWidget):
         self.edit_icon_button.setIcon(self.edit_icon)
         self.edit_icon_button.setIconSize(QtCore.QSize(28, 28))
         self.edit_icon_button.setObjectName("toolbar_icon_button")
-        self.edit_icon_button.clicked(self.edit_item) # FIXME: Use controller (selected tab, selected item)
+        self.edit_icon_button.setEnabled(False)
+        self.edit_icon_button.clicked.connect(self.edit_item) # FIXME: Use controller (selected tab, selected item)
         self.toolbar_layout.addWidget(self.edit_icon_button, 0, col, 0, 2, alignment=QtGui.Qt.AlignCenter)
         col += 2
         
@@ -130,7 +146,8 @@ class MainWindow(QtWidgets.QWidget):
         self.delete_icon_button.setIcon(self.delete_icon)
         self.delete_icon_button.setIconSize(QtCore.QSize(28, 28))
         self.delete_icon_button.setObjectName("toolbar_icon_button")
-        self.delete_icon_button.clicked(self.delete_items) # FIXME: Use controller (selected tab, selected items)
+        self.delete_icon_button.setEnabled(False)
+        self.delete_icon_button.clicked.connect(self.delete_items) # FIXME: Use controller (selected tab, selected items)
         self.toolbar_layout.addWidget(self.delete_icon_button, 0, col, 0, 2, alignment=QtGui.Qt.AlignCenter)
         col += 2
 
@@ -167,11 +184,11 @@ class MainWindow(QtWidgets.QWidget):
         self.todays_notes_layout.addWidget(self.todays_notes_header)
 
         self.todays_notes_list = QtWidgets.QListWidget(objectName="todays_notes_list")
-        for i in range(30):
+        for note in self.today_notes:
             item = QtWidgets.QListWidgetItem(self.todays_notes_list)
             self.todays_notes_list.addItem(item)
 
-            row = todays_notes_row_widget.TodaysNotesRowWidget("23:00", "note with a name -- or") # title as you could or possibly would wish if there is an angle in the size")
+            row = todays_notes_row_widget.TodaysNotesRowWidget(*note)
             item.setSizeHint(row.minimumSizeHint())
 
             self.todays_notes_list.setItemWidget(item, row)
@@ -196,7 +213,10 @@ class MainWindow(QtWidgets.QWidget):
         self.tabs.addTab(self.categories_tab_widget, "Categories")
         self.tabs.addTab(self.tags_tab_widget, "Tags")
         self.tabs.addTab(self.filters_tab_widget, "Fast filters")
+        
+        self.tabs.currentChanged.connect(self.tab_update_buttons_enabling)
         self.tabs_content_layout.addWidget(self.tabs)
+
 
 
     def __init_notes_tab(self):
@@ -217,9 +237,9 @@ class MainWindow(QtWidgets.QWidget):
         self.notes_advanced_filter_button = QtWidgets.QPushButton("Advanced filter")
 
         self.notes_toggle_switch_label = QtWidgets.QLabel("Table view")
-
         self.notes_toggle_switch_button = toggle_switch_button.ToggleSwitchButton()
-        
+        self.notes_toggle_switch_button.clicked.connect(self.toggle_notes_view)
+
         self.notes_tab_filtering_layout.addWidget(self.notes_tab_searchbar, 0, 0, 0, 4)
         self.notes_tab_filtering_layout.addWidget(self.notes_filter_button, 0, 4, 0, 1)
         self.notes_tab_filtering_layout.addWidget(self.notes_advanced_filter_button, 0, 5, 0, 1)
@@ -231,30 +251,33 @@ class MainWindow(QtWidgets.QWidget):
         self.notes_tab_filtering_layout.addLayout(self.notes_toggle_layout, 0, 6, 0, 2)
 
         self.notes_tab_table = common_table_view.CommonTableView(
-            ["Name", "Time", "Text"],
-            [
-                ["Note name", "12.8.2023", "This text belongs to this note"],
-                ["Note name", "12.8.2023", "This text belongs to this note"],
-                ["Note text", "12.8.2023", "Another text a bit shorter"],
-                ["Short note", "13.8.2023", "Very short text"],
-                ["Note", "14.8.2023", "This text is a medium length text"],
-                ["Note name", "12.8.2023", "This text belongs to this note"],
-                ["Note text", "12.8.2023", "Another text a bit shorter"],
-                ["Short note", "13.8.2023", "Very short text"],
-                ["Note", "14.8.2023", "This text is a medium length text"],
-                ["Note text", "12.8.2023", "Another text a bit shorter"],
-                ["Short note", "13.8.2023", "Very short text"],
-                ["Note", "14.8.2023", "This text is a medium length text"],
-                ["Note name", "12.8.2023", "This text belongs to this note"],
-                ["Note text", "12.8.2023", "Another text a bit shorter"],
-                ["Short note", "13.8.2023", "Very short text"],
-                ["Note", "14.8.2023", "This text is a medium length text"],
-            ]
+            ["Name", "Priority", "Time", "Text"], self.table_notes, 3, 1, QtCore.Qt.DescendingOrder
         )
+        self.notes_tab_table.selectionModel().selectionChanged.connect(self.table_update_buttons_enabling)
 
-        self.notes_tab_layout.addWidget(self.notes_tab_filtering_container_widget)
-        self.notes_tab_layout.addWidget(self.notes_tab_table)
+        self.notes_tab_accordion = collapsable_tree_dialog.CollapsableTreeDialog()
+        self.notes_tab_accordion.hide()
+        self.notes_tab_accordion_pagination = pagination_widget.PaginationWidget(5, len(self.table_notes)) # FIXME size
+        self.notes_tab_accordion_pagination.hide()
+        self.is_table_view = True
+
+        self.notes_tab_layout.addWidget(self.notes_tab_filtering_container_widget, 0, 0, alignment=QtCore.Qt.AlignTop)
+        self.notes_tab_layout.addWidget(self.notes_tab_table, 1, 0)
+        self.notes_tab_layout.addWidget(self.notes_tab_accordion, 2, 0)
+        self.notes_tab_layout.addWidget(self.notes_tab_accordion_pagination, 3, 0, alignment=QtCore.Qt.AlignCenter)
         
+
+    @QtCore.Slot()
+    def toggle_notes_view(self, table_view):
+        self.is_table_view = table_view
+        if table_view:
+            self.notes_tab_accordion.hide()
+            self.notes_tab_accordion_pagination.hide()
+            self.notes_tab_table.show()
+        else:
+            self.notes_tab_table.hide()
+            self.notes_tab_accordion.show()
+            self.notes_tab_accordion_pagination.show()
 
 
     def __init_categories_tab(self):
@@ -284,8 +307,11 @@ class MainWindow(QtWidgets.QWidget):
                 ["Note text", "Another text a bit shorter"],
                 ["Short note", "Very short text"],
                 ["Note", "This text is a medium length text"],
-            ]
+            ],
+            1
         )
+        self.categories_tab_table.selectionModel().selectionChanged.connect(self.table_update_buttons_enabling)
+        
         self.categories_tab_layout.setColumnStretch(0, 1)
         self.categories_tab_layout.setColumnStretch(2, 1)
         
@@ -311,8 +337,11 @@ class MainWindow(QtWidgets.QWidget):
                 ["Food", "Anything what you can eat"],
                 ["Entertainment", "Anything fun"],
                 ["Shopping", "Shopping of any kind"],
-            ]
+            ],
+            1
         )
+        self.tags_tab_table.selectionModel().selectionChanged.connect(self.table_update_buttons_enabling)
+        
         self.tags_tab_layout.setColumnStretch(0, 1)
         self.tags_tab_layout.setColumnStretch(2, 1)
         
@@ -350,8 +379,11 @@ class MainWindow(QtWidgets.QWidget):
                 ["Note text", "12.8.2023", "Another text a bit shorter"],
                 ["Short note", "13.8.2023", "Very short text"],
                 ["Note", "14.8.2023", "This text is a medium length text"],
-            ]
+            ],
+            2
         )
+        self.filters_tab_table.selectionModel().selectionChanged.connect(self.table_update_buttons_enabling)
+        
         self.filters_tab_layout.setColumnStretch(0, 1)
         self.filters_tab_layout.setColumnStretch(2, 1)
         
@@ -360,22 +392,110 @@ class MainWindow(QtWidgets.QWidget):
         self.filters_tab_layout.addWidget(QtWidgets.QWidget(), 0, 2)
         self.filters_tab_layout.addWidget(self.filters_tab_table, 1, 0, 1, 3)
 
+
+    @QtCore.Slot()
+    def tab_update_buttons_enabling(self, index):
+        if index == 0: # Notes tab
+            if self.is_table_view:
+                selected_rows_count = self.count_selected_rows(self.notes_tab_table)
+            else:
+                selected_rows_count = self.count_selected_notes() # FIXME
+        elif index == 1: # Categories tab
+            selected_rows_count = self.count_selected_rows(self.categories_tab_table)
+        elif index == 2: # Tags tab
+            selected_rows_count = self.count_selected_rows(self.tags_tab_table)
+        elif index == 3: # Filters tab
+            selected_rows_count = self.count_selected_rows(self.filters_tab_table)
+        else: # Error
+            self.edit_icon_button.setEnabled(False)
+            self.delete_icon_button.setEnabled(False)
+        self.edit_icon_button.setEnabled(selected_rows_count == 1)
+        self.delete_icon_button.setEnabled(selected_rows_count >= 1)
+            
+
+    def count_selected_rows(self, table):
+        return len(table.selectionModel().selectedRows())
+
+
+    def count_selected_notes(self):
+        return 0
+
+
+    @QtCore.Slot()
+    def table_update_buttons_enabling(self):
+        current_tab_name = self.tabs.currentWidget().objectName()
+        if current_tab_name == "notes_tab":
+            selected_rows_count = self.count_selected_rows(self.notes_tab_table)
+        elif current_tab_name == "categories_tab":
+            selected_rows_count = self.count_selected_rows(self.categories_tab_table)
+        elif current_tab_name == "tags_tab":
+            selected_rows_count = self.count_selected_rows(self.tags_tab_table)
+        elif current_tab_name == "filters_tab":
+            selected_rows_count = self.count_selected_rows(self.filters_tab_table)
+        else:
+            self.edit_icon_button.setEnabled(False)
+            self.delete_icon_button.setEnabled(False)
+        self.edit_icon_button.setEnabled(selected_rows_count == 1)
+        self.delete_icon_button.setEnabled(selected_rows_count >= 1)
+
     
     @QtCore.Slot()
     def add_item(self):
-        popup = note_dialog.NoteDialog()
-        popup.show()
+        self.loading_bar.loading_bar.setRange(0, 0)
+        self.item_action("ADD")
+        self.loading_bar.loading_bar.setRange(0, 1)
 
     
     @QtCore.Slot()
     def edit_item(self):
-        pass
+        self.loading_bar.loading_bar.setRange(0, 0)
+        self.item_action("EDIT")
+        self.loading_bar.loading_bar.setRange(0, 1)
 
     
+    def item_action(self, action_name): # FIXME: add actions to dialogs
+        current_tab_name = self.tabs.currentWidget().objectName()
+        if current_tab_name == "notes_tab":
+            dialog = note_dialog.NoteDialog(objectName="dialog")
+        elif current_tab_name == "categories_tab":
+            dialog = category_dialog.CategoryDialog(objectName="dialog")
+        elif current_tab_name == "tags_tab":
+            dialog = tag_dialog.TagDialog(objectName="dialog")
+        elif current_tab_name == "filters_tab":
+            dialog = filter_dialog.FilterDialog(objectName="dialog")
+        else:
+            dialog = QtWidgets.QDialog() # FIXME: show error message
+        dialog.exec()
+
+
     @QtCore.Slot()
-    def delete_item(self):
-        pass
-    
+    def delete_items(self): # TODO
+        current_tab_name = self.tabs.currentWidget().objectName()
+        if current_tab_name == "notes_tab":
+            if self.is_table_view:
+                pass # table selected rows
+                selected_notes = self.notes_tab_table.get_selected_rows()
+            else:
+                pass # grid checked items
+                selected_notes = []
+            note_controller.delete_notes(selected_categories)
+            self.notes_tab_table.delete_selection()
+        elif current_tab_name == "categories_tab":
+            selected_categories = self.categories_tab_table.get_selected_rows()
+            # controller.delete_categories(selected_categories) FIXME
+            self.categories_tab_table.delete_selection()
+        elif current_tab_name == "tags_tab":
+            selected_tags = self.notes_tags_table.get_selected_rows()
+            # controller.delete_tags(selected_tags) FIXME
+            self.tags_tab_table.delete_selection()
+        elif current_tab_name == "filters_tab":
+            selected_filters = self.filters_tab_table.get_selected_rows()
+            # controller.delete_filters(selected_filters) FIXME
+            self.filters_tab_table.delete_selection()
+        else:
+            dialog = QtWidgets.QDialog() # FIXME: show error message
+            dialog.exec()
+
 
     @QtCore.Slot()
     def __set_basic_text_filtering(self, model, searchbar):
@@ -394,7 +514,11 @@ if __name__ == "__main__":
     with open(stylesheet, "r") as f:
         app.setStyleSheet(f.read())
 
-    widget = MainWindow()
+    note_controller = NoteController.NoteController()
+    #notes = [note for note in note_controller.get_notes()]
+    #print(notes)
+
+    widget = MainWindow(note_controller)
     widget.resize(800, 600)
     widget.show()
 

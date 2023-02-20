@@ -4,19 +4,24 @@ from PySide6 import QtWidgets, QtCore, QtGui
 
 
 class CommonTableView(QtWidgets.QTableView):
-    def __init__(self, header, data, *args, **kwargs):
+    def __init__(self, header, data, stretch_column, sort_column=0, order=QtCore.Qt.AscendingOrder, *args, **kwargs):
         super(CommonTableView, self).__init__(*args, **kwargs)
+        self.header = header
+        self.data = data
+        self.sort_column = sort_column
+        self.order = order
+        
         self.model = CommonTableModel(header, data)
-        self.__create_proxy_model()
+        self.__create_proxy_model(sort_column, order)
         self.setModel(self.filter_proxy_model)
 
         self.verticalHeader().hide()
 
         header = self.horizontalHeader()
         header.setSectionResizeMode(QtWidgets.QHeaderView.ResizeToContents)
-        header.setSectionResizeMode(1, QtWidgets.QHeaderView.Stretch)
+        header.setSectionResizeMode(stretch_column, QtWidgets.QHeaderView.Stretch)
 
-        self.resizeRowsToContents() # good enough
+        self.resizeRowsToContents()
 
         align_delegate = TableCellAlignDelegate(QtCore.Qt.AlignCenter, self)
         self.setItemDelegate(align_delegate)
@@ -25,11 +30,33 @@ class CommonTableView(QtWidgets.QTableView):
         self.setSelectionMode(QtWidgets.QAbstractItemView.ExtendedSelection)
 
 
-    def __create_proxy_model(self):
+    def __create_proxy_model(self, sort_column, order):
         self.filter_proxy_model = QtCore.QSortFilterProxyModel()
         self.filter_proxy_model.setFilterKeyColumn(0)
         self.filter_proxy_model.setSourceModel(self.model)
-        self.filter_proxy_model.sort(0, QtCore.Qt.AscendingOrder)
+        self.filter_proxy_model.sort(sort_column, order)
+
+
+    def get_selected_rows(self): # TODO
+        selected_rows = []
+        for selected_model_index in self.selectionModel().selectedRows():
+            selected_rows.append(selected_model_index.data(-42))
+        return selected_rows
+
+
+    def delete_selection(self):
+        selected_indices = []
+        
+        for selected_model_index in self.selectionModel().selectedRows():
+            # selected_model_index.column() == 0
+            # .data() -> returns first column
+            # .data(-42) -> returns whole row -- see hack in .data()
+            item = selected_model_index.data(-42)
+            data_index = self.model.find_data_index(item)
+            selected_indices.append(data_index)
+        
+        for selected_index in reversed(sorted(selected_indices)):
+            self.model.removeRows(selected_index, 1)
 
 
 
@@ -38,6 +65,13 @@ class CommonTableModel(QtCore.QAbstractTableModel):
         super().__init__()
         self._data = data
         self.header = header
+
+
+    def find_data_index(self, item_id):
+        for index in range(len(self._data)):
+            if item_id == self._data[index]:
+                return index
+        return 0
 
 
     def headerData(self, col, orientation, role):
@@ -49,6 +83,9 @@ class CommonTableModel(QtCore.QAbstractTableModel):
     def data(self, index, role):
         if role == QtCore.Qt.DisplayRole and index.isValid():
             return self._data[index.row()][index.column()]
+        # ugly hack to retrieve row
+        elif role == -42 and index.isValid():
+            return self._data[index.row()]
 
 
     def rowCount(self, index):
@@ -56,7 +93,32 @@ class CommonTableModel(QtCore.QAbstractTableModel):
 
 
     def columnCount(self, index):
-        return len(self._data[0])
+        return len(self._data[0]) if len(self._data) > 0 else 0
+
+
+    def insertRows(self, new_row, position, rows, parent=QtCore.QModelIndex()):
+        position = (position + self.rowCount()) if position < 0 else position
+        start = position
+        end = position + rows - 1
+
+        if end <= 8:
+            self.beginInsertRows(parent, start, end)
+            self._data.append(new_row) 
+            self.endInsertRows()
+            return True
+        else:
+            self.beginInsertRows(parent, start, end)
+            self._data.append(new_row) 
+            self.endInsertRows()
+            self.removeRows(0, 0)
+            return True
+
+
+    def removeRows(self, position, rows=1, parent=QtCore.QModelIndex()):
+        self.beginRemoveRows(parent, position, position + rows - 1)
+        del self._data[position : position + rows]
+        self.endRemoveRows()
+        return True
 
 
 

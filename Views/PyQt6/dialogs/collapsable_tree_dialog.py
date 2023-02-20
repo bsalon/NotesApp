@@ -4,12 +4,15 @@ from PySide6 import QtWidgets, QtGui, QtCore
 
 
 # https://stackoverflow.com/questions/32476006/how-to-make-an-expandable-collapsable-section-widget-in-qt
-class CollapsableTreeWidget(QtWidgets.QDialog):
+class CollapsableTreeDialog(QtWidgets.QDialog):
     def __init__(self, *args, **kwargs):
-        super(CollapsableTreeWidget, self).__init__(*args, **kwargs)
+        super(CollapsableTreeDialog, self).__init__(*args, **kwargs)
         self.tree = QtWidgets.QTreeWidget()
         self.tree.setHeaderHidden(True)
+        self.tree.setObjectName("collapsable_tree")
+        
         layout = QtWidgets.QVBoxLayout()
+        layout.setContentsMargins(0, 0, 0, 0)
         layout.addWidget(self.tree)
         self.setLayout(layout)
         self.tree.setIndentation(0)
@@ -98,6 +101,11 @@ class CollapsableExpandWidget(QtWidgets.QWidget):
     @QtCore.Slot()
     def toggle_check_state(self):
         self.setObjectName("collapsable_widget_checked" if self.checkbox.isChecked() else "collapsable_widget")
+        self.setStyleSheet('''
+        QWidget#collapsable_widget_checked {
+            border: 1px solid black;
+            background-color: #d7eb5a;
+        }''')
     
 
     # issue explained here - https://stackoverflow.com/questions/7276330/qt-stylesheet-for-custom-widget
@@ -113,6 +121,10 @@ class CollapsableExpandWidget(QtWidgets.QWidget):
 if __name__ == "__main__":
     app = QtWidgets.QApplication(sys.argv)
     app.setStyleSheet('''
+QTreeWidget#collapsable_tree {
+    background-color: #f7fade;
+}
+
 QWidget#collapsable_widget_frame {
     background-color: #f7fade;
 }
@@ -128,7 +140,7 @@ QWidget#collapsable_widget_checked {
 }
 
     ''')
-    window = CollapsableTreeWidget()
+    window = CollapsableTreeDialog()
     window.show()
     sys.exit(app.exec())
 

@@ -24,6 +24,21 @@ QWidget#search_container
     background-color: white;
 }
 
+QWidget#collapsable_widget_frame {
+    background-color: #f7fade;
+}
+
+QWidget#collapsable_widget {
+    background-color: #e9f29b;
+    border: 1px solid black;
+}
+
+QWidget#collapsable_widget_checked {
+    border: 1px solid black;
+    background-color: #d7eb5a;
+}
+
+
 QHeaderView::section {
     background-color: #d7eb5a;
 }
@@ -133,9 +148,23 @@ QLabel#panel_time_header {
     font-weight: bold;
 }
 
+QLabel#pagination {
+    border: 1px dotted black;
+}
+
+QLabel#pagination_current_page {
+    border: 1px dotted black;
+    background-color: #ffc957;
+}
+
 
 QDialog#dialog {
     background: #d7eb5a;
+}
+
+
+QTreeWidget#collapsable_tree {
+    background: #f7fade;
 }
 
 

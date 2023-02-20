@@ -1,8 +1,8 @@
 from peewee import *
 
+import os.path
 
-db = SqliteDatabase("notes_database.db")
 
 class BaseModel(Model):
     class Meta:
-        database = db
+        database = SqliteDatabase(os.path.abspath(os.path.dirname(__file__) + "/../Database") + "/notes_database.db")

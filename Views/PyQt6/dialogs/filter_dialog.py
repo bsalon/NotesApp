@@ -3,9 +3,9 @@ import sys
 from PySide6 import QtWidgets, QtCore, QtGui
 
 
-class FiltersDialog(QtWidgets.QDialog):
+class FilterDialog(QtWidgets.QDialog):
     def __init__(self, *args, **kwargs):
-        super(FiltersDialog, self).__init__(*args, **kwargs)
+        super(FilterDialog, self).__init__(*args, **kwargs)
         self.setWindowTitle("Note dialog window")
         self.setAttribute(QtCore.Qt.WA_DeleteOnClose)
         
@@ -112,7 +112,7 @@ QDialog {
     background: #d7eb5a;
 }
     ''')
-    dialog = FiltersDialog(objectName="dialog")
+    dialog = FilterDialog(objectName="dialog")
     dialog.show()
     sys.exit(app.exec())
 

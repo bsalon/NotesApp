@@ -14,28 +14,6 @@ class LoadingBarWidget(QtWidgets.QWidget):
         self.loading_bar.setRange(0, 1)
 
         layout.addWidget(self.loading_bar)
-        
-#        button = QtWidgets.QPushButton("Start", self)
-#        layout.addWidget(button)
-#        button.clicked.connect(self.onStart)
-#
-#        self.myLongTask = TaskThread()
-#        self.myLongTask.taskFinished.connect(self.onFinished)
-#
-#    def onStart(self): 
-#        self.loading_bar.setRange(0,0)
-#        self.myLongTask.start()
-#
-#    def onFinished(self):
-#        self.loading_bar.setRange(0,1)
-#
-#
-#class TaskThread(QtCore.QThread):
-#    taskFinished = QtCore.Signal()
-#
-#    def run(self):
-#        time.sleep(3)
-#        self.taskFinished.emit()
 
 
 if __name__ == "__main__":
