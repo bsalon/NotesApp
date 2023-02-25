@@ -20,6 +20,14 @@ class BaseService:
 
     def paginate(self, page, size):
         return self.model.select().paginate(page, size)
+    
+
+    def get_by_id(self, item_id):
+        return self.model.select().where(self.model.id == item_id).get()
+
+    
+    def get_by_name(self, name):
+        return self.model.select().where(self.model.name == name).get()
 
 
     def get_all(self):

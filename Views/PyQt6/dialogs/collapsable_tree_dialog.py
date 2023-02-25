@@ -18,7 +18,7 @@ class CollapsableTreeDialog(QtWidgets.QDialog):
         self.tree.setIndentation(0)
 
         self.sections = []
-        self.define_sections(["note1", "note2", "note3"])
+        self.define_sections(["note1", "note2", "note3"]) # FIXME
         self.add_sections()
 
 
@@ -48,10 +48,10 @@ class CollapsableTreeDialog(QtWidgets.QDialog):
             layout.addWidget(category_label)
             layout.addWidget(tags_label)
 
-            self.sections.append(("", widget)) # note_name note_title
+            self.sections.append(("", widget)) # FIXME note_name note_title
 
 
-    def add_button(self, note_name, note_date=""):
+    def add_button(self, note_name, note_date=""): # TODO
         """creates a QTreeWidgetItem containing a widget 
         to expand or collapse its section
         """

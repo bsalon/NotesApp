@@ -7,7 +7,7 @@ class TagDialog(QtWidgets.QDialog):
     def __init__(self, *args, **kwargs):
         super(TagDialog, self).__init__(*args, **kwargs)
         self.setWindowTitle("Tag")
-        
+
         dialog_layout = QtWidgets.QVBoxLayout()
         form_layout = QtWidgets.QFormLayout()
         
@@ -31,31 +31,12 @@ class TagDialog(QtWidgets.QDialog):
 
     def ok_callback(self):
         print("ACCEPTED")
-        if "action" == "create":
-            pass
-        elif "action" == "edit":
-            pass
-        else:
-            pass
         self.close()
 
 
     def cancel_callback(self):
         print("CLOSE")
         self.close()
-
-
-    def edit_tag(self):
-        pass
-        # get note data
-        # call controller
-
-
-    def save_tag(self):
-        pass
-        # get data
-        # create class?
-        # call controller
 
 
 

@@ -4,10 +4,10 @@ from PySide6 import QtWidgets, QtCore, QtGui
 
 
 class NoteDialog(QtWidgets.QDialog):
-    def __init__(self, *args, **kwargs):
+    def __init__(self, categories, tags, *args, **kwargs):
         super(NoteDialog, self).__init__(*args, **kwargs)
         self.setWindowTitle("Note dialog window")
-        
+
         dialog_layout = QtWidgets.QVBoxLayout()
         form_layout = QtWidgets.QFormLayout()
         
@@ -19,8 +19,8 @@ class NoteDialog(QtWidgets.QDialog):
         self.datetime_lineedit.setToolTip("Rewrite date and time or use ticks")
         form_layout.addRow("Date and time:", self.datetime_lineedit)
         
-        self.description_lineedit = QtWidgets.QLineEdit()
-        form_layout.addRow("Description:", self.description_lineedit)
+        self.text_lineedit = QtWidgets.QLineEdit()
+        form_layout.addRow("Text:", self.text_lineedit)
         
         form_layout.addItem(QtWidgets.QSpacerItem(0, 20))
 
@@ -35,14 +35,14 @@ class NoteDialog(QtWidgets.QDialog):
         self.priority_slider_label = QtWidgets.QLabel("0")
         self.priority_slider_label.setAlignment(QtCore.Qt.AlignmentFlag.AlignHCenter | QtCore.Qt.AlignmentFlag.AlignCenter)
         self.priority_slider_label.setMinimumWidth(80)
-        priority_slider = QtWidgets.QSlider(QtCore.Qt.Horizontal)
-        priority_slider.setRange(0, 100)
-        priority_slider.setSingleStep(1)
-        priority_slider.valueChanged.connect(self.update_slider_label)
+        self.priority_slider = QtWidgets.QSlider(QtCore.Qt.Horizontal)
+        self.priority_slider.setRange(0, 100)
+        self.priority_slider.setSingleStep(1)
+        self.priority_slider.valueChanged.connect(self.update_slider_label)
         priority_slider_layout = QtWidgets.QHBoxLayout()
         priority_slider_layout.setContentsMargins(0, 8, 0, 0)
         priority_slider_layout.setAlignment(QtCore.Qt.AlignTop)
-        priority_slider_layout.addWidget(priority_slider)
+        priority_slider_layout.addWidget(self.priority_slider)
         priority_slider_layout.addWidget(self.priority_slider_label)
         form_layout.addRow("Priority value:", priority_slider_layout)
 
@@ -51,15 +51,13 @@ class NoteDialog(QtWidgets.QDialog):
         self.categories_listwidget = QtWidgets.QListWidget()
         self.categories_listwidget.setMaximumHeight(60)
         self.categories_listwidget.setToolTip("Select one category from the list")
-        categories = ["default category", "new category", "old category", "shop me"] # FIXME
-        self.fill_categories_listwidget(categories)
+        self.fill_categories_listwidget(categories) # from the constructor
         form_layout.addRow("Category:", self.categories_listwidget)
 
         self.tags_listwidget = QtWidgets.QListWidget()
         self.tags_listwidget.setMaximumHeight(60)
         self.tags_listwidget.setToolTip("Select zero or more tags from the list")
-        tags = ["default tag", "new tag", "old tag", "shop me"] # FIXME
-        self.fill_tags_listwidget(tags)
+        self.fill_tags_listwidget(tags) # from the constructor
         form_layout.addRow("Tags:", self.tags_listwidget)
 
         btnBox = QtWidgets.QDialogButtonBox()
@@ -88,47 +86,63 @@ class NoteDialog(QtWidgets.QDialog):
             self.tags_listwidget.addItem(tag_item)
 
 
-    def ok_callback(self): # FIXME
-        print("ACCEPTED")
-        if "action" == "create":
-            pass
-        elif "action" == "edit":
-            pass
-        else:
-            pass
+    def fill_dialog(self, note):
+        self.name_lineedit.setText(note.name)
+        self.datetime_lineedit.setDateTime(note.time)
+        self.text_lineedit.setText(note.text)
+        self.yes_radiobutton.setChecked(True)
+        self.priority_slider.setValue(note.priority)
+        self.select_category(note.category.name)
+        self.select_tags(note.tags)
 
-        name = self.name_lineedit.text()
-        date_time = self.datetime_lineedit.dateTime()
-        description = self.description_lineedit.text()
-        priority = self.priority_slider_label.text()
-        category = self.categories_listwidget.selectedItems()[0].text()
-        tags = [self.tags_listwidget.item(index).text() for index in range(self.tags_listwidget.count()) if self.tags_listwidget.item(index).checkState() == QtCore.Qt.Checked]
-        print(f"Name={name} Date={date_time} Description={description} Priority={priority} Category={category} Tags={tags}")
-        # self.close()
+
+    def select_category(self, category):
+        for i in range(self.categories_listwidget.count()):
+            category_item = self.categories_listwidget.item(i)
+            category_item_widget = self.categories_listwidget.itemWidget(category_item)
+            if category_item_widget.text() == category:
+                category_item_widget.setChecked(True)
+
+
+    def select_tags(self, tags):
+        for i in range(self.tags_listwidget.count()):
+            tag_item = self.tags_listwidget.item(i)
+            if tag_item.text() in tags:
+                tag_item.setCheckState(QtCore.Qt.Checked)
+
+
+    def ok_callback(self):
+        self.data_dict = {
+            "name" : self.name_lineedit.text(),
+            "time" : self.datetime_lineedit.dateTime(),
+            "text" : self.text_lineedit.text(),
+            "priority" : self.priority_slider.value(),
+            "category" : self.get_selected_category_name(),
+            "tags" : self.get_selected_tags_names()
+        }
+        self.accept()
+        self.close()
 
 
     def cancel_callback(self):
         self.close()
 
 
+    def get_selected_category_name(self):
+        for i in range(self.categories_listwidget.count()):
+            category_item = self.categories_listwidget.item(i)
+            category_item_widget = self.categories_listwidget.itemWidget(category_item)
+            if category_item_widget.isChecked():
+                return category_item_widget.text()
+
+
+    def get_selected_tags_names(self):
+        return [self.tags_listwidget.item(index).text() for index in range(self.tags_listwidget.count()) if self.tags_listwidget.item(index).checkState() == QtCore.Qt.Checked]
+
+
     @QtCore.Slot()
     def update_slider_label(self, value):
         self.priority_slider_label.setText(str(value))
-
-
-    def edit_note(self): # FIXME
-        pass
-        # get note data
-        # call controller
-
-
-    def save_note(self): # FIXME
-        pass
-        # get data
-        # create class?
-        # call controller
-
-
 
 
 if __name__ == "__main__":

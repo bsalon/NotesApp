@@ -3,7 +3,7 @@ import random
 
 from datetime import datetime
 
-from Controllers import UseCases
+from Controllers import Controller
 
 import loading_bar
 import common_table_view
@@ -13,7 +13,7 @@ import time_widget
 import todays_notes_row_widget
 import toggle_switch_button
 
-from dialogs import advanced_filter_dialog, note_dialog, tag_dialog, category_dialog, filter_dialog, collapsable_tree_dialog
+from dialogs import note_dialog, tag_dialog, category_dialog, filter_dialog, collapsable_tree_dialog
 
 from PySide6 import QtCore, QtWidgets, QtGui
 
@@ -22,19 +22,18 @@ from PySide6 import QtCore, QtWidgets, QtGui
 
 
 class MainWindow(QtWidgets.QWidget):
-    def __init__(self, use_cases, *args, **kwargs):
+    def __init__(self, controller, *args, **kwargs):
         super(MainWindow, self).__init__(*args, **kwargs)
-        self.controller = use_cases # TODO RENAME
+        self.controller = controller
 
         # FIXME use controllers
-        controller_notes = [note for note in self.controller.get_notes()]
-
+        controller_notes = [note for note in controller.get_notes()]
         self.table_notes = [(note.name, note.priority, note.time.strftime("%d/%m/%Y %H:%M"), note.text) for note in controller_notes]
         self.today_notes = [(note.time.strftime("%H:%M"), note.name) for note in controller_notes if note.time.date() == datetime.today().date()]
 
-        self.table_tags = [(tag.name, tag.description) for tag in self.controller.get_tags()]
+        self.table_tags = [(tag.name, tag.description) for tag in controller.get_tags()]
         
-        self.table_categories = [(category.name, category.description) for category in self.controller.get_categories()]
+        self.table_categories = [(category.name, category.description) for category in controller.get_categories()]
         
         #self.filters = [[str(note.name), str(note.priority), str(note.time), str(note.text)] for note in controller.get_filters()]
         
@@ -253,7 +252,6 @@ class MainWindow(QtWidgets.QWidget):
         )
 
         self.notes_advanced_filter_button = QtWidgets.QPushButton("Advanced filter")
-        self.notes_advanced_filter_button.clicked.connect(self.notes_advanced_filtering)
 
         self.notes_toggle_switch_label = QtWidgets.QLabel("Table view")
         self.notes_toggle_switch_button = toggle_switch_button.ToggleSwitchButton()
@@ -287,35 +285,7 @@ class MainWindow(QtWidgets.QWidget):
         self.notes_tab_layout.addWidget(self.notes_tab_table, 1, 0)
         self.notes_tab_layout.addWidget(self.notes_tab_accordion, 2, 0)
         self.notes_tab_layout.addWidget(self.notes_tab_accordion_pagination, 3, 0, alignment=QtCore.Qt.AlignCenter)
-
-
-    @QtCore.Slot()
-    def notes_advanced_filtering(self):
-        dialog = advanced_filter_dialog.AdvancedFilterDialog(objectName="dialog")
-        if dialog.exec():
-            filters = lambda: None
-            filters.note_name = dialog.data_dict["note_name"]
-            filters.note_min_priority = int(dialog.data_dict["note_min_priority"])
-            filters.note_max_priority = int(dialog.data_dict["note_max_priority"])
-            filters.note_min_time = dialog.data_dict["note_from_date"].toPython()
-            filters.note_max_time = dialog.data_dict["note_to_date"].toPython()
-            filters.note_text = dialog.data_dict["note_text"]
-            filters.category_name = dialog.data_dict["category_name"]
-            filters.category_description = dialog.data_dict["category_description"]
-            filters.tag_name = dialog.data_dict["tag_name"]
-            filters.tag_description = dialog.data_dict["tag_description"]
-            
-            self.current_note_filter = filters
-
-            filtered_notes = self.controller.get_filtered_notes(filters)
-            self.table_notes = [(note.name, note.priority, note.time.strftime("%d/%m/%Y %H:%M"), note.text) for note in filtered_notes]
-            
-            # TODO self.grid_notes = [note for note in self.controller.get_filtered_notes_paged(filters, page=1, size=10)]
-
-            print(*self.table_notes)
-            self.notes_tab_table.replace_data(list(set(self.table_notes)))
-
-
+        
 
     @QtCore.Slot()
     def toggle_notes_view(self, table_view):
@@ -340,6 +310,24 @@ class MainWindow(QtWidgets.QWidget):
         )
         self.categories_tab_table = common_table_view.CommonTableView(
             ["Name", "Description"], self.table_categories,
+            #[
+            #    ["Note name", "This text belongs to this note"],
+            #    ["Note name", "This text belongs to this note"],
+            #    ["Note text", "Another text a bit shorter"],
+            #    ["Short note", "Very short text"],
+            #    ["Note", "This text is a medium length text"],
+            #    ["Note name", "This text belongs to this note"],
+            #    ["Note text", "Another text a bit shorter"],
+            #    ["Short note", "Very short text"],
+            #    ["Note", "This text is a medium length text"],
+            #    ["Note text", "Another text a bit shorter"],
+            #    ["Short note", "Very short text"],
+            #    ["Note", "This text is a medium length text"],
+            #    ["Note name", "This text belongs to this note"],
+            #    ["Note text", "Another text a bit shorter"],
+            #    ["Short note", "Very short text"],
+            #    ["Note", "This text is a medium length text"],
+            #],
             stretch_column=1
         )
         self.categories_tab_table.selectionModel().selectionChanged.connect(self.table_update_buttons_enabling)
@@ -363,6 +351,13 @@ class MainWindow(QtWidgets.QWidget):
         )
         self.tags_tab_table = common_table_view.CommonTableView(
             ["Name", "Description"], self.table_tags,
+            #[
+            #    ["Default tag", "Just a default note tag"],
+            #    ["Expense", "This note will cost me money"],
+            #    ["Food", "Anything what you can eat"],
+            #    ["Entertainment", "Anything fun"],
+            #    ["Shopping", "Shopping of any kind"],
+            #],
             stretch_column=1
         )
         self.tags_tab_table.selectionModel().selectionChanged.connect(self.table_update_buttons_enabling)
@@ -442,7 +437,7 @@ class MainWindow(QtWidgets.QWidget):
         return len(table.selectionModel().selectedRows())
 
 
-    def count_selected_notes(self): # TODO
+    def count_selected_notes(self):
         return 0
 
 
@@ -478,75 +473,19 @@ class MainWindow(QtWidgets.QWidget):
         self.loading_bar.loading_bar.setRange(0, 1)
 
     
-    def item_action(self, action_name): # TODO fill data and retrieve them
+    def item_action(self, action_name): # TODO add actions to dialogs
         current_tab_name = self.tabs.currentWidget().objectName()
         if current_tab_name == "notes_tab":
-            categories_names = [category.name for category in self.controller.get_categories()]
-            tags_names = [tag.name for tag in self.controller.get_tags()]
-            dialog = note_dialog.NoteDialog(categories_names, tags_names, objectName="dialog")
-            if action_name == "EDIT":
-                selected_note = self.get_selected_note()
-                dialog.fill_dialog(selected_note)
-                if dialog.exec():
-                    updated_note = lambda: None
-                    updated_note.name = dialog.data_dict["name"]
-                    updated_note.time = dialog.data_dict["time"].toPython()
-                    updated_note.text = dialog.data_dict["text"]
-                    updated_note.priority = int(dialog.data_dict["priority"])
-                    updated_note.category_name = dialog.data_dict["category"]
-                    updated_note.tags_names = dialog.data_dict["tags"]
-                    self.controller.update_note(selected_note.id, updated_note) # TODO: check existing name
-                    # TODO update table
-
+            dialog = note_dialog.NoteDialog(objectName="dialog")
         elif current_tab_name == "categories_tab":
             dialog = category_dialog.CategoryDialog(objectName="dialog")
-            if action_name == "EDIT":
-                selected_category = self.get_selected_category()
-                dialog.fill_dialog(selected_category)
-
         elif current_tab_name == "tags_tab":
             dialog = tag_dialog.TagDialog(objectName="dialog")
-            if action_name == "EDIT":
-                selected_tag = self.get_selected_tag()
-                dialog.fill_dialog(selected_tag)
-
         elif current_tab_name == "filters_tab":
             dialog = filter_dialog.FilterDialog(objectName="dialog")
-            if action_name == "EDIT":
-                selected_filter = self.get_selected_filter()
-                dialog.fill_dialog(selected_filter)
-
         else:
             dialog = QtWidgets.QDialog() # TODO show error message
-            dialog.exec()
-
-
-    def get_selected_note(self):
-        if self.is_table_view:
-            selected_notes = self.notes_tab_table.get_selected_rows()
-            if len(selected_notes) != 1:
-                return None
-            return self.controller.find_detailed_note_by_name(selected_notes[0][0])
-        else:
-            # TODO note from grid
-            pass
-
-
-    def get_selected_category(self):
-        selected_categories = self.categories_tab_table.get_selected_rows()
-        return selected_categories[0] if len(selected_categories) == 1 else None
-
-
-    def get_selected_tag(self):
-        selected_tags = self.tags_tab_table.get_selected_rows()
-        return selected_tags[0] if len(selected_tags) == 1 else None
-
-
-    def get_selected_filter(self):
-        selected_filters = self.filters_tab_table.get_selected_rows()
-        if len(selected_filters) != 1:
-            return None
-        return self.controller.find_filter_by_name(selected_filters[0][0])
+        dialog.exec()
 
 
     @QtCore.Slot()
@@ -603,11 +542,11 @@ if __name__ == "__main__":
     with open(stylesheet, "r") as f:
         app.setStyleSheet(f.read())
 
-    use_cases = UseCases.UseCases()
+    controller = Controller.PyQt6Controller()
     #notes = [note for note in controller.get_notes()]
     #print(notes)
 
-    widget = MainWindow(use_cases)
+    widget = MainWindow(controller)
     widget.resize(800, 600)
     widget.show()
 

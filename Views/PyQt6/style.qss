@@ -38,6 +38,11 @@ QWidget#collapsable_widget_checked {
     background-color: #d7eb5a;
 }
 
+QWidget#info_alert_widget {
+    background-color: #ffc957;
+    border: 1px solid black;
+}
+
 
 QHeaderView::section {
     background-color: #d7eb5a;
@@ -125,6 +130,23 @@ QToolButton#toolbar_icon_button:hover {
     font-weight: bold;
     background-color: #efb947;
 }
+
+QToolButton#alert_icon_button {
+    background-color: #ffc957;
+    border-style: outset;
+    border-width: 0px;
+}
+
+QToolButton#alert_cross_button {
+    background-color: #ffc957;
+    border-style: outset;
+    border-width: 0px;
+}
+
+QToolButton#alert_cross_button:hover {
+    background-color: #efb947;
+}
+
 
 
 QLabel#text_link {

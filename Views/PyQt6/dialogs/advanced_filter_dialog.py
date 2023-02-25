@@ -3,25 +3,17 @@ import sys
 from PySide6 import QtWidgets, QtCore, QtGui
 
 
-class FilterDialog(QtWidgets.QDialog):
+class AdvancedFilterDialog(QtWidgets.QDialog):
     def __init__(self, *args, **kwargs):
-        super(FilterDialog, self).__init__(*args, **kwargs)
-        self.setWindowTitle("Note dialog window")
+        super(AdvancedFilterDialog, self).__init__(*args, **kwargs)
+        self.setWindowTitle("Advanced filter dialog")
         self.setAttribute(QtCore.Qt.WA_DeleteOnClose)
-
+        
         dialog_layout = QtWidgets.QVBoxLayout()
         form_layout = QtWidgets.QFormLayout()
         
-        self.filter_name_lineedit = QtWidgets.QLineEdit()
-        form_layout.addRow("Filter name:", self.filter_name_lineedit)
-        
-        self.filter_order_lineedit = QtWidgets.QLineEdit()
-        form_layout.addRow("Filter order:", self.filter_order_lineedit)
-        
-        form_layout.addItem(QtWidgets.QSpacerItem(0, 20))
-        
         self.note_name_lineedit = QtWidgets.QLineEdit()
-        form_layout.addRow("Note name:", self.note_name_lineedit)
+        form_layout.addRow("Note name contains:", self.note_name_lineedit)
         
         note_datetime_layout = QtWidgets.QHBoxLayout()
         note_datetime_layout.setContentsMargins(0, 0, 0, 0)
@@ -37,8 +29,8 @@ class FilterDialog(QtWidgets.QDialog):
         note_datetime_layout.addWidget(self.note_to_datetime_edit, stretch=1)
         form_layout.addRow("Note date and time range:", note_datetime_layout)
         
-        self.note_description_lineedit = QtWidgets.QLineEdit()
-        form_layout.addRow("Note description:", self.note_description_lineedit)
+        self.note_text_lineedit = QtWidgets.QLineEdit()
+        form_layout.addRow("Note text contains:", self.note_text_lineedit)
 
         note_priority_layout = QtWidgets.QHBoxLayout()
         note_priority_layout.setContentsMargins(0, 0, 0, 0)
@@ -53,19 +45,19 @@ class FilterDialog(QtWidgets.QDialog):
         form_layout.addItem(QtWidgets.QSpacerItem(0, 20))
 
         self.category_name_lineedit = QtWidgets.QLineEdit()
-        form_layout.addRow("Category name:", self.category_name_lineedit)
+        form_layout.addRow("Category name contains:", self.category_name_lineedit)
         
         self.category_description_lineedit = QtWidgets.QLineEdit()
-        form_layout.addRow("Category description:", self.category_description_lineedit)
+        form_layout.addRow("Category description contains:", self.category_description_lineedit)
 
         self.tag_name_lineedit = QtWidgets.QLineEdit()
-        form_layout.addRow("Tag name:", self.tag_name_lineedit)
+        form_layout.addRow("Tag name contains:", self.tag_name_lineedit)
         
         self.tag_description_lineedit = QtWidgets.QLineEdit()
-        form_layout.addRow("Tag description:", self.tag_description_lineedit)
+        form_layout.addRow("Tag description contains:", self.tag_description_lineedit)
 
         btnBox = QtWidgets.QDialogButtonBox()
-        btnBox.setStandardButtons(QtWidgets.QDialogButtonBox.Save | QtWidgets.QDialogButtonBox.Cancel)
+        btnBox.setStandardButtons(QtWidgets.QDialogButtonBox.Ok | QtWidgets.QDialogButtonBox.Cancel)
         btnBox.accepted.connect(self.ok_callback)
         btnBox.rejected.connect(self.cancel_callback)
         
@@ -77,12 +69,25 @@ class FilterDialog(QtWidgets.QDialog):
 
 
     def ok_callback(self):
-        print("ACCEPTED")
+        self.data_dict = {
+            "note_name" : self.note_name_lineedit.text(),
+            "note_from_date" : self.note_from_datetime_edit.dateTime(),
+            "note_to_date" : self.note_to_datetime_edit.dateTime(),
+            "note_min_priority" : self.note_min_priority_lineedit.text(),
+            "note_max_priority" : self.note_max_priority_lineedit.text(),
+            "note_text" : self.note_text_lineedit.text(),
+            "category_name" : self.category_name_lineedit.text(),
+            "category_description" : self.category_description_lineedit.text(),
+            "tag_name" : self.tag_name_lineedit.text(),
+            "tag_description" : self.tag_description_lineedit.text()
+        }
+        self.accept()
         self.close()
 
 
     def cancel_callback(self):
         self.close()
+
 
 
 if __name__ == "__main__":
@@ -92,7 +97,7 @@ QDialog {
     background: #d7eb5a;
 }
     ''')
-    dialog = FilterDialog(objectName="dialog")
+    dialog = AdvancedFilterDialog(objectName="dialog")
     dialog.show()
     sys.exit(app.exec())
 

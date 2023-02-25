@@ -7,6 +7,8 @@ class TodaysNotesRowWidget(QtWidgets.QWidget):
     def __init__(self, note_time, note_name, parent=None):
         super(TodaysNotesRowWidget, self).__init__(parent, objectName="panel_row")
 
+        self.note_name = note_name
+
         layout = QtWidgets.QVBoxLayout(self)
 
         note_time_label = QtWidgets.QLabel(note_time, objectName="panel_time_header")
@@ -46,7 +48,7 @@ class TodaysNotesRowWidget(QtWidgets.QWidget):
         note_name_text.setVerticalScrollBarPolicy(QtCore.Qt.ScrollBarAlwaysOff)
         note_name_text.setWordWrapMode(QtGui.QTextOption.WordWrap)
         layout.addWidget(note_name_text)
-
+        
 
 
 

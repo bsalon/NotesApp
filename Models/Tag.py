@@ -5,6 +5,5 @@ from peewee import *
 
 
 class TagModel(BaseModel):
-    note = ForeignKeyField(NoteModel, backref="tags")
     name = CharField(unique=True)
     description = TextField()

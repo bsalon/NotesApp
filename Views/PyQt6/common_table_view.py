@@ -8,11 +8,12 @@ class CommonTableView(QtWidgets.QTableView):
         super(CommonTableView, self).__init__(*args, **kwargs)
         self.header = header
         self.data = data
+        self.stretch_column = stretch_column
         self.sort_column = sort_column
         self.order = order
         
         self.model = CommonTableModel(header, data)
-        self.__create_proxy_model(sort_column, order)
+        self.__create_proxy_model()
         self.setModel(self.filter_proxy_model)
 
         self.verticalHeader().hide()
@@ -30,11 +31,11 @@ class CommonTableView(QtWidgets.QTableView):
         self.setSelectionMode(QtWidgets.QAbstractItemView.ExtendedSelection)
 
 
-    def __create_proxy_model(self, sort_column, order):
+    def __create_proxy_model(self):
         self.filter_proxy_model = QtCore.QSortFilterProxyModel()
         self.filter_proxy_model.setFilterKeyColumn(0)
         self.filter_proxy_model.setSourceModel(self.model)
-        self.filter_proxy_model.sort(sort_column, order)
+        self.filter_proxy_model.sort(self.sort_column, self.order)
 
 
     def get_selected_rows(self): # TODO
@@ -57,6 +58,20 @@ class CommonTableView(QtWidgets.QTableView):
         
         for selected_index in reversed(sorted(selected_indices)):
             self.model.removeRows(selected_index, 1)
+
+
+    def replace_data(self, new_data):
+        self.model = CommonTableModel(self.header, new_data)
+        self.__create_proxy_model()
+        self.setModel(self.filter_proxy_model)
+
+        self.verticalHeader().hide()
+
+        header = self.horizontalHeader()
+        header.setSectionResizeMode(QtWidgets.QHeaderView.ResizeToContents)
+        header.setSectionResizeMode(self.stretch_column, QtWidgets.QHeaderView.Stretch)
+
+        self.resizeRowsToContents()
 
 
 
