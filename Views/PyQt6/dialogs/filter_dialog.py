@@ -37,8 +37,8 @@ class FilterDialog(QtWidgets.QDialog):
         note_datetime_layout.addWidget(self.note_to_datetime_edit, stretch=1)
         form_layout.addRow("Note date and time range:", note_datetime_layout)
         
-        self.note_description_lineedit = QtWidgets.QLineEdit()
-        form_layout.addRow("Note description:", self.note_description_lineedit)
+        self.note_text_lineedit = QtWidgets.QLineEdit()
+        form_layout.addRow("Note text:", self.note_text_lineedit)
 
         note_priority_layout = QtWidgets.QHBoxLayout()
         note_priority_layout.setContentsMargins(0, 0, 0, 0)
@@ -76,13 +76,44 @@ class FilterDialog(QtWidgets.QDialog):
         self.setLayout(dialog_layout)
 
 
+    def fill_dialog(self, fast_filter): # TODO - time header
+        self.filter_name_lineedit.setText(fast_filter.name)
+        self.filter_order_lineedit.setText(str(fast_filter.order))
+        self.note_name_lineedit.setText(fast_filter.note_name)
+        self.note_min_priority_lineedit.setText(str(fast_filter.note_min_priority))
+        self.note_max_priority_lineedit.setText(str(fast_filter.note_max_priority))
+        self.note_from_datetime_edit.setDate(fast_filter.note_min_time)
+        self.note_to_datetime_edit.setDate(fast_filter.note_max_time)
+        self.note_text_lineedit.setText(fast_filter.note_text)
+        self.tag_name_lineedit.setText(fast_filter.tag_name)
+        self.tag_description_lineedit.setText(fast_filter.tag_description)
+        self.category_name_lineedit.setText(fast_filter.category_name)
+        self.category_description_lineedit.setText(fast_filter.category_description)
+
+
     def ok_callback(self):
-        print("ACCEPTED")
+        self.data_dict = {
+            "name": self.filter_name_lineedit.text(),
+            "order": self.filter_order_lineedit.text(),
+            "note_name": self.note_name_lineedit.text(),
+            "note_min_priority": self.note_min_priority_lineedit.text(),
+            "note_max_priority": self.note_max_priority_lineedit.text(),
+            "note_from_time": self.note_from_datetime_edit.dateTime(),
+            "note_to_time": self.note_to_datetime_edit.dateTime(),
+            "note_text": self.note_text_lineedit.text(),
+            "tag_name": self.tag_name_lineedit.text(),
+            "tag_description": self.tag_description_lineedit.text(),
+            "category_name": self.category_name_lineedit.text(),
+            "category_description": self.category_description_lineedit.text()
+        }
+        self.accept()
         self.close()
 
 
     def cancel_callback(self):
         self.close()
+
+
 
 
 if __name__ == "__main__":

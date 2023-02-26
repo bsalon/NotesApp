@@ -7,8 +7,6 @@ class CategoryDialog(QtWidgets.QDialog):
     def __init__(self, *args, **kwargs):
         super(CategoryDialog, self).__init__(*args, **kwargs)
         self.setWindowTitle("Tag")
-        
-        self.action = action
 
         dialog_layout = QtWidgets.QVBoxLayout()
         form_layout = QtWidgets.QFormLayout()
@@ -31,14 +29,23 @@ class CategoryDialog(QtWidgets.QDialog):
         self.setLayout(dialog_layout)
 
 
+    def fill_dialog(self, category):
+        self.name_lineedit.setText(category.name)
+        self.description_lineedit.setText(category.description)
+
+
     def ok_callback(self):
-        print("ACCEPTED")
+        self.data_dict = {
+            "name" : self.name_lineedit.text(),
+            "description" : self.description_lineedit.text(),
+        }
+        self.accept()
         self.close()
 
 
     def cancel_callback(self):
-        print("CLOSE")
         self.close()
+
 
 
 if __name__ == "__main__":

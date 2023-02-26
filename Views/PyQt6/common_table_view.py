@@ -13,32 +13,21 @@ class CommonTableView(QtWidgets.QTableView):
         self.order = order
         
         self.model = CommonTableModel(header, data)
-        self.__create_proxy_model()
+        self._create_proxy_model()
         self.setModel(self.filter_proxy_model)
 
-        self.verticalHeader().hide()
-
-        header = self.horizontalHeader()
-        header.setSectionResizeMode(QtWidgets.QHeaderView.ResizeToContents)
-        header.setSectionResizeMode(stretch_column, QtWidgets.QHeaderView.Stretch)
-
-        self.resizeRowsToContents()
-
+        self._resize_table()
+        
         align_delegate = TableCellAlignDelegate(QtCore.Qt.AlignCenter, self)
         self.setItemDelegate(align_delegate)
         
         self.setSelectionBehavior(QtWidgets.QTableView.SelectRows)
         self.setSelectionMode(QtWidgets.QAbstractItemView.ExtendedSelection)
+        
+        self.setSortingEnabled(True)
 
 
-    def __create_proxy_model(self):
-        self.filter_proxy_model = QtCore.QSortFilterProxyModel()
-        self.filter_proxy_model.setFilterKeyColumn(0)
-        self.filter_proxy_model.setSourceModel(self.model)
-        self.filter_proxy_model.sort(self.sort_column, self.order)
-
-
-    def get_selected_rows(self): # TODO
+    def get_selected_rows(self): # Uses -42 index to get the whole row
         selected_rows = []
         for selected_model_index in self.selectionModel().selectedRows():
             selected_rows.append(selected_model_index.data(-42))
@@ -65,6 +54,26 @@ class CommonTableView(QtWidgets.QTableView):
         self.__create_proxy_model()
         self.setModel(self.filter_proxy_model)
 
+
+    def replace_row(self, old_row, new_row):
+        self.model.removeRow(old_row)
+        self.model.insertRows(new_row)
+        self.sortByColumn(self.sort_column, self.order)
+
+
+    def add_row(self, new_row):
+        self.model.insertRows(new_row)
+        self.sortByColumn(self.sort_column, self.order)
+
+
+    def _create_proxy_model(self):
+        self.filter_proxy_model = QtCore.QSortFilterProxyModel()
+        self.filter_proxy_model.setFilterKeyColumn(0)
+        self.filter_proxy_model.setSourceModel(self.model)
+        self.filter_proxy_model.sort(self.sort_column, self.order)
+
+
+    def _resize_table(self):
         self.verticalHeader().hide()
 
         header = self.horizontalHeader()
@@ -111,22 +120,22 @@ class CommonTableModel(QtCore.QAbstractTableModel):
         return len(self._data[0]) if len(self._data) > 0 else 0
 
 
-    def insertRows(self, new_row, position, rows, parent=QtCore.QModelIndex()):
-        position = (position + self.rowCount()) if position < 0 else position
-        start = position
-        end = position + rows - 1
+    def insertRows(self, new_row, rows=1, parent=QtCore.QModelIndex()):
+        start = len(self._data) - 1
+        end = start + rows - 1
 
-        if end <= 8:
-            self.beginInsertRows(parent, start, end)
+        self.beginInsertRows(parent, start, end)
+        for i in range(rows):
             self._data.append(new_row) 
-            self.endInsertRows()
-            return True
-        else:
-            self.beginInsertRows(parent, start, end)
-            self._data.append(new_row) 
-            self.endInsertRows()
-            self.removeRows(0, 0)
-            return True
+        self.endInsertRows()
+        return True
+
+
+    def removeRow(self, row):
+        for i in range(len(self._data)):
+            if row == self._data[i]:
+                self.removeRows(i)
+                return i
 
 
     def removeRows(self, position, rows=1, parent=QtCore.QModelIndex()):
@@ -141,6 +150,7 @@ class TableCellAlignDelegate(QtWidgets.QStyledItemDelegate):
     def __init__(self, alignment, *args, **kwargs):
         super(TableCellAlignDelegate, self).__init__(*args, **kwargs)
         self.alignment_option = alignment
+
 
     def initStyleOption(self, option, index):
         super(TableCellAlignDelegate, self).initStyleOption(option, index)

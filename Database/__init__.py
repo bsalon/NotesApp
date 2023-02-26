@@ -64,7 +64,7 @@ if len(filters) < 1:
     print("Creating test data [fast filters]")
     for i in range(10):
         NoteFilterModel.create(
-            filter_name = "Filter " + str(i),
+            name = "Filter " + str(i),
             note_name = "",
             note_min_priority = 0 + i,
             note_max_priority = 100 - i,

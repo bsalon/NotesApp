@@ -14,17 +14,53 @@ class NoteService(BaseService):
 
 
     def get_paged_filtered(self, filters, page, size):
-        query = self.get_all_filtered(filters)
-        return query.offset((page - 1) * size).limit(size)
+        query = self._joined_note_query()
+        filtered_query = self._filter_note_query(query, filters)
+        return filtered_query.offset((page - 1) * size).limit(size).order_by(NoteModel.priority)
 
 
     def get_all_filtered(self, filters):
-        query = NoteModel \
+        query = self._joined_note_query()
+        return self._filter_note_query(query, filters)
+
+
+    def find_detailed_by_name(self, note_name):
+        return self._joined_note_query() \
+            .where(NoteModel.name == note_name)
+
+
+    def update_note(self, note, updated_note):
+        return NoteModel \
+            .update(name = updated_note.name, \
+                time = updated_note.time, \
+                text = updated_note.text, \
+                priority = updated_note.priority, \
+                category = updated_note.category) \
+            .where(NoteModel.id == note.id) \
+            .execute()
+
+
+    def exists_by_category_name(self, category_name):
+        return NoteModel \
+            .select() \
+            .where(NoteModel.category.name == category_name) \
+            .exists()
+
+
+    def _joined_note_query(self):
+        return NoteModel \
             .select(NoteModel, CategoryModel, NoteTagModel, TagModel) \
             .join(CategoryModel, JOIN.LEFT_OUTER) \
             .switch(NoteModel) \
             .join(NoteTagModel, JOIN.LEFT_OUTER) \
-            .join(TagModel, JOIN.LEFT_OUTER) \
+            .join(TagModel, JOIN.LEFT_OUTER)
+
+
+    def _filter_note_query(self, query, filters):
+        if filters == None:
+            return query
+        
+        query = query \
             .where(NoteModel.name.contains(filters.note_name)) \
             .where(NoteModel.priority >= filters.note_min_priority) \
             .where(NoteModel.priority <= filters.note_max_priority) \
@@ -39,29 +75,8 @@ class NoteService(BaseService):
             query = query.where(TagModel.name.contains(filters.tag_name)) \
                 .where(TagModel.description.contains(filters.tag_description))
         
-        #query = query.group_by(NoteModel, CategoryModel, NoteTagModel, TagModel)
         return query
 
-
-    def find_detailed_by_name(self, note_name):
-        return NoteModel \
-            .select(NoteModel, CategoryModel, NoteTagModel, TagModel) \
-            .join(CategoryModel, JOIN.LEFT_OUTER) \
-            .switch(NoteModel) \
-            .join(NoteTagModel, JOIN.LEFT_OUTER) \
-            .join(TagModel, JOIN.LEFT_OUTER) \
-            .where(NoteModel.name == note_name)
-
-
-    def update_note(self, note, updated_note):
-        return NoteModel \
-            .update(name = updated_note.name, \
-                time = updated_note.time, \
-                text = updated_note.text, \
-                priority = updated_note.priority, \
-                category = updated_note.category) \
-            .where(NoteModel.id == note.id) \
-            .execute()
 
 
 if __name__ == "__main__":

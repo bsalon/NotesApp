@@ -4,9 +4,12 @@ from PySide6 import QtWidgets, QtGui, QtCore
 
 
 # https://stackoverflow.com/questions/32476006/how-to-make-an-expandable-collapsable-section-widget-in-qt
-class CollapsableTreeDialog(QtWidgets.QDialog):
-    def __init__(self, *args, **kwargs):
-        super(CollapsableTreeDialog, self).__init__(*args, **kwargs)
+class CollapsableNoteTreeDialog(QtWidgets.QDialog):
+    selection_changed = QtCore.Signal()
+    
+    def __init__(self, notes, *args, **kwargs):
+        super(CollapsableNoteTreeDialog, self).__init__(*args, **kwargs)
+
         self.tree = QtWidgets.QTreeWidget()
         self.tree.setHeaderHidden(True)
         self.tree.setObjectName("collapsable_tree")
@@ -17,48 +20,60 @@ class CollapsableTreeDialog(QtWidgets.QDialog):
         self.setLayout(layout)
         self.tree.setIndentation(0)
 
+        self.replace_sections(notes)
+
+
+    def replace_sections(self, notes):
+        self.tree.clear()
+        self.notes = notes
+        
         self.sections = []
-        self.define_sections(["note1", "note2", "note3"]) # FIXME
+        for note in self.notes:
+            section = self.create_note_section(note)
+            self.sections.append(section)
         self.add_sections()
 
 
     def add_sections(self):
-        """adds a collapsable sections for every 
-        (title, widget) tuple in self.sections
-        """
-        for (title, widget) in self.sections:
-            button = self.add_button(title)
-            section = self.add_widget(button, widget)
-            button.addChild(section)
+        self.widgets = []
+        for (index, (name, date, widget)) in enumerate(self.sections):
+            item, tree_widget = self.add_expand_widget(name, date)
+            section = self.add_widget(item, widget)
+            item.addChild(section)
+            self.widgets.append(tree_widget)
 
 
-    def define_sections(self, notes):
-        for note in notes:
-            widget = QtWidgets.QFrame(self.tree, objectName="collapsable_widget_frame")
-            layout = QtWidgets.QVBoxLayout(widget)
+    def create_note_section(self, note):
+        widget = QtWidgets.QFrame(self.tree, objectName="collapsable_widget_frame")
+        layout = QtWidgets.QVBoxLayout(widget)
 
-            description_label = QtWidgets.QLabel(f"<b>Description:</b> {note}")
-            priority_label = QtWidgets.QLabel(f"<b>Priority:</b> {note}")
-            category_label = QtWidgets.QLabel(f"<b>Category:</b> {note}")
-            tags_string = " ".join(notes)
-            tags_label = QtWidgets.QLabel(f"<b>Tags:</b> {tags_string}")
+        text_label = QtWidgets.QLabel(f"<b>Text:</b> {note.text}")
+        text_label.setWordWrap(True)
+        priority_label = QtWidgets.QLabel(f"<b>Priority:</b> {note.priority}")
+        category_label = QtWidgets.QLabel(f"<b>Category:</b> {note.category.name}")
+        tags_string = " ".join(note.tags)
+        tags_label = QtWidgets.QLabel(f"<b>Tags:</b> {tags_string}")
+        tags_label.setWordWrap(True)
 
-            layout.addWidget(description_label)
-            layout.addWidget(priority_label)
-            layout.addWidget(category_label)
-            layout.addWidget(tags_label)
+        layout.addWidget(text_label)
+        layout.addWidget(priority_label)
+        layout.addWidget(category_label)
+        layout.addWidget(tags_label)
 
-            self.sections.append(("", widget)) # FIXME note_name note_title
+        return note.name, note.time, widget
 
 
-    def add_button(self, note_name, note_date=""): # TODO
+    def add_expand_widget(self, note_name, note_date):
         """creates a QTreeWidgetItem containing a widget 
         to expand or collapse its section
         """
         item = QtWidgets.QTreeWidgetItem()
+        collapsable_widget = CollapsableExpandWidget(item, note_name, note_date, objectName="collapsable_widget")
+        collapsable_widget.checkbox.stateChanged.connect(self.emit_signal)
+
         self.tree.addTopLevelItem(item)
-        self.tree.setItemWidget(item, 0, CollapsableExpandWidget(item, objectName="collapsable_widget")) # TODO note_name note_title
-        return item
+        self.tree.setItemWidget(item, 0, collapsable_widget)
+        return item, collapsable_widget
 
 
     def add_widget(self, button, widget):
@@ -71,18 +86,38 @@ class CollapsableTreeDialog(QtWidgets.QDialog):
         return section
 
 
+    @QtCore.Slot()
+    def emit_signal(self):
+        self.selection_changed.emit()
+
+
+    # TODO
+    def remove_all_widgets(self):
+        pass
+        #for item in self.tree:
+        #    remove item
+
+
+    def get_selected_notes(self):
+        selected_notes = []
+        for (index, widget) in enumerate(self.widgets):
+            if widget.checkbox.isChecked():
+                selected_notes.append(self.notes[index])
+        return selected_notes
+
+
 
 class CollapsableExpandWidget(QtWidgets.QWidget):
-    def __init__(self, section, text = "", *args, **kwargs):
+    def __init__(self, section, name, date, *args, **kwargs):
         super(CollapsableExpandWidget, self).__init__(*args, **kwargs) # text
 
-        note_name_label = QtWidgets.QLabel("Note name", objectName="collapsable_note_name")
-        note_date_label = QtWidgets.QLabel("Note date & time", objectName="collapsable_note_date")
+        self.note_name_label = QtWidgets.QLabel(name, objectName="collapsable_note_name")
+        note_date_label = QtWidgets.QLabel(date.strftime("%d/%m/%Y %H:%M"), objectName="collapsable_note_date")
         self.checkbox = QtWidgets.QCheckBox()
         self.checkbox.stateChanged.connect(self.toggle_check_state)
 
         layout = QtWidgets.QGridLayout(self)
-        layout.addWidget(note_name_label,  0, 0, alignment=QtCore.Qt.AlignLeft)
+        layout.addWidget(self.note_name_label,  0, 0, alignment=QtCore.Qt.AlignLeft)
         layout.addWidget(note_date_label, 0, 1, alignment=QtCore.Qt.AlignCenter)
         layout.addWidget(self.checkbox, 0, 2, alignment=QtCore.Qt.AlignRight)
         

@@ -1,4 +1,3 @@
-# import View
 from BusinessLogic.NoteService import NoteService
 from BusinessLogic.NoteTagService import NoteTagService
 from BusinessLogic.TagService import TagService
@@ -15,20 +14,51 @@ class UseCases():
         self.filter_service = NoteFilterService()
 
 
-    def create_note(self, **keys_values):
-        self.note_service.create(**key_values)
-    
+    def create_note(self, note):
+        if self.note_service.exists_by_name(note.name):
+            return 0
+
+        category = self.category_service.get_by_name(note.category_name)
+        query_result = self.note_service.create(
+            name=note.name,
+            time=note.time,
+            priority=note.priority,
+            text=note.text,
+            category=category
+        )
+
+        new_note = self.note_service.get_by_name(note.name)
+        for tag_name in note.tags_names:
+            tag = self.tag_service.get_by_name(tag_name)
+            self.notetag_service.create(
+                note=new_note,
+                tag=tag
+            )
+
+        return query_result
+
 
     def get_notes(self):
         return [note for note in self.note_service.get_all()]
 
 
     def get_filtered_notes_paged(self, filters, page, size):
-        return [note for note in self.note_service.get_paged_filtered(filters, page, size)]
+        notes = [note for note in self.note_service.get_paged_filtered(filters, page, size)]
+        notes_with_tags = []
+        index = -1
+        for note in notes:
+            if index == -1 or note.name != notes_with_tags[index].name:
+                index += 1
+                notes_with_tags.append(note)
+                notes_with_tags[index].tags = set()
+
+            if note.notetagmodel_set:
+                notes_with_tags[index].tags.add(note.notetagmodel.tag.name)
+
+        return notes_with_tags
 
 
     def get_filtered_notes(self, filters):
-        # note.category.name ... note.notetagmode.note.name
         return [note for note in self.note_service.get_all_filtered(filters)]
 
     
@@ -46,75 +76,153 @@ class UseCases():
 
     def update_note(self, note_id, updated_note):
         note = self.note_service.get_by_id(note_id)
-        #if self.note_service.get_by_name(updated_note.name):
-        #    return None
+        if self.note_service.exists_by_name(updated_note.name) and note.name != updated_note.name:
+            return 0
 
-        note_tags = self.notetag_service.get_note_tags(note)
+        note_tags = self.notetag_service.get_note_tags_by_note(note)
         for note_tag in note_tags:
             note_tag.delete_instance()
 
         updated_note.category = self.category_service.get_by_name(note.category.name)
         query_result = self.note_service.update_note(note, updated_note)
+        new_note = self.note_service.get_by_id(note_id)
 
         for tag_name in updated_note.tags_names:
             found_tag = self.tag_service.get_by_name(tag_name)
             self.notetag_service.create(note=new_note, tag=found_tag)
 
-        print(query_result)
-
         return query_result
 
 
-    def delete_notes(self, notes_names): # FIXME: delete tags and categories
-        notes = []
+    def delete_notes(self, notes_names):
         for note_name in notes_names:
             note = self.note_service.get_by_name(note_name)
+            note_tags = self.notetag_service.get_note_tags_by_note(note)
+            for note_tag in note_tags:
+                note_tag.delete_instance()
             note.delete_instance()
 
 
 
-    # TODO add here
-    def create_category(self, **keys_values):
-        self.category_service.create(**key_values)
+    def create_category(self, category):
+        if self.category_service.exists_by_name(category.name):
+            return 0
+
+        query_result = self.category_service.create(
+            name=category.name,
+            description=category.description
+        )
+        return query_result
 
 
     def get_categories(self):
         return [category for category in self.category_service.get_all()]
 
 
-    def delete_categories(self, notes_names): # FIXME: dont delete if note exists
-        categories = []
+    def update_category(self, category_id, updated_category):
+        category = self.category_service.get_by_id(category_id)
+        if self.category_service.exists_by_name(updated_category.name) and category.name != updated_category.name:
+            return 0
+
+        query_result = self.category_service.update_category(category, updated_category)
+        return query_result
+
+
+    def find_category_by_name(self, category_name):
+        return self.category_service.get_by_name(category_name)
+
+
+    def delete_categories(self, categories_names):
+        for category_name in categories_names:
+            if self.note_service.exists_by_category_name(category_name):
+                return 0
+
+        for category_name in categories_names:
+            category = self.category_service.get_by_name(category_name)
+            category.delete_instance()
+
+        return 1
 
 
 
-    # TODO add here
-    def create_tag(self, **keys_values):
-        self.tag_service.create(**key_values)
+    def create_tag(self, tag):
+        if self.tag_service.exists_by_name(tag.name):
+            return 0
+
+        query_result = self.tag_service.create(
+            name=tag.name,
+            description=tag.description
+        )
+        return query_result
 
 
     def get_tags(self):
         return [tag for tag in self.tag_service.get_all()]
 
 
-    def delete_tags(self, tags_names): # FIXME: dont delete if note exists
-        tags = []
+    def update_tag(self, tag_id, updated_tag):
+        tag = self.tag_service.get_by_id(tag_id)
+        if self.tag_service.exists_by_name(updated_tag.name) and tag.name != updated_tag.name:
+            return 0
+
+        query_result = self.tag_service.update_tag(tag, updated_tag)
+        return query_result
+
+
+    def find_tag_by_name(self, tag_name):
+        return self.tag_service.get_by_name(tag_name)
+
+
+    def delete_tags(self, tags_names):
+        for tag_name in tags_names:
+            tag = self.tag_service.get_by_name(tag_name)
+            note_tags = self.notetag_service.get_note_tags_by_tag(tag)
+            for note_tag in note_tags:
+                note_tag.delete_instance()
+            tag.delete_instance()
 
 
 
-    # TODO add here
-    def create_filter(self, **keys_values):
-        self.filter_service.create(**key_values)
+    def create_filter(self, note_filter):
+        if self.filter_service.exists_by_name(note_filter.name):
+            return 0
+
+        query_result = self.filter_service.create(
+            name=note_filter.name,
+            note_name=note_filter.note_name,
+            note_min_priority=note_filter.note_min_priority,
+            note_max_priority=note_filter.note_max_priority,
+            note_min_time=note_filter.note_min_time,
+            note_max_time=note_filter.note_max_time,
+            note_text=note_filter.note_text,
+            tag_name=note_filter.tag_name,
+            tag_description=note_filter.tag_description,
+            category_name=note_filter.category_name,
+            category_description=note_filter.category_description,
+            order=note_filter.order,
+        )
+        return query_result
 
 
     def get_filters(self):
         return [fast_filter for fast_filter in self.filter_service.get_all()]
     
 
-    def find_filter_by_name(self, note_name): # TODO
+    def update_filter(self, filter_id, updated_filter):
+        note_filter = self.filter_service.get_by_id(filter_id)
+        if self.filter_service.exists_by_name(updated_filter.name) and note_filter.name != updated_filter.name:
+            return 0
+
+        query_result = self.filter_service.update_filter(note_filter, updated_filter)
+        return query_result
+
+
+    def find_filter_by_name(self, note_name):
         return self.filter_service.get_by_name(note_name)
 
 
     def delete_filters(self, filters_names):
-        filters = []
-
+        for filter_name in filters_names:
+            fast_filter = self.filter_service.get_by_name(filter_name)
+            fast_filter.delete_instance()
 

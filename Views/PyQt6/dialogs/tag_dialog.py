@@ -29,13 +29,21 @@ class TagDialog(QtWidgets.QDialog):
         self.setLayout(dialog_layout)
 
 
+    def fill_dialog(self, tag):
+        self.name_lineedit.setText(tag.name)
+        self.description_lineedit.setText(tag.description)
+
+
     def ok_callback(self):
-        print("ACCEPTED")
+        self.data_dict = {
+            "name" : self.name_lineedit.text(),
+            "description" : self.description_lineedit.text(),
+        }
+        self.accept()
         self.close()
 
 
     def cancel_callback(self):
-        print("CLOSE")
         self.close()
 
 

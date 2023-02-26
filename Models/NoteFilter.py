@@ -5,7 +5,7 @@ from peewee import *
 
 
 class NoteFilterModel(BaseModel):
-    filter_name = CharField(unique=True)
+    name = CharField(unique=True)
     note_name = CharField()
     note_min_priority = IntegerField(default=0)
     note_max_priority = IntegerField(default=100)

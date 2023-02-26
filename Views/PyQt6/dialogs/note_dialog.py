@@ -111,23 +111,6 @@ class NoteDialog(QtWidgets.QDialog):
                 tag_item.setCheckState(QtCore.Qt.Checked)
 
 
-    def ok_callback(self):
-        self.data_dict = {
-            "name" : self.name_lineedit.text(),
-            "time" : self.datetime_lineedit.dateTime(),
-            "text" : self.text_lineedit.text(),
-            "priority" : self.priority_slider.value(),
-            "category" : self.get_selected_category_name(),
-            "tags" : self.get_selected_tags_names()
-        }
-        self.accept()
-        self.close()
-
-
-    def cancel_callback(self):
-        self.close()
-
-
     def get_selected_category_name(self):
         for i in range(self.categories_listwidget.count()):
             category_item = self.categories_listwidget.item(i)
@@ -143,6 +126,23 @@ class NoteDialog(QtWidgets.QDialog):
     @QtCore.Slot()
     def update_slider_label(self, value):
         self.priority_slider_label.setText(str(value))
+
+
+    def ok_callback(self):
+        self.data_dict = {
+            "name" : self.name_lineedit.text(),
+            "time" : self.datetime_lineedit.dateTime(),
+            "text" : self.text_lineedit.text(),
+            "priority" : self.priority_slider.value(),
+            "category" : self.get_selected_category_name(),
+            "tags" : self.get_selected_tags_names()
+        }
+        self.accept()
+        self.close()
+
+
+    def cancel_callback(self):
+        self.close()
 
 
 if __name__ == "__main__":

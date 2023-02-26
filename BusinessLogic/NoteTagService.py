@@ -10,7 +10,13 @@ class NoteTagService(BaseService):
         super().__init__(NoteTagModel)
 
 
-    def get_note_tags(self, note):
+    def get_note_tags_by_note(self, note):
         return NoteTagModel \
             .select(NoteTagModel) \
             .where(NoteTagModel.note == note)
+
+
+    def get_note_tags_by_tag(self, tag):
+        return NoteTagModel \
+            .select(NoteTagModel) \
+            .where(NoteTagModel.tag == tag)

@@ -22,6 +22,10 @@ class BaseService:
         return self.model.select().paginate(page, size)
     
 
+    def exists_by_name(self, name):
+        return self.model.select().where(self.model.name == name).exists()
+
+
     def get_by_id(self, item_id):
         return self.model.select().where(self.model.id == item_id).get()
 
