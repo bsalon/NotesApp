@@ -91,13 +91,6 @@ class CollapsableNoteTreeDialog(QtWidgets.QDialog):
         self.selection_changed.emit()
 
 
-    # TODO
-    def remove_all_widgets(self):
-        pass
-        #for item in self.tree:
-        #    remove item
-
-
     def get_selected_notes(self):
         selected_notes = []
         for (index, widget) in enumerate(self.widgets):

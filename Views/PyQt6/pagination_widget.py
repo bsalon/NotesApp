@@ -1,3 +1,4 @@
+import math
 import sys
 
 import clickable_label
@@ -6,6 +7,8 @@ from PySide6 import QtCore, QtWidgets, QtGui
 
 
 class PaginationWidget(QtWidgets.QWidget):
+    page_changed = QtCore.Signal()
+
     def __init__(self, page_size, items_count, *args, **kwargs):
         super(PaginationWidget, self).__init__(*args, **kwargs)
         self.page_size = page_size
@@ -47,8 +50,8 @@ class PaginationWidget(QtWidgets.QWidget):
             self.layout.addWidget(label)
 
 
-    def pages_count(self): # FIXME
-        return (self.items_count // self.page_size) + 1
+    def pages_count(self):
+        return math.ceil(self.items_count / self.page_size)
 
 
     # https://stackoverflow.com/questions/4528347/clear-all-widgets-in-a-layout-in-pyqt
@@ -61,6 +64,7 @@ class PaginationWidget(QtWidgets.QWidget):
     def go_to_prev_page(self):
         self.current_page -= 1
         self.current_page = self.current_page if self.current_page >= 1 else 1
+        self.page_changed.emit()
         self.create_labels()
 
 
@@ -69,12 +73,14 @@ class PaginationWidget(QtWidgets.QWidget):
         last_page = self.pages_count()
         self.current_page += 1
         self.current_page = self.current_page if self.current_page <= last_page else last_page
+        self.page_changed.emit()
         self.create_labels()
 
 
     @QtCore.Slot()
     def go_to_page(self, page):
         self.current_page = page
+        self.page_changed.emit()
         self.create_labels()
 
 

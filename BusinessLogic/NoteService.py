@@ -16,7 +16,7 @@ class NoteService(BaseService):
     def get_paged_filtered(self, filters, page, size):
         query = self._joined_note_query()
         filtered_query = self._filter_note_query(query, filters)
-        return filtered_query.offset((page - 1) * size).limit(size).order_by(NoteModel.priority)
+        return filtered_query.offset((page - 1) * size).limit(size).order_by(NoteModel.priority).group_by(NoteModel.name)
 
 
     def get_all_filtered(self, filters):
@@ -40,7 +40,14 @@ class NoteService(BaseService):
             .execute()
 
 
-    def exists_by_category_name(self, category_name):
+    def exists_by_category(self, category): # FIXME
+        return NoteModel \
+            .select() \
+            .where(NoteModel.category == category) \
+            .exists()
+
+
+    def exists_by_category_name(self, category_name): # FIXME
         return NoteModel \
             .select() \
             .where(NoteModel.category.name == category_name) \

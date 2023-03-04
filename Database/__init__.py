@@ -48,7 +48,6 @@ if len(tags) < 1:
         )
 tags = [tag for tag in TagModel.select()]
 
-# FIXME
 notes_tags = [note_tag for note_tag in NoteTagModel.select()]
 if len(notes_tags) < 1:
     print("Creating test data [notes_tags]")

@@ -34,6 +34,19 @@ class CommonTableView(QtWidgets.QTableView):
         return selected_rows
 
 
+    def delete_rows(self, rows):
+        indices = []
+
+        for i in range(self.model.rowCount(self.currentIndex())):
+            index = self.model.index(i, 0)
+            row = self.model.data(index, -42)
+            if row in rows:
+                indices.append(i)
+
+        for i in reversed(sorted(indices)):
+            self.model.removeRows(i, 1)
+
+
     def delete_selection(self):
         selected_indices = []
         
@@ -45,25 +58,29 @@ class CommonTableView(QtWidgets.QTableView):
             data_index = self.model.find_data_index(item)
             selected_indices.append(data_index)
         
-        for selected_index in reversed(sorted(selected_indices)):
-            self.model.removeRows(selected_index, 1)
+        for i in reversed(sorted(selected_indices)):
+            self.model.removeRows(i, 1)
 
 
     def replace_data(self, new_data):
-        self.model = CommonTableModel(self.header, new_data)
-        self.__create_proxy_model()
-        self.setModel(self.filter_proxy_model)
+        self.model.removeAllRows()
+        for row in new_data:
+            self.model.insertRows(row)
 
 
     def replace_row(self, old_row, new_row):
         self.model.removeRow(old_row)
         self.model.insertRows(new_row)
-        self.sortByColumn(self.sort_column, self.order)
+        order = self.horizontalHeader().sortIndicatorOrder()
+        column = self.horizontalHeader().sortIndicatorSection()
+        self.sortByColumn(column, order) # TODO - doesnt work
 
 
     def add_row(self, new_row):
         self.model.insertRows(new_row)
-        self.sortByColumn(self.sort_column, self.order)
+        order = self.horizontalHeader().sortIndicatorOrder()
+        column = self.horizontalHeader().sortIndicatorSection()
+        self.sortByColumn(column, order) # TODO - doesnt work
 
 
     def _create_proxy_model(self):
@@ -143,6 +160,10 @@ class CommonTableModel(QtCore.QAbstractTableModel):
         del self._data[position : position + rows]
         self.endRemoveRows()
         return True
+
+
+    def removeAllRows(self):
+        self.removeRows(0, len(self._data))
 
 
 

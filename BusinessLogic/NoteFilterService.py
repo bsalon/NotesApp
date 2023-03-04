@@ -8,6 +8,10 @@ class NoteFilterService(BaseService):
         super().__init__(NoteFilterModel)
 
 
+    def find_by_order(self, order):
+        return NoteFilterModel.select().where(NoteFilterModel.order == order)
+
+
     def update_filter(self, note_filter, updated_filter):
         return NoteFilterModel \
             .update(name = updated_filter.name, \
@@ -25,3 +29,10 @@ class NoteFilterService(BaseService):
             .where(NoteFilterModel.id == note_filter.id) \
             .execute()
 
+
+    def remove_order(self, order):
+        return NoteFilterModel \
+            .update(order = -1) \
+            .where(NoteFilterModel.order == order) \
+            .execute()
+        

@@ -2,6 +2,8 @@ import sys
 
 from PySide6 import QtWidgets, QtCore, QtGui
 
+from dialogs import reg_exp_validator
+
 
 class FilterDialog(QtWidgets.QDialog):
     def __init__(self, *args, **kwargs):
@@ -44,7 +46,13 @@ class FilterDialog(QtWidgets.QDialog):
         note_priority_layout.setContentsMargins(0, 0, 0, 0)
         note_priority_layout.setAlignment(QtCore.Qt.AlignTop)
         self.note_min_priority_lineedit = QtWidgets.QLineEdit()
+        min_priority_validator = reg_exp_validator.RegExpValidator(r"1?\d{1,2}", self)
+        min_priority_validator.validationChanged.connect(self.handle_min_priority_validation)
+        self.note_min_priority_lineedit.setValidator(min_priority_validator)
         self.note_max_priority_lineedit = QtWidgets.QLineEdit()
+        max_priority_validator = reg_exp_validator.RegExpValidator(r"1?\d{1,2}", self)
+        max_priority_validator.validationChanged.connect(self.handle_max_priority_validation)
+        self.note_max_priority_lineedit.setValidator(max_priority_validator)
         note_priority_layout.addWidget(self.note_min_priority_lineedit)
         note_priority_layout.addWidget(QtWidgets.QLabel(" - "))
         note_priority_layout.addWidget(self.note_max_priority_lineedit)
@@ -76,7 +84,20 @@ class FilterDialog(QtWidgets.QDialog):
         self.setLayout(dialog_layout)
 
 
-    def fill_dialog(self, fast_filter): # TODO - time header
+    def handle_min_priority_validation(self, state):
+        color = "lime" if state == QtGui.QValidator.Acceptable else "red"
+        self.note_min_priority_lineedit.setStyleSheet("border: 3px solid %s" % color)
+        QtCore.QTimer.singleShot(1000, lambda: self.note_min_priority_lineedit.setStyleSheet(''))
+    
+
+    def handle_max_priority_validation(self, state):
+        color = "lime" if state == QtGui.QValidator.Acceptable else "red"
+        self.note_max_priority_lineedit.setStyleSheet("border: 3px solid %s" % color)
+        QtCore.QTimer.singleShot(1000, lambda: self.note_max_priority_lineedit.setStyleSheet(''))
+
+
+
+    def fill_dialog(self, fast_filter): 
         self.filter_name_lineedit.setText(fast_filter.name)
         self.filter_order_lineedit.setText(str(fast_filter.order))
         self.note_name_lineedit.setText(fast_filter.note_name)

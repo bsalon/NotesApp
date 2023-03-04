@@ -1,11 +1,13 @@
-import sys
+import bisect
 import random
+import sys
 
 from datetime import datetime
 
 from Controllers import UseCases
 
 import loading_bar
+import clickable_label
 import common_table_view
 import pagination_widget
 import searchbar_with_icon
@@ -25,13 +27,14 @@ class MainWindow(QtWidgets.QWidget):
         self.controller = use_cases # TODO RENAME
 
         # get data from database for tables and accordion
-        self.current_note_filter = None
+        self.current_note_filter = self.create_default_filter()
         self.grid_page = 1
         self.grid_notes = [note for note in self.controller.get_filtered_notes_paged(self.current_note_filter, page=self.grid_page, size=10)]
-        
+
         controller_notes = [note for note in self.controller.get_notes()]
         self.table_notes = [(note.name, note.priority, note.time.strftime("%d/%m/%Y %H:%M"), note.text) for note in controller_notes]
         self.today_notes = [(note.time.strftime("%H:%M"), note.name) for note in controller_notes if note.time.date() == datetime.today().date()]
+        self.today_notes.sort(key = lambda note: note[0])
 
         self.table_tags = [(tag.name, tag.description) for tag in self.controller.get_tags()]
 
@@ -47,7 +50,7 @@ class MainWindow(QtWidgets.QWidget):
         self.layout.setContentsMargins(0, 0, 0, 0)
         self.layout.setSpacing(0)
 
-        # top toolbar layout
+        # toolbar layout on top
         self.toolbar_container_widget = QtWidgets.QWidget(objectName="toolbar_container")
         self.toolbar_layout = QtWidgets.QGridLayout(self.toolbar_container_widget)
         self.__init_toolbar_layout()
@@ -73,27 +76,17 @@ class MainWindow(QtWidgets.QWidget):
         self.setLayout(self.layout)
 
 
-    @QtCore.Slot()
-    def toggle_todays_notes_pane(self):
-        if self.todays_notes_pane_visible:
-            self.todays_notes_container_widget.hide()
-            self.layout.addWidget(self.tabs_content_container_widget, 1, 0, 14, 8)
-        else:
-            self.layout.addWidget(self.tabs_content_container_widget, 1, 1, 14, 7)
-            self.todays_notes_container_widget.show()
-        self.todays_notes_pane_visible = not self.todays_notes_pane_visible
-
 
     def __init_toolbar_layout(self):
         col = 0
 
         # Today's notes icon button
-        self.icon = QtGui.QIcon()
-        self.icon.addFile("/home/benjaminsalon/diplom/NotesApp/Views/PyQt6/icons/TodaysNotesIcon.png")
+        todays_notes_icon = QtGui.QIcon()
+        todays_notes_icon.addFile("/home/benjaminsalon/diplom/NotesApp/Views/PyQt6/icons/TodaysNotesIcon.png")
         self.today_notes_icon_button = QtWidgets.QToolButton()
         self.today_notes_icon_button.setText("Today's notes")
         self.today_notes_icon_button.setToolButtonStyle(QtGui.Qt.ToolButtonTextUnderIcon)
-        self.today_notes_icon_button.setIcon(self.icon)
+        self.today_notes_icon_button.setIcon(todays_notes_icon)
         self.today_notes_icon_button.setIconSize(QtCore.QSize(28, 28))
         self.today_notes_icon_button.setObjectName("today_notes_icon_button")
         self.toolbar_layout.addWidget(self.today_notes_icon_button, 0, col, 0, 4, alignment=QtGui.Qt.AlignCenter)
@@ -101,29 +94,15 @@ class MainWindow(QtWidgets.QWidget):
         self.todays_notes_pane_visible = True
         col += 4
 
-        # TODO - remove
-        self.breadcrumb_text_links = [QtWidgets.QLabel("Notes Tab", objectName="text_link"),
-                                      QtWidgets.QLabel("Page 1", objectName="text_link")]
-        for breadcrumb_text_link in self.breadcrumb_text_links:
-            self.toolbar_layout.addWidget(breadcrumb_text_link, 0, col, 0, 1)
-            col += 1
-            self.toolbar_layout.addWidget(QtWidgets.QLabel(" > "), 0, col, 0, 1)
-            col += 1
-        self.breadcrumb_text_links.append(QtWidgets.QLabel("", objectName="text_link"))
-        self.toolbar_layout.addWidget(self.breadcrumb_text_links[-1], 0, col, 0, 1)
-        col += 1
-
-        # TODO - activate
-        self.fast_filters_text_links_layout = QtWidgets.QGridLayout()
-        self.fast_filters_text_links_layout.addWidget(QtWidgets.QLabel("Use fast filters"), 0, 0, 1, 3)
-        col_fast_filters_layout = 0
-        self.fast_filters_text_links = [QtWidgets.QLabel("#1"), QtWidgets.QLabel("#2"), QtWidgets.QLabel("#3")]
-        for fast_filters_text_link in self.fast_filters_text_links:
-            self.fast_filters_text_links_layout.addWidget(fast_filters_text_link, 1, col_fast_filters_layout)
-            col_fast_filters_layout += 1
+        # Use fast filter section
+        self.toolbar_layout.addWidget(QtWidgets.QLabel("Use fast filters:"), 0, col, 0, 3, alignment=QtGui.Qt.AlignCenter)
+        col += 3
+        self.fast_filters_text_links = [clickable_label.ClickableQLabel("#1"), clickable_label.ClickableQLabel("#2"), clickable_label.ClickableQLabel("#3")]
+        for order, fast_filters_text_link in enumerate(self.fast_filters_text_links):
+            self.toolbar_layout.addWidget(fast_filters_text_link, 0, col, 0, 2)
+            fast_filters_text_link.clicked.connect(lambda o=order: self.use_fast_filter(o+1))
+            col += 2
             fast_filters_text_link.setObjectName("text_link")
-        self.toolbar_layout.addLayout(self.fast_filters_text_links_layout, 0, col, 0, 4)
-        col += 4
 
         # Time widget
         self.time_widget = time_widget.TimeWidget()
@@ -131,10 +110,10 @@ class MainWindow(QtWidgets.QWidget):
         col += 6
 
         # Add icon button
-        self.add_icon = QtGui.QIcon()
-        self.add_icon.addFile("/home/benjaminsalon/diplom/NotesApp/Views/PyQt6/icons/AddIcon.png")
+        add_icon = QtGui.QIcon()
+        add_icon.addFile("/home/benjaminsalon/diplom/NotesApp/Views/PyQt6/icons/AddIcon.png")
         self.add_icon_button = QtWidgets.QToolButton()
-        self.add_icon_button.setIcon(self.add_icon)
+        self.add_icon_button.setIcon(add_icon)
         self.add_icon_button.setIconSize(QtCore.QSize(28, 28))
         self.add_icon_button.setObjectName("toolbar_icon_button")
         self.add_icon_button.clicked.connect(self.add_item)
@@ -170,8 +149,7 @@ class MainWindow(QtWidgets.QWidget):
         self.toolbar_layout.addWidget(self.loading_bar, 0, col, 0, 5)
         col += 5
 
-        # TODO - activate
-        # Settings icon button
+        # Settings icon button TODO
         self.settings_icon = QtGui.QIcon()
         self.settings_icon.addFile("/home/benjaminsalon/diplom/NotesApp/Views/PyQt6/icons/SettingsIcon.png")
         self.settings_dropdown_button = QtWidgets.QToolButton()
@@ -188,7 +166,29 @@ class MainWindow(QtWidgets.QWidget):
             self.toolbar_layout.setColumnStretch(time_col, 2)
 
 
-    # TODO - remove on update delete and creation and so on - no filtering
+
+    @QtCore.Slot()
+    def toggle_todays_notes_pane(self):
+        if self.todays_notes_pane_visible:
+            self.todays_notes_container_widget.hide()
+            self.layout.addWidget(self.tabs_content_container_widget, 1, 0, 14, 8)
+        else:
+            self.layout.addWidget(self.tabs_content_container_widget, 1, 1, 14, 7)
+            self.todays_notes_container_widget.show()
+        self.todays_notes_pane_visible = not self.todays_notes_pane_visible
+
+
+
+    @QtCore.Slot()
+    def use_fast_filter(self, order):
+        self.current_note_filter = self.controller.find_filter_by_order(order)
+        if self.current_note_filter == None:
+            self.current_note_filter = self.create_default_filter()
+            self.display_error_message_box(f"Fast filter with order={order} is not available")
+        self.use_current_note_filter()
+
+
+
     def __init_todays_notes_layout(self):
         self.todays_notes_layout.setContentsMargins(0, 0, 0, 0)
         self.todays_notes_layout.setSpacing(0)
@@ -211,6 +211,7 @@ class MainWindow(QtWidgets.QWidget):
         self.todays_notes_layout.addWidget(self.todays_notes_list)
 
 
+
     # Maybe faster algorithm here could help
     def remove_notes_from_todays_notes(self, notes):
         remove_indices = []
@@ -222,7 +223,23 @@ class MainWindow(QtWidgets.QWidget):
 
         for i in reversed(sorted(remove_indices)):
             self.todays_notes_list.takeItem(i)
-        
+            self.today_notes.pop(i)
+
+
+
+    def add_note_to_todays_notes(self, note):
+        if note.time.date() == datetime.today().date():
+            note_tuple = (note.time.strftime("%H:%M"), note.name)
+            bisect.insort_left(self.today_notes, note_tuple)
+
+            new_note_index = self.today_notes.index(note_tuple)
+
+            item = QtWidgets.QListWidgetItem()
+            self.todays_notes_list.insertItem(new_note_index, item)
+            row = todays_notes_row_widget.TodaysNotesRowWidget(*note_tuple)
+            item.setSizeHint(row.minimumSizeHint())
+            self.todays_notes_list.setItemWidget(item, row)
+
 
     
     def __init_tabs_content_layout(self):
@@ -257,6 +274,7 @@ class MainWindow(QtWidgets.QWidget):
         self.notes_tab_searchbar = searchbar_with_icon.SearchBarWithIcon(objectName="search_container")
         
         self.notes_filter_button = QtWidgets.QPushButton("Filter")
+        self.notes_filter_button.setToolTip("Resets fast or advanced filter")
         self.notes_filter_button.clicked.connect(lambda: self.__set_basic_text_filtering(
             self.notes_tab_table.filter_proxy_model,
             self.notes_tab_searchbar.searchbar)
@@ -291,7 +309,8 @@ class MainWindow(QtWidgets.QWidget):
         self.notes_tab_accordion = collapsable_note_tree_dialog.CollapsableNoteTreeDialog(self.grid_notes)
         self.notes_tab_accordion.selection_changed.connect(self.notes_accordion_buttons_enabling)
         self.notes_tab_accordion.hide()
-        self.notes_tab_accordion_pagination = pagination_widget.PaginationWidget(10, len(self.table_notes)) 
+        self.notes_tab_accordion_pagination = pagination_widget.PaginationWidget(10, len(self.table_notes))
+        self.notes_tab_accordion_pagination.page_changed.connect(self.change_notes_tab_accordion_page)
         # FIXME size
         
         self.notes_tab_accordion_pagination.hide()
@@ -310,8 +329,8 @@ class MainWindow(QtWidgets.QWidget):
         if dialog.exec():
             filters = lambda: None
             filters.note_name = dialog.data_dict["note_name"]
-            filters.note_min_priority = int(dialog.data_dict["note_min_priority"])
-            filters.note_max_priority = int(dialog.data_dict["note_max_priority"])
+            filters.note_min_priority = int("0" + dialog.data_dict["note_min_priority"])
+            filters.note_max_priority = int("0" + dialog.data_dict["note_max_priority"])
             filters.note_min_time = dialog.data_dict["note_from_date"].toPython()
             filters.note_max_time = dialog.data_dict["note_to_date"].toPython()
             filters.note_text = dialog.data_dict["note_text"]
@@ -321,12 +340,16 @@ class MainWindow(QtWidgets.QWidget):
             filters.tag_description = dialog.data_dict["tag_description"]
             
             self.current_note_filter = filters
+            self.use_current_note_filter()
 
-            filtered_notes = self.controller.get_filtered_notes(filters)
-            self.table_notes = [(note.name, note.priority, note.time.strftime("%d/%m/%Y %H:%M"), note.text) for note in filtered_notes]
-            
-            self.grid_notes = [note for note in self.controller.get_filtered_notes_paged(self.current_note_filter, page=self.grid_page, size=10)]
-            self.notes_tab_table.replace_data(list(set(self.table_notes)))
+
+
+    def use_current_note_filter(self):
+        filtered_notes = self.controller.get_filtered_notes(self.current_note_filter)
+        self.table_notes = [(note.name, note.priority, note.time.strftime("%d/%m/%Y %H:%M"), note.text) for note in filtered_notes]
+
+        self.notes_tab_table.replace_data(list(set(self.table_notes)))
+        self.update_notes_tab_accordion()
 
 
 
@@ -336,11 +359,16 @@ class MainWindow(QtWidgets.QWidget):
         if table_view:
             self.notes_tab_accordion.hide()
             self.notes_tab_accordion_pagination.hide()
+            selected_rows_count = self.count_selected_rows(self.notes_tab_table)
             self.notes_tab_table.show()
         else:
             self.notes_tab_table.hide()
+            selected_rows_count = self.count_selected_notes()
             self.notes_tab_accordion.show()
             self.notes_tab_accordion_pagination.show()
+        self.edit_icon_button.setEnabled(selected_rows_count == 1)
+        self.delete_icon_button.setEnabled(selected_rows_count >= 1)
+
 
 
     def __init_categories_tab(self):
@@ -366,6 +394,7 @@ class MainWindow(QtWidgets.QWidget):
         self.categories_tab_layout.addWidget(self.categories_tab_table, 1, 0, 1, 3)
 
 
+
     def __init_tags_tab(self):
         self.tags_tab_layout = QtWidgets.QGridLayout(self.tags_tab_widget)
         self.tags_tab_searchbar = searchbar_with_icon.SearchBarWithIcon(objectName="search_container")
@@ -387,6 +416,7 @@ class MainWindow(QtWidgets.QWidget):
         self.tags_tab_layout.addWidget(self.tags_filter_button, 0, 1)
         self.tags_tab_layout.addWidget(QtWidgets.QWidget(), 0, 2)
         self.tags_tab_layout.addWidget(self.tags_tab_table, 1, 0, 1, 3)
+
 
 
     def __init_filters_tab(self):
@@ -413,6 +443,7 @@ class MainWindow(QtWidgets.QWidget):
         self.filters_tab_layout.addWidget(self.filters_tab_table, 1, 0, 1, 3)
 
 
+
     @QtCore.Slot()
     def tab_update_buttons_enabling(self, index):
         if index == 0: # Notes tab
@@ -433,12 +464,15 @@ class MainWindow(QtWidgets.QWidget):
         self.delete_icon_button.setEnabled(selected_rows_count >= 1)
             
 
+
     def count_selected_rows(self, table):
         return len(table.selectionModel().selectedRows())
 
 
+
     def count_selected_notes(self):
         return len(self.notes_tab_accordion.get_selected_notes())
+
 
 
     @QtCore.Slot()
@@ -459,6 +493,7 @@ class MainWindow(QtWidgets.QWidget):
         self.delete_icon_button.setEnabled(selected_rows_count >= 1)
 
 
+
     @QtCore.Slot()
     def notes_accordion_buttons_enabling(self):
         if self.tabs.currentWidget().objectName() == "notes_tab" and not self.is_table_view:
@@ -466,12 +501,16 @@ class MainWindow(QtWidgets.QWidget):
             self.edit_icon_button.setEnabled(selected_notes_count == 1)
             self.delete_icon_button.setEnabled(selected_notes_count >= 1)
 
+
     
+    # Operations on items
+
     @QtCore.Slot()
     def add_item(self):
         self.loading_bar.loading_bar.setRange(0, 0)
         self.item_action("ADD")
         self.loading_bar.loading_bar.setRange(0, 1)
+
 
     
     @QtCore.Slot()
@@ -480,161 +519,40 @@ class MainWindow(QtWidgets.QWidget):
         self.item_action("EDIT")
         self.loading_bar.loading_bar.setRange(0, 1)
 
+
     
     def item_action(self, action_name):
         current_tab_name = self.tabs.currentWidget().objectName()
         if current_tab_name == "notes_tab":
-            categories_names = [category.name for category in self.controller.get_categories()]
-            tags_names = [tag.name for tag in self.controller.get_tags()]
-            dialog = note_dialog.NoteDialog(categories_names, tags_names, objectName="dialog")
             if action_name == "EDIT":
-                selected_note = self.get_selected_note()
-                dialog.fill_dialog(selected_note)
-                if dialog.exec():
-                    updated_note = lambda: None
-                    updated_note.name = dialog.data_dict["name"]
-                    updated_note.time = dialog.data_dict["time"].toPython()
-                    updated_note.text = dialog.data_dict["text"]
-                    updated_note.priority = int(dialog.data_dict["priority"])
-                    updated_note.category_name = dialog.data_dict["category"]
-                    updated_note.tags_names = dialog.data_dict["tags"]
-                    if self.controller.update_note(selected_note.id, updated_note):
-                        old_note_row = (selected_note.name, selected_note.priority, selected_note.time.strftime("%d/%m/%Y %H:%M"), selected_note.text)
-                        new_note_row = (updated_note.name, updated_note.priority, updated_note.time.strftime("%d/%m/%Y %H:%M"), updated_note.text)
-                        self.notes_tab_table.replace_row(old_note_row, new_note_row)
-                    else:
-                        self.display_error_message_box(f"Note with {updated_note.name} already exists")
+                self._edit_note()
             elif action_name == "ADD":
-                if dialog.exec():
-                    new_note = lambda: None
-                    new_note.name = dialog.data_dict["name"]
-                    new_note.time = dialog.data_dict["time"].toPython()
-                    new_note.text = dialog.data_dict["text"]
-                    new_note.priority = int(dialog.data_dict["priority"])
-                    new_note.category_name = dialog.data_dict["category"]
-                    new_note.tags_names = dialog.data_dict["tags"]
-                    if self.controller.create_note(new_note):
-                        new_note_row = (new_note.name, new_note.priority, new_note.time.strftime("%d/%m/%Y %H:%M"), new_note.text)
-                        self.notes_tab_table.add_row(new_note_row)
-                    else:
-                        self.display_error_message_box(f"Note with {new_note.name} already exists")
-                
+                self._add_note()
 
         elif current_tab_name == "categories_tab":
-            dialog = category_dialog.CategoryDialog(objectName="dialog")
             if action_name == "EDIT":
-                selected_category = self.get_selected_category()
-                dialog.fill_dialog(selected_category)
-                if dialog.exec():
-                    updated_category = lambda: None
-                    updated_category.name = dialog.data_dict["name"]
-                    updated_category.description = dialog.data_dict["description"]
-                    if self.controller.update_category(selected_category.id, updated_category):
-                        old_category = self.categories_tab_table.get_selected_rows()[0]
-                        new_category = (updated_category.name, updated_category.description)
-                        self.categories_tab_table.replace_row(old_category, new_category)
-                    else:
-                        self.display_error_message_box(f"Category with {updated_category.name} already exists")
+                self._edit_category()
             elif action_name == "ADD":
-                if dialog.exec():
-                    new_category = lambda: None
-                    new_category.name = dialog.data_dict["name"]
-                    new_category.description = dialog.data_dict["description"]
-                    if self.controller.create_category(new_category):
-                        new_category_row = (new_category.name, new_category.description)
-                        self.categories_tab_table.add_row(new_category_row)
-                    else:
-                        self.display_error_message_box(f"Category with {new_category.name} already exists")
-                
+                self._add_category()
 
         elif current_tab_name == "tags_tab":
-            dialog = tag_dialog.TagDialog(objectName="dialog")
             if action_name == "EDIT":
-                selected_tag = self.get_selected_tag()
-                dialog.fill_dialog(selected_tag)
-                if dialog.exec():
-                    updated_tag = lambda: None
-                    updated_tag.name = dialog.data_dict["name"]
-                    updated_tag.description = dialog.data_dict["description"]
-                    if self.controller.update_tag(selected_tag.id, updated_tag):
-                        old_tag = self.tags_tab_table.get_selected_rows()[0]
-                        new_tag = (updated_tag.name, updated_tag.description)
-                        self.tags_tab_table.replace_row(old_tag, new_tag)
-                    else:
-                        self.display_error_message_box(f"Tag with {updated_tag.name} already exists")
+                self._edit_tag()
             elif action_name == "ADD":
-                if dialog.exec():
-                    new_tag = lambda: None
-                    new_tag.name = dialog.data_dict["name"]
-                    new_tag.description = dialog.data_dict["description"]
-                    if self.controller.create_tag(new_tag):
-                        new_tag_row = (new_tag.name, new_tag.description)
-                        self.tags_tab_table.add_row(new_tag_row)
-                    else:
-                        self.display_error_message_box(f"Tag with {new_tag.name} already exists")
+                self._add_tag()
 
         elif current_tab_name == "filters_tab":
-            dialog = filter_dialog.FilterDialog(objectName="dialog")
             if action_name == "EDIT":
-                selected_filter = self.get_selected_filter()
-                dialog.fill_dialog(selected_filter)
-                if dialog.exec():
-                    updated_filter = lambda: None
-                    updated_filter.name = dialog.data_dict["name"]
-                    updated_filter.note_name = dialog.data_dict["note_name"]
-                    updated_filter.note_min_priority = int(dialog.data_dict["note_min_priority"])
-                    updated_filter.note_max_priority = int(dialog.data_dict["note_max_priority"])
-                    updated_filter.note_min_time = dialog.data_dict["note_from_time"].toPython()
-                    updated_filter.note_max_time = dialog.data_dict["note_to_time"].toPython()
-                    updated_filter.note_text = dialog.data_dict["note_text"]
-                    updated_filter.tag_name = dialog.data_dict["tag_name"]
-                    updated_filter.tag_description = dialog.data_dict["tag_description"]
-                    updated_filter.category_name = dialog.data_dict["category_name"]
-                    updated_filter.category_description = dialog.data_dict["category_description"]
-                    updated_filter.order = int(dialog.data_dict["order"])
-
-                    if self.controller.update_filter(selected_filter.id, updated_filter):
-                        old_filter = self.filters_tab_table.get_selected_rows()[0]
-                        new_filter = (updated_filter.name,
-                                      updated_filter.order,
-                                      updated_filter.note_name,
-                                      f"{updated_filter.note_min_priority} - {updated_filter.note_max_priority}",
-                                      updated_filter.note_min_time.strftime("%d/%m/%Y %H:%M"),
-                                      updated_filter.note_max_time.strftime("%d/%m/%Y %H:%M"),
-                                      updated_filter.category_name)
-                        self.filters_tab_table.replace_row(old_filter, new_filter)
-                    else:
-                        self.display_error_message_box(f"Fast filter with {updated_filter.name} already exists")
-                        
+                self._edit_filter()
 
             elif action_name == "ADD":
-                if dialog.exec():
-                    new_filter = lambda: None
-                    new_filter.name = dialog.data_dict["name"]
-                    new_filter.note_name = dialog.data_dict["note_name"]
-                    new_filter.note_min_priority = int(dialog.data_dict["note_min_priority"])
-                    new_filter.note_max_priority = int(dialog.data_dict["note_max_priority"])
-                    new_filter.note_min_time = dialog.data_dict["note_from_time"].toPython()
-                    new_filter.note_max_time = dialog.data_dict["note_to_time"].toPython()
-                    new_filter.note_text = dialog.data_dict["note_text"]
-                    new_filter.tag_name = dialog.data_dict["tag_name"]
-                    new_filter.tag_description = dialog.data_dict["tag_description"]
-                    new_filter.category_name = dialog.data_dict["category_name"]
-                    new_filter.category_description = dialog.data_dict["category_description"]
-                    new_filter.order = int(dialog.data_dict["order"])
-
-                    if self.controller.create_filter(new_filter):
-                        new_filter_row = (new_filter.name,
-                                          new_filter.order,
-                                          new_filter.note_name,
-                                          new_filter.category_name)
-                        self.filters_tab_table.add_row(new_filter_row)
-                    else:
-                        self.display_error_message_box(f"Fast filter with {new_filter.name} already exists")
+                self._add_filter()
         else:
             self.display_error_message_box("Unknown tab")
         
         self.update_notes_tab_accordion()
+        self.notes_accordion_buttons_enabling()
+
 
 
     def display_error_message_box(self, text):
@@ -645,77 +563,215 @@ class MainWindow(QtWidgets.QWidget):
         
 
 
-    def add_note(self):
-        pass
+    # CRUD operations for all items
 
-
-    def edit_note(self):
-        pass
-
-
-    def add_category(self):
-        pass
-
-
-    def edit_category(self):
-        pass
-
-
-    def add_tag(self):
-        pass
-
-
-    def edit_tag(self):
-        pass
-
-
-    def add_filter(self):
-        pass
-
-
-    def edit_filter(self):
-        pass
+    def _add_note(self):
+        categories_names = [category.name for category in self.controller.get_categories()]
+        tags_names = [tag.name for tag in self.controller.get_tags()]
+        
+        dialog = note_dialog.NoteDialog(categories_names, tags_names, objectName="dialog")
+        if dialog.exec():
+            new_note = lambda: None
+            new_note.name = dialog.data_dict["name"]
+            new_note.time = dialog.data_dict["time"].toPython()
+            new_note.text = dialog.data_dict["text"]
+            new_note.priority = int(dialog.data_dict["priority"])
+            new_note.category_name = dialog.data_dict["category"]
+            new_note.tags_names = dialog.data_dict["tags"]
+            if self.controller.create_note(new_note):
+                new_note_row = (new_note.name, new_note.priority, new_note.time.strftime("%d/%m/%Y %H:%M"), new_note.text)
+                self.notes_tab_table.add_row(new_note_row)
+                if self._is_note_filter_accepted(new_note):
+                    self.add_note_to_todays_notes(new_note)
+            else:
+                self.display_error_message_box(f"Note with {new_note.name} already exists")
 
 
 
-
-    def update_notes_tab_accordion(self):
-        self.grid_notes = [note for note in self.controller.get_filtered_notes_paged(self.current_note_filter, page=self.grid_page, size=10)]
-        self.notes_tab_accordion.replace_sections(self.grid_notes)
-
-
-    def get_selected_note(self):
-        if self.is_table_view:
-            selected_notes = self.notes_tab_table.get_selected_rows()
-            if len(selected_notes) != 1:
-                return None
-            return self.controller.find_detailed_note_by_name(selected_notes[0][0])
-        else:
-            selected_notes = self.notes_tab_accordion.get_selected_notes()
-            if len(selected_notes) != 1:
-                return None
-            return selected_notes[0]
-
-
-    def get_selected_category(self):
-        selected_categories = self.categories_tab_table.get_selected_rows()
-        if len(selected_categories) != 1:
-            return None
-        return self.controller.find_category_by_name(selected_categories[0][0])
-
-
-    def get_selected_tag(self):
-        selected_tags = self.tags_tab_table.get_selected_rows()
-        if len(selected_tags) != 1:
-            return None
-        return self.controller.find_tag_by_name(selected_tags[0][0])
+    def _edit_note(self):
+        categories_names = [category.name for category in self.controller.get_categories()]
+        tags_names = [tag.name for tag in self.controller.get_tags()]
+        selected_note = self._get_selected_note()
+        
+        dialog = note_dialog.NoteDialog(categories_names, tags_names, objectName="dialog")
+        dialog.fill_dialog(selected_note)
+        if dialog.exec():
+            updated_note = lambda: None
+            updated_note.name = dialog.data_dict["name"]
+            updated_note.time = dialog.data_dict["time"].toPython()
+            updated_note.text = dialog.data_dict["text"]
+            updated_note.priority = int(dialog.data_dict["priority"])
+            updated_note.category_name = dialog.data_dict["category"]
+            updated_note.tags_names = dialog.data_dict["tags"]
+            if self.controller.update_note(selected_note.id, updated_note):
+                old_note_row = (selected_note.name, selected_note.priority, selected_note.time.strftime("%d/%m/%Y %H:%M"), selected_note.text)
+                new_note_row = (updated_note.name, updated_note.priority, updated_note.time.strftime("%d/%m/%Y %H:%M"), updated_note.text)
+                self.notes_tab_table.replace_row(old_note_row, new_note_row)
+                self.remove_notes_from_todays_notes([updated_note.name])
+                if self._is_note_filter_accepted(updated_note):
+                    self.add_note_to_todays_notes(updated_note)
+            else:
+                self.display_error_message_box(f"Note with {updated_note.name} already exists")
 
 
-    def get_selected_filter(self):
-        selected_filters = self.filters_tab_table.get_selected_rows()
-        if len(selected_filters) != 1:
-            return None
-        return self.controller.find_filter_by_name(selected_filters[0][0])
+
+    def _is_note_filter_accepted(self, note):
+        if self.current_note_filter == None:
+            return True
+        return self.current_note_filter.note_name in note.name and \
+               self.current_note_filter.note_min_time <= note.time and \
+               self.current_note_filter.note_max_time <= note.time and \
+               self.current_note_filter.note_text in note.text and \
+               self.current_note_filter.note_min_priority <= note.priority and \
+               self.current_note_filter.note_max_priority >= note.priority and \
+               self.current_note_filter.category_name in note.category_name and \
+               (len([tag for tag in note.tags_names if self.current_note_filter.tag_name in tag]) > 0 or \
+                self.current_note_filter.tag_name == "")
+
+
+
+    def _add_category(self):
+        dialog = category_dialog.CategoryDialog(objectName="dialog")
+        if dialog.exec():
+            new_category = lambda: None
+            new_category.name = dialog.data_dict["name"]
+            new_category.description = dialog.data_dict["description"]
+            if self.controller.create_category(new_category):
+                new_category_row = (new_category.name, new_category.description)
+                self.categories_tab_table.add_row(new_category_row)
+            else:
+                self.display_error_message_box(f"Category with {new_category.name} already exists")
+
+
+
+    def _edit_category(self):
+        selected_category = self._get_selected_category()
+        
+        dialog = category_dialog.CategoryDialog(objectName="dialog")
+        dialog.fill_dialog(selected_category)
+        if dialog.exec():
+            updated_category = lambda: None
+            updated_category.name = dialog.data_dict["name"]
+            updated_category.description = dialog.data_dict["description"]
+            if self.controller.update_category(selected_category.id, updated_category):
+                old_category = self.categories_tab_table.get_selected_rows()[0]
+                new_category = (updated_category.name, updated_category.description)
+                self.categories_tab_table.replace_row(old_category, new_category)
+            else:
+                self.display_error_message_box(f"Category with {updated_category.name} already exists")
+
+
+    def _add_tag(self):
+        dialog = tag_dialog.TagDialog(objectName="dialog")
+        if dialog.exec():
+            new_tag = lambda: None
+            new_tag.name = dialog.data_dict["name"]
+            new_tag.description = dialog.data_dict["description"]
+            if self.controller.create_tag(new_tag):
+                new_tag_row = (new_tag.name, new_tag.description)
+                self.tags_tab_table.add_row(new_tag_row)
+            else:
+                self.display_error_message_box(f"Tag with {new_tag.name} already exists")
+
+
+    def _edit_tag(self):
+        selected_tag = self._get_selected_tag()
+        
+        dialog = tag_dialog.TagDialog(objectName="dialog")
+        dialog.fill_dialog(selected_tag)
+        if dialog.exec():
+            updated_tag = lambda: None
+            updated_tag.name = dialog.data_dict["name"]
+            updated_tag.description = dialog.data_dict["description"]
+            if self.controller.update_tag(selected_tag.id, updated_tag):
+                old_tag = self.tags_tab_table.get_selected_rows()[0]
+                new_tag = (updated_tag.name, updated_tag.description)
+                self.tags_tab_table.replace_row(old_tag, new_tag)
+            else:
+                self.display_error_message_box(f"Tag with {updated_tag.name} already exists")
+
+
+    def _add_filter(self):
+        dialog = filter_dialog.FilterDialog(objectName="dialog")
+        if dialog.exec():
+            new_filter = lambda: None
+            new_filter.name = dialog.data_dict["name"]
+            new_filter.note_name = dialog.data_dict["note_name"]
+            new_filter.note_min_priority = int("0" + dialog.data_dict["note_min_priority"])
+            new_filter.note_max_priority = int("0" + dialog.data_dict["note_max_priority"])
+            new_filter.note_min_time = dialog.data_dict["note_from_time"].toPython()
+            new_filter.note_max_time = dialog.data_dict["note_to_time"].toPython()
+            new_filter.note_text = dialog.data_dict["note_text"]
+            new_filter.tag_name = dialog.data_dict["tag_name"]
+            new_filter.tag_description = dialog.data_dict["tag_description"]
+            new_filter.category_name = dialog.data_dict["category_name"]
+            new_filter.category_description = dialog.data_dict["category_description"]
+            new_filter.order = int(dialog.data_dict["order"])
+
+            ordered_filters = [fast_filter for fast_filter in self.controller.find_filter_by_order_listed(updated_filter.order)]
+            
+            if self.controller.create_filter(new_filter):
+                new_filter_row = (new_filter.name,
+                                  new_filter.order,
+                                  new_filter.note_name,
+                                  new_filter.category_name)
+                self.filters_tab_table.add_row(new_filter_row)
+
+                table_rows = [(row.name,
+                               row.order,
+                               row.note_name,
+                               row.category_name) for row in ordered_filters]
+                self.filters_tab_table.delete_rows(table_rows)
+
+                for i, row in enumerate(table_rows):
+                    table_rows[i] = row[0], -1, row[2], row[3]
+                    self.filters_tab_table.add_row(table_rows[i])
+            else:
+                self.display_error_message_box(f"Fast filter with {new_filter.name} already exists")
+
+
+    def _edit_filter(self):
+        selected_filter = self._get_selected_filter()
+        
+        dialog = filter_dialog.FilterDialog(objectName="dialog")
+        dialog.fill_dialog(selected_filter)
+        if dialog.exec():
+            updated_filter = lambda: None
+            updated_filter.name = dialog.data_dict["name"]
+            updated_filter.note_name = dialog.data_dict["note_name"]
+            updated_filter.note_min_priority = int("0" + dialog.data_dict["note_min_priority"])
+            updated_filter.note_max_priority = int("0" + dialog.data_dict["note_max_priority"])
+            updated_filter.note_min_time = dialog.data_dict["note_from_time"].toPython()
+            updated_filter.note_max_time = dialog.data_dict["note_to_time"].toPython()
+            updated_filter.note_text = dialog.data_dict["note_text"]
+            updated_filter.tag_name = dialog.data_dict["tag_name"]
+            updated_filter.tag_description = dialog.data_dict["tag_description"]
+            updated_filter.category_name = dialog.data_dict["category_name"]
+            updated_filter.category_description = dialog.data_dict["category_description"]
+            updated_filter.order = int("0" + dialog.data_dict["order"])
+
+            ordered_filters = [fast_filter for fast_filter in self.controller.find_filter_by_order_listed(updated_filter.order)]
+
+            if self.controller.update_filter(selected_filter.id, updated_filter):
+                old_filter = self.filters_tab_table.get_selected_rows()[0]
+                new_filter = (updated_filter.name,
+                              updated_filter.order,
+                              updated_filter.note_name,
+                              updated_filter.category_name)
+                self.filters_tab_table.replace_row(old_filter, new_filter)
+    
+                table_rows = [(row.name,
+                               row.order,
+                               row.note_name,
+                               row.category_name) for row in ordered_filters]
+                self.filters_tab_table.delete_rows(table_rows)
+
+                for i, row in enumerate(table_rows):
+                    table_rows[i] = row[0], -1, row[2], row[3]
+                    self.filters_tab_table.add_row(table_rows[i])
+            else:
+                self.display_error_message_box(f"Fast filter with {updated_filter.name} already exists")
+
 
 
     @QtCore.Slot()
@@ -725,11 +781,12 @@ class MainWindow(QtWidgets.QWidget):
             if self.is_table_view:
                 selected_rows = self.notes_tab_table.get_selected_rows()
                 selected_notes = [note[0] for note in selected_rows]
+                self.notes_tab_table.delete_selection()
             else:
                 selected_rows = self.notes_tab_accordion.get_selected_notes()
                 selected_notes = [note.name for note in selected_rows]
-                self.notes_tab_table.delete_selection()
-            # TODO self.notes_tab_table.remove_rows(selected_notes)
+                table_rows = [(note.name, note.priority, note.time.strftime("%d/%m/%Y %H:%M"), note.text) for note in selected_rows]
+                self.notes_tab_table.delete_rows(table_rows)
             self.controller.delete_notes(selected_notes)
             self.remove_notes_from_todays_notes(selected_notes)
 
@@ -757,15 +814,89 @@ class MainWindow(QtWidgets.QWidget):
             self.display_error_message_box("Unknown tab")
 
         self.update_notes_tab_accordion()
+        self.notes_accordion_buttons_enabling()
+
+
+
+    def _get_selected_note(self):
+        if self.is_table_view:
+            selected_notes = self.notes_tab_table.get_selected_rows()
+            if len(selected_notes) != 1:
+                return None
+            return self.controller.find_detailed_note_by_name(selected_notes[0][0])
+        else:
+            selected_notes = self.notes_tab_accordion.get_selected_notes()
+            if len(selected_notes) != 1:
+                return None
+            return selected_notes[0]
+
+
+
+    def _get_selected_category(self):
+        selected_categories = self.categories_tab_table.get_selected_rows()
+        if len(selected_categories) != 1:
+            return None
+        return self.controller.find_category_by_name(selected_categories[0][0])
+
+
+
+    def _get_selected_tag(self):
+        selected_tags = self.tags_tab_table.get_selected_rows()
+        if len(selected_tags) != 1:
+            return None
+        return self.controller.find_tag_by_name(selected_tags[0][0])
+
+
+
+    def _get_selected_filter(self):
+        selected_filters = self.filters_tab_table.get_selected_rows()
+        if len(selected_filters) != 1:
+            return None
+        return self.controller.find_filter_by_name(selected_filters[0][0])
+
+
+
+    @QtCore.Slot()
+    def change_notes_tab_accordion_page(self):
+        self.grid_page = self.notes_tab_accordion_pagination.current_page
+        self.update_notes_tab_accordion()
+        selected_rows_count = self.count_selected_notes()
+        self.edit_icon_button.setEnabled(selected_rows_count == 1)
+        self.delete_icon_button.setEnabled(selected_rows_count >= 1)
+
+
+    def update_notes_tab_accordion(self):
+        self.grid_notes = [note for note in self.controller.get_filtered_notes_paged(self.current_note_filter, page=self.grid_page, size=10)]
+        self.notes_tab_accordion.replace_sections(self.grid_notes)
+
+        index = self.notes_tab_table.currentIndex()
+        self.notes_tab_accordion_pagination.items_count = self.notes_tab_table.model.rowCount(index)
+        self.notes_tab_accordion_pagination.create_labels()
 
 
     @QtCore.Slot()
     def __set_basic_text_filtering(self, model, searchbar):
-        # TODO - grid filtering?
-        # You can choose the type of search by connecting to a different slot here.
-        # see https://doc.qt.io/qt-5/qsortfilterproxymodel.html#public-slots
-        # self.searchbar.textChanged.connect(self.proxy_model.setFilterFixedString)
+        if self.tabs.currentWidget().objectName() == "notes_tab":
+            self.current_note_filter = self.create_default_filter()
+            self.current_note_filter.note_name = searchbar.text()
+            self.use_current_note_filter()
         model.setFilterFixedString(searchbar.text())
+
+
+
+    def create_default_filter(self):
+        filters = lambda: None
+        filters.note_name = ""
+        filters.note_min_priority = 0
+        filters.note_max_priority = 100
+        filters.note_min_time = datetime.min
+        filters.note_max_time = datetime.max
+        filters.note_text = ""
+        filters.category_name = ""
+        filters.category_description = ""
+        filters.tag_name = ""
+        filters.tag_description = ""
+        return filters
 
 
 

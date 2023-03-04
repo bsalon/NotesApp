@@ -44,16 +44,11 @@ class UseCases():
 
     def get_filtered_notes_paged(self, filters, page, size):
         notes = [note for note in self.note_service.get_paged_filtered(filters, page, size)]
-        notes_with_tags = []
-        index = -1
-        for note in notes:
-            if index == -1 or note.name != notes_with_tags[index].name:
-                index += 1
-                notes_with_tags.append(note)
-                notes_with_tags[index].tags = set()
 
-            if note.notetagmodel_set:
-                notes_with_tags[index].tags.add(note.notetagmodel.tag.name)
+        notes_with_tags = []
+        for note in notes:
+            notes_with_tags.append(note)
+            notes_with_tags[-1].tags = set([notetag.tag.name for notetag in self.notetag_service.get_note_tags_by_note(note)])
 
         return notes_with_tags
 
@@ -133,12 +128,14 @@ class UseCases():
 
 
     def delete_categories(self, categories_names):
-        for category_name in categories_names:
-            if self.note_service.exists_by_category_name(category_name):
-                return 0
-
+        categories = []
         for category_name in categories_names:
             category = self.category_service.get_by_name(category_name)
+            if self.note_service.exists_by_category(category):
+                return 0
+            categories.append(category)
+
+        for category in categories:
             category.delete_instance()
 
         return 1
@@ -187,6 +184,7 @@ class UseCases():
         if self.filter_service.exists_by_name(note_filter.name):
             return 0
 
+        self.filter_service.remove_order(note_filter.order)
         query_result = self.filter_service.create(
             name=note_filter.name,
             note_name=note_filter.note_name,
@@ -213,12 +211,22 @@ class UseCases():
         if self.filter_service.exists_by_name(updated_filter.name) and note_filter.name != updated_filter.name:
             return 0
 
+        self.filter_service.remove_order(updated_filter.order)
         query_result = self.filter_service.update_filter(note_filter, updated_filter)
         return query_result
 
 
     def find_filter_by_name(self, note_name):
         return self.filter_service.get_by_name(note_name)
+
+
+    def find_filter_by_order(self, order):
+        query = self.filter_service.find_by_order(order)
+        return query.get() if query.exists() else None
+
+
+    def find_filter_by_order_listed(self, order):
+        return [order_filter for order_filter in self.filter_service.find_by_order(order)]
 
 
     def delete_filters(self, filters_names):
