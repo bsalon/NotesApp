@@ -1,25 +1,29 @@
 import tkinter
 from tkinter import ttk 
 
+import scrollable_frame
 
-class NotesAccordion(tkinter.Frame):
+
+class NotesAccordion(scrollable_frame.ScrollableFrame):
     def __init__(self, master, notes, *args, **kwargs):
-        super(CollapsableFrame, self).__init__(master, *args, **kwargs)
+        super(NotesAccordion, self).__init__(master, *args, **kwargs)
         self.master = master
         self.notes = notes
+        self.args = args
+        self.kwargs = kwargs
         self._add_rows(notes)
 
 
     def replace_rows(self, notes):
         self.destroy()
-        super(CollapsableFrame, self).__init__(self.master, *args, **kwargs)
+        super(NotesAccordion, self).__init__(self.master, *self.args, **self.kwargs)
         self._add_rows(notes)
 
 
     def get_selected_notes(self):
         selected_notes = []
         for (index, row) in enumerate(self.rows):
-            if row.check_button.checked_row == 1:
+            if row.checked_row.get() == 1:
                 selected_notes.append(self.notes[index])
         return selected_notes
 
@@ -27,11 +31,15 @@ class NotesAccordion(tkinter.Frame):
     def _add_rows(self, notes):
         self.notes = notes
         self.rows = []
-        for note in notes:
-            row = CollapsableFrameRow(self)
+        for (index, note) in enumerate(notes):
+            row = CollapsableFrameRow(self.interior)
             self._add_note_to_row(row, note)
+            row.grid(row=index, column=0, sticky="nsew")
             row.check_button.bind("<ButtonRelease-1>", lambda e: self.event_generate("<<RowCheck>>"))
             self.rows.append(row)
+        self.interior.grid_columnconfigure(0, weight=1)
+        if len(notes) > 0:
+            self.interior.grid_rowconfigure(tuple(range(len(notes))), weight=1)
 
 
     def _add_note_to_row(self, row, note):
@@ -42,7 +50,7 @@ class NotesAccordion(tkinter.Frame):
 
 class CollapsableFrameRow(tkinter.Frame):
     def __init__(self, master, *args, **kwargs):
-        super(CollapsableFrame, self).__init__(master, *args, **kwargs)
+        super(CollapsableFrameRow, self).__init__(master, *args, **kwargs)
         self.show = tkinter.IntVar()
         self.show.set(1)
 
@@ -55,9 +63,8 @@ class CollapsableFrameRow(tkinter.Frame):
     def add_title_content(self, note):
         name_label = tkinter.Label(self.title_frame, text = note.name)
         note_time = tkinter.Label(self.title_frame, text = note.time.strftime("%d/%m/%Y %H:%M"))
-        self.checked_row = Tkinter.IntVar()
-        self.check_button = Tkinter.Checkbutton(self.title_frame, variable=self.checked_row)
-        self.check_button.state(['!alternate']) 
+        self.checked_row = tkinter.IntVar()
+        self.check_button = tkinter.Checkbutton(self.title_frame, variable=self.checked_row)
         self.toggle_button = tkinter.Button(self.title_frame, text=" + ", command=self.toggle)
 
         name_label.pack(side="left", fill="x", expand=1)
@@ -81,11 +88,11 @@ class CollapsableFrameRow(tkinter.Frame):
 
     def toggle(self):
         if bool(self.show.get()):
-            self.content.pack(fill="x", expand=1)
+            self.content_frame.pack(fill="x", expand=1)
             self.toggle_button.configure(text=" - ")
             self.show.set(0)
         else:
-            self.content.forget()
+            self.content_frame.forget()
             self.toggle_button.configure(text=" + ")
             self.show.set(1)
 

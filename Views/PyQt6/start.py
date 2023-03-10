@@ -579,10 +579,10 @@ class MainWindow(QtWidgets.QWidget):
             new_note.category_name = dialog.data_dict["category"]
             new_note.tags_names = dialog.data_dict["tags"]
             if self.controller.create_note(new_note):
-                new_note_row = (new_note.name, new_note.priority, new_note.time.strftime("%d/%m/%Y %H:%M"), new_note.text)
-                self.notes_tab_table.add_row(new_note_row)
+                self.add_note_to_todays_notes(new_note)
                 if self._is_note_filter_accepted(new_note):
-                    self.add_note_to_todays_notes(new_note)
+                    new_note_row = (new_note.name, new_note.priority, new_note.time.strftime("%d/%m/%Y %H:%M"), new_note.text)
+                    self.notes_tab_table.add_row(new_note_row)
             else:
                 self.display_error_message_box(f"Note with {new_note.name} already exists")
 
@@ -604,12 +604,12 @@ class MainWindow(QtWidgets.QWidget):
             updated_note.category_name = dialog.data_dict["category"]
             updated_note.tags_names = dialog.data_dict["tags"]
             if self.controller.update_note(selected_note.id, updated_note):
-                old_note_row = (selected_note.name, selected_note.priority, selected_note.time.strftime("%d/%m/%Y %H:%M"), selected_note.text)
-                new_note_row = (updated_note.name, updated_note.priority, updated_note.time.strftime("%d/%m/%Y %H:%M"), updated_note.text)
-                self.notes_tab_table.replace_row(old_note_row, new_note_row)
                 self.remove_notes_from_todays_notes([updated_note.name])
+                self.add_note_to_todays_notes(updated_note)
                 if self._is_note_filter_accepted(updated_note):
-                    self.add_note_to_todays_notes(updated_note)
+                    old_note_row = (selected_note.name, selected_note.priority, selected_note.time.strftime("%d/%m/%Y %H:%M"), selected_note.text)
+                    new_note_row = (updated_note.name, updated_note.priority, updated_note.time.strftime("%d/%m/%Y %H:%M"), updated_note.text)
+                    self.notes_tab_table.replace_row(old_note_row, new_note_row)
             else:
                 self.display_error_message_box(f"Note with {updated_note.name} already exists")
 
@@ -620,7 +620,7 @@ class MainWindow(QtWidgets.QWidget):
             return True
         return self.current_note_filter.note_name in note.name and \
                self.current_note_filter.note_min_time <= note.time and \
-               self.current_note_filter.note_max_time <= note.time and \
+               self.current_note_filter.note_max_time >= note.time and \
                self.current_note_filter.note_text in note.text and \
                self.current_note_filter.note_min_priority <= note.priority and \
                self.current_note_filter.note_max_priority >= note.priority and \
@@ -720,7 +720,7 @@ class MainWindow(QtWidgets.QWidget):
                 table_rows = [(row.name,
                                row.order,
                                row.note_name,
-                               row.category_name) for row in ordered_filters]
+                               row.category_name) for row in ordered_filters if row.name != new_filter.name]
                 self.filters_tab_table.delete_rows(table_rows)
 
                 for i, row in enumerate(table_rows):
@@ -763,7 +763,7 @@ class MainWindow(QtWidgets.QWidget):
                 table_rows = [(row.name,
                                row.order,
                                row.note_name,
-                               row.category_name) for row in ordered_filters]
+                               row.category_name) for row in ordered_filters if row.name != updated_filter.name]
                 self.filters_tab_table.delete_rows(table_rows)
 
                 for i, row in enumerate(table_rows):

@@ -11,6 +11,6 @@ class SearchBarWithIcon(tkinter.Frame):
         searchbar_icon_container.icon = searchbar_icon
         searchbar_icon_container.grid(row=0, column=0, sticky="news")
 
-        searchbar_entry = tkinter.Entry(self)
-        searchbar_entry.insert(0, "Filter by name...")
-        searchbar_entry.grid(row=0, column=1, sticky="news")
+        self.entry = tkinter.Entry(self)
+        self.entry.insert(0, "Filter by name...")
+        self.entry.grid(row=0, column=1, sticky="news")
