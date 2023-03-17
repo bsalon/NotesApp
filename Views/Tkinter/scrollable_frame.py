@@ -4,7 +4,6 @@ from tkinter.constants import *
 
 
 # Copied from https://stackoverflow.com/questions/16188420/tkinter-scrollbar-for-frame
-
 # Based on
 #   https://web.archive.org/web/20170514022131id_/http://tkinter.unpythonic.net/wiki/VerticalScrolledFrame
 
@@ -15,13 +14,13 @@ class ScrollableFrame(ttk.Frame):
     * This frame only allows vertical scrolling.
     """
     def __init__(self, parent, *args, **kw):
-        ttk.Frame.__init__(self, parent, *args, **kw)
+        super(ScrollableFrame, self).__init__(parent, *args, **kw)
 
         # Create a canvas object and a vertical scrollbar for scrolling it
         vscrollbar = ttk.Scrollbar(self, orient=VERTICAL)
         vscrollbar.pack(fill=Y, side=RIGHT, expand=FALSE)
-        
-        canvas = tk.Canvas(self, bd=0, highlightthickness=0, yscrollcommand=vscrollbar.set)
+
+        canvas = tk.Canvas(self, bd=0, highlightthickness=1, highlightbackground="black", yscrollcommand=vscrollbar.set, bg="#f1f6be")
         canvas.pack(side=LEFT, fill=BOTH, expand=TRUE)
 
         vscrollbar.config(command=canvas.yview)
@@ -31,7 +30,7 @@ class ScrollableFrame(ttk.Frame):
         canvas.yview_moveto(0)
 
         # Create a frame inside the canvas which will be scrolled with it
-        self.interior = interior = ttk.Frame(canvas)
+        self.interior = interior = ttk.Frame(canvas, style="scrollable_interior.TFrame")
         interior_id = canvas.create_window(0, 0, window=interior, anchor="nw")
 
         # Track changes to the canvas and frame width and sync them, also updating the scrollbar

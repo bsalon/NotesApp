@@ -36,3 +36,7 @@ class BaseService:
 
     def get_all(self):
         return self.model.select()
+
+
+    def find_all_by_name(self, name):
+        return self.model.select().where(self.model.name.contains(name))

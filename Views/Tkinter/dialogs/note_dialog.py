@@ -17,8 +17,10 @@ class NoteDialog(tkinter.simpledialog.Dialog):
 
 
     def body(self, frame):
+        frame.configure(bg="#d7eb5a")
+
         # Name
-        name_label = tkinter.Label(frame, text="Name:", anchor="e")
+        name_label = tkinter.Label(frame, text="Name:", anchor="e", bg="#d7eb5a")
         name_label.grid(row=0, column=0, sticky="news")
         self.name_entry = tkinter.Entry(frame, width=25)
         self.name_entry.grid(row=0, column=1, columnspan=2, pady=(5, 5))
@@ -26,14 +28,14 @@ class NoteDialog(tkinter.simpledialog.Dialog):
         # Date and time
         today = datetime.date.today()
 
-        date_label = tkinter.Label(frame, text="Date:", anchor="e")
+        date_label = tkinter.Label(frame, text="Date:", anchor="e", bg="#d7eb5a")
         date_label.grid(row=1, column=0, sticky="news")
         self.date_entry = tkcalendar.DateEntry(frame, selectmode="day", year=today.year, month=today.month, day=today.day)
         self.date_entry.grid(row=1, column=1, columnspan=2, pady=(5, 5), sticky="news")
 
         self.hour_variable = tkinter.StringVar(frame)
         self.hour_variable.set("0")
-        time_label = tkinter.Label(frame, text="Time (hh:mm):", anchor="e")
+        time_label = tkinter.Label(frame, text="Time (hh:mm):", anchor="e", bg="#d7eb5a")
         time_label.grid(row=2, column=0, pady=(5, 5), sticky="news")
         self.time_hour_spinbox = tkinter.Spinbox(frame, from_=0, to=23, wrap=True, width=5, state="readonly", justify=tkinter.CENTER, textvariable=self.hour_variable)
         self.time_hour_spinbox.grid(row=2, column=1, pady=(5, 5), sticky="news")
@@ -44,26 +46,26 @@ class NoteDialog(tkinter.simpledialog.Dialog):
         self.time_minute_spinbox.grid(row=2, column=2, pady=(5, 5), sticky="news")
 
         # Text
-        text_label = tkinter.Label(frame, text="Text:", anchor="e")
+        text_label = tkinter.Label(frame, text="Text:", anchor="e", bg="#d7eb5a")
         text_label.grid(row=3, column=0, pady=(5, 20), sticky="news")
         self.text_entry = tkinter.Entry(frame, width=25)
         self.text_entry.grid(row=3, column=1, columnspan=2, pady=(5, 20))
 
         # Priority radio buttons
-        priority_label = tkinter.Label(frame, text="Assign priority:", anchor="e")
+        priority_label = tkinter.Label(frame, text="Assign priority:", anchor="e", bg="#d7eb5a")
         priority_label.grid(row=4, column=0, pady=(5, 5), sticky="news")
         self.assign_priority = tkinter.IntVar()
-        yes_radiobutton = tkinter.Radiobutton(frame, text="Yes", variable=self.assign_priority, value=1, command=self._slider_enabling)
+        yes_radiobutton = tkinter.Radiobutton(frame, text="Yes", variable=self.assign_priority, value=1, command=self._slider_enabling, bg="#d7eb5a")
         yes_radiobutton.grid(row=4, column=1, pady=(5, 5))
-        no_radiobutton = tkinter.Radiobutton(frame, text="No", variable=self.assign_priority, value=2, command=self._slider_enabling)
+        no_radiobutton = tkinter.Radiobutton(frame, text="No", variable=self.assign_priority, value=2, command=self._slider_enabling, bg="#d7eb5a")
         no_radiobutton.grid(row=4, column=2, pady=(5, 5))
 
         # Priority slider
-        self.priority_slider = tkinter.Scale(frame, from_=0, to=100, orient=tkinter.HORIZONTAL)
+        self.priority_slider = tkinter.Scale(frame, from_=0, to=100, orient=tkinter.HORIZONTAL, bg="#d7eb5a")
         self.priority_slider.grid(row=5, column=1, columnspan=2, pady=(5, 20), sticky="news")
 
         # Categories
-        self.categories_label = tkinter.Label(frame, text="Select category:", anchor="e")
+        self.categories_label = tkinter.Label(frame, text="Select category:", anchor="e", bg="#d7eb5a")
         self.categories_label.grid(row=6, column=0, pady=(5, 5), sticky="news")
         self.categories_combobox = ttk.Combobox(frame, width = 25)
         self.categories_combobox["values"] = self.categories_names
@@ -71,7 +73,7 @@ class NoteDialog(tkinter.simpledialog.Dialog):
         self.categories_combobox.current(0)
 
         # Tags
-        self.tags_label = tkinter.Label(frame, text="Select tags:", anchor="e")
+        self.tags_label = tkinter.Label(frame, text="Select tags:", anchor="e", bg="#d7eb5a")
         self.tags_label.grid(row=7, column=0, pady=(5, 5), sticky="news")
         self.tags = tkinter.Variable(value=self.tags_names)
         self.tags_listbox = tkinter.Listbox(frame, listvariable=self.tags, height = 3, selectmode="multiple")
@@ -116,6 +118,7 @@ class NoteDialog(tkinter.simpledialog.Dialog):
 
 
     def buttonbox(self):
+        self.configure(bg="#d7eb5a")
         self.ok_button = tkinter.Button(self, text='Save', width=5, command=self.save_pressed)
         self.ok_button.pack(side="top")
         cancel_button = tkinter.Button(self, text='Cancel', width=5, command=self.cancel_pressed)

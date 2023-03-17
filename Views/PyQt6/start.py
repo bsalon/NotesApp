@@ -311,7 +311,6 @@ class MainWindow(QtWidgets.QWidget):
         self.notes_tab_accordion.hide()
         self.notes_tab_accordion_pagination = pagination_widget.PaginationWidget(10, len(self.table_notes))
         self.notes_tab_accordion_pagination.page_changed.connect(self.change_notes_tab_accordion_page)
-        # FIXME size
         
         self.notes_tab_accordion_pagination.hide()
         self.is_table_view = True

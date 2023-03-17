@@ -1,7 +1,8 @@
-from datetime import datetime
 import tkinter
 
 from tkinter import ttk
+
+from datetime import datetime
 
 import bisect
 import textwrap
@@ -11,8 +12,11 @@ from Controllers import UseCases
 from dialogs import advanced_filter_dialog, category_dialog, note_dialog, filter_dialog, tag_dialog
 
 import common_tree_view
+import custom_ttk_style
 import notes_accordion
+import pagination_labels
 import time_label
+import toggle_switch_button
 import searchbar_with_icon
 import scrollable_frame
 
@@ -20,6 +24,7 @@ import scrollable_frame
 class TkinterApplication(ttk.Frame):
     def __init__(self, master, use_cases, *args, **kwargs):
         super(TkinterApplication, self).__init__(master, *args, **kwargs)
+        self["borderwidth"] = 2
         self.use_cases = use_cases
 
         self.current_note_filter = self.create_default_filter()
@@ -27,7 +32,7 @@ class TkinterApplication(ttk.Frame):
         self.grid_notes = [note for note in self.use_cases.get_filtered_notes_paged(self.current_note_filter, page=self.grid_page, size=10)]
 
         use_cases_notes = [note for note in self.use_cases.get_notes()]
-        self.table_notes = [(note.name, f"{note.priority:03d}", note.time.strftime("%d/%m/%Y %H:%M"), note.text) for note in use_cases_notes]
+        self.table_notes = [(note.name, note.priority, note.time.strftime("%d/%m/%Y %H:%M"), note.text) for note in use_cases_notes]
         self.today_notes = [(note.time.strftime("%H:%M"), note.name) for note in use_cases_notes if note.time.date() == datetime.today().date()]
         self.today_notes.sort(key = lambda note: note[0])
 
@@ -36,7 +41,7 @@ class TkinterApplication(ttk.Frame):
         self.table_categories = [(category.name, category.description) for category in self.use_cases.get_categories()]
 
         self.table_filters = [(note_filter.name,
-                               f"{note_filter.order:05d}",
+                               note_filter.order,
                                note_filter.note_name,
                                note_filter.category_name) for note_filter in self.use_cases.get_filters()]
 
@@ -70,62 +75,66 @@ class TkinterApplication(ttk.Frame):
         col = 0
 
         # Today's notes icon button
-        todays_notes_icon = tkinter.PhotoImage(file = "TodaysNotesIcon.png")
-        todays_notes_icon = todays_notes_icon.subsample(18, 18) # TODO - resize image
+        todays_notes_icon = tkinter.PhotoImage(file = "/home/benjaminsalon/diplom/NotesApp/Views/PyQt6/icons/TodaysNotesIcon.png")
+        todays_notes_icon = todays_notes_icon.subsample(24, 24)
         self.todays_notes_icon_button = ttk.Button(self.toolbar_layout, text="Today's notes", image=todays_notes_icon, compound="top", command=self.toggle_todays_notes_pane, style="today_notes_icon_button.TButton")
         self.todays_notes_icon_button.icon = todays_notes_icon
-        self.todays_notes_icon_button.grid(row=0, column=col, rowspan=1, columnspan=4)
+        self.todays_notes_icon_button.grid(row=0, column=col, rowspan=1, columnspan=4, pady=(2, 2))
         self.todays_notes_pane_visible = True
         col += 4
 
         # Use fast filter section
-        tkinter.Label(self.toolbar_layout, text = "Use fast filters:").grid(row=0, column=col, rowspan=1, columnspan=3)
+        tkinter.Label(self.toolbar_layout, text="Use fast filters:", bg="#ffc957").grid(row=0, column=col, rowspan=1, columnspan=3)
         col += 3
-        self.fast_filters_text_links = [tkinter.Label(self.toolbar_layout, text = "#1"), tkinter.Label(self.toolbar_layout, text = "#2"), tkinter.Label(self.toolbar_layout, text = "#3")]
+        self.fast_filters_text_links = [ttk.Label(self.toolbar_layout, text="#1", style="text_link.TLabel"),
+                                        ttk.Label(self.toolbar_layout, text="#2", style="text_link.TLabel"),
+                                        ttk.Label(self.toolbar_layout, text="#3", style="text_link.TLabel")]
         for order, fast_filter_text_link in enumerate(self.fast_filters_text_links):
             fast_filter_text_link.grid(row=0, column=col, rowspan=1, columnspan=2)
             fast_filter_text_link.bind("<Button-1>", lambda e, o=order: self.use_fast_filter(o+1))
+            fast_filter_text_link.bind("<Enter>", lambda e, f=fast_filter_text_link: f.configure(style="hover_text_link.TLabel"))
+            fast_filter_text_link.bind("<Leave>", lambda e, f=fast_filter_text_link: f.configure(style="text_link.TLabel"))
             col += 2
 
         # Time widget
-        self.time_widget = time_label.TimeLabel(self.toolbar_layout)
+        self.time_widget = time_label.TimeLabel(self.toolbar_layout, style="toolbar_time.TLabel")
         self.time_widget.grid(row=0, column=col, rowspan=1, columnspan=6)
         col += 6
 
         # Add icon button
         add_icon = tkinter.PhotoImage(file = "/home/benjaminsalon/diplom/NotesApp/Views/PyQt6/icons/AddIcon.png")
-        add_icon = add_icon.subsample(16, 16) # TODO - resize image
-        self.add_icon_button = ttk.Button(self.toolbar_layout, image = add_icon, command=self.add_item)
+        add_icon = add_icon.subsample(18, 18)
+        self.add_icon_button = ttk.Button(self.toolbar_layout, image=add_icon, command=self.add_item, style="toolbar_icon_button.TButton")
         self.add_icon_button.icon = add_icon
         self.add_icon_button.grid(row=0, column=col, rowspan=1, columnspan=2)
         col += 2
 
         # Edit icon button
         edit_icon = tkinter.PhotoImage(file = "/home/benjaminsalon/diplom/NotesApp/Views/PyQt6/icons/EditIcon.png")
-        edit_icon = edit_icon.subsample(14, 14) # TODO - resize image
-        self.edit_icon_button = ttk.Button(self.toolbar_layout, image = edit_icon, command=self.edit_item)
+        edit_icon = edit_icon.subsample(12, 12)
+        self.edit_icon_button = ttk.Button(self.toolbar_layout, image=edit_icon, command=self.edit_item, style="toolbar_icon_button.TButton")
         self.edit_icon_button.icon = edit_icon
         self.edit_icon_button.grid(row=0, column=col, rowspan=1, columnspan=2)
         col += 2
 
         # Delete icon button
         delete_icon = tkinter.PhotoImage(file = "/home/benjaminsalon/diplom/NotesApp/Views/PyQt6/icons/DeleteIcon.png")
-        delete_icon = delete_icon.subsample(16, 16) # TODO - resize image
-        self.delete_icon_button = ttk.Button(self.toolbar_layout, image = delete_icon, command=self.delete_items)
+        delete_icon = delete_icon.subsample(16, 16)
+        self.delete_icon_button = ttk.Button(self.toolbar_layout, image=delete_icon, command=self.delete_items, style="toolbar_icon_button.TButton")
         self.delete_icon_button.icon = delete_icon
         self.delete_icon_button.grid(row=0, column=col, rowspan=1, columnspan=2)
         col += 2
 
         # Loading bar
-        self.loading_bar = ttk.Progressbar(self.toolbar_layout, mode="indeterminate")
+        self.loading_bar = ttk.Progressbar(self.toolbar_layout, mode="indeterminate", style="LoadingBar.Horizontal.TProgressbar")
         self.loading_bar.grid(row=0, column=col, rowspan=1, columnspan=5)
         col += 5
         
 
         # Settings icon button
         settings_icon = tkinter.PhotoImage(file = "/home/benjaminsalon/diplom/NotesApp/Views/PyQt6/icons/SettingsIcon.png")
-        settings_icon = settings_icon.subsample(16, 16) # TODO - resize image
-        self.settings_icon_button = ttk.Button(self.toolbar_layout, image = settings_icon) # TODO click
+        settings_icon = settings_icon.subsample(18, 18)
+        self.settings_icon_button = ttk.Button(self.toolbar_layout, image = settings_icon, style="toolbar_icon_button.TButton") # TODO click
         self.settings_icon_button.icon = settings_icon
         self.settings_icon_button.grid(row=0, column=col, rowspan=1, columnspan=2)
         col += 2
@@ -176,25 +185,29 @@ class TkinterApplication(ttk.Frame):
 
     def _fill_todays_notes_list(self):
         for note in self.today_notes:
-            time_label = tkinter.Label(self.todays_notes_list_frame.interior, text=note[0], bg="red")
-            time_label.grid(pady=(0, 5), sticky="news")
+            font = tkinter.font.nametofont("TkDefaultFont")
+            time_label = tkinter.Label(self.todays_notes_list_frame.interior, text=note[0], bg="#f1f6be", font=f"{font.cget('family')} {font.cget('size')} bold")
+            time_label.grid(pady=(5, 5))
 
-            # Fixed width of 20 characters
-            wrapped_name = '\n'.join(textwrap.wrap(note[1], 20))
-            name_label = tkinter.Label(self.todays_notes_list_frame.interior, text=wrapped_name, bg="yellow")
-            name_label.grid(pady=(0, 20), sticky="news")
+            # Fixed width of 12 characters
+            wrapped_name = '\n'.join(textwrap.wrap(note[1], 12))
+            name_label = tkinter.Label(self.todays_notes_list_frame.interior, text=wrapped_name, bg="#f1f6be")
+            name_label.grid(pady=(0, 15))
 
             self.todays_notes_list.append((time_label, name_label))
 
 
 
     def remove_notes_from_todays_notes(self, notes):
+        wrapped_notes = ['\n'.join(textwrap.wrap(note, 12)) for note in notes]
+
         remove_indices = []
         for time_label, name_label in self.todays_notes_list:
             name = name_label.cget("text")
             time = time_label.cget("text")
-            if name in notes:
-                i = self.today_notes.index((time, name))
+            if name in wrapped_notes:
+                notes_index = wrapped_notes.index(name)
+                i = self.today_notes.index((time, notes[notes_index]))
                 remove_indices.append(i)
 
         for i in reversed(sorted(remove_indices)):
@@ -209,15 +222,16 @@ class TkinterApplication(ttk.Frame):
     def add_note_to_todays_notes(self, note):
         if note.time.date() == datetime.today().date():
             # Fixed width of 20 characters
-            wrapped_name = '\n'.join(textwrap.wrap(note.name, 20))
+            wrapped_name = '\n'.join(textwrap.wrap(note.name, 12))
             
             note_tuple = (note.time.strftime("%H:%M"), wrapped_name)
             bisect.insort_left(self.today_notes, note_tuple)
 
             new_note_index = self.today_notes.index(note_tuple)
             
-            time_label = tkinter.Label(self.todays_notes_list_frame.interior, text=note_tuple[0], bg="red")
-            name_label = tkinter.Label(self.todays_notes_list_frame.interior, text=note_tuple[1], bg="yellow")
+            font = tkinter.font.nametofont("TkDefaultFont")
+            time_label = tkinter.Label(self.todays_notes_list_frame.interior, text=note_tuple[0], bg="#f1f6be", font=f"{font.cget('family')} {font.cget('size')} bold")
+            name_label = tkinter.Label(self.todays_notes_list_frame.interior, text=note_tuple[1], bg="#f1f6be")
             self.todays_notes_list.insert(new_note_index, (time_label, name_label))
 
             for widget in self.todays_notes_list_frame.interior.children.values():
@@ -225,23 +239,23 @@ class TkinterApplication(ttk.Frame):
             
             index = 0
             for time_label, name_label in self.todays_notes_list:
-                time_label.grid(row=index, pady=(0, 5))
+                time_label.grid(row=index, pady=(5, 5))
                 index += 1
-                name_label.grid(row=index, pady=(0, 20))
+                name_label.grid(row=index, pady=(0, 15))
                 index += 1
 
 
 
     def _init_tabs_content_layout(self):
-        self.tabs = ttk.Notebook(self.tabs_content_layout)
+        self.tabs = ttk.Notebook(self.tabs_content_layout, style="tab.TNotebook")
         
-        self.notes_tab = tkinter.Frame(self.tabs)
+        self.notes_tab = ttk.Frame(self.tabs, style="tabs_content_container.TFrame")
         self._init_notes_tab()
-        self.categories_tab = tkinter.Frame(self.tabs)
+        self.categories_tab = ttk.Frame(self.tabs, style="tabs_content_container.TFrame")
         self._init_categories_tab()
-        self.tags_tab = tkinter.Frame(self.tabs)
+        self.tags_tab = ttk.Frame(self.tabs, style="tabs_content_container.TFrame")
         self._init_tags_tab()
-        self.filters_tab = tkinter.Frame(self.tabs)
+        self.filters_tab = ttk.Frame(self.tabs, style="tabs_content_container.TFrame")
         self._init_filters_tab()
 
         self.tabs.add(self.notes_tab, text="Notes", sticky="news")
@@ -250,47 +264,63 @@ class TkinterApplication(ttk.Frame):
         self.tabs.add(self.filters_tab, text="Fast filters", sticky="news")
 
         self.tabs.bind("<<NotebookTabChanged>>", self.tab_update_buttons_enabling)
-        self.tabs.pack(fill=tkinter.BOTH, expand=True)
+        self.tabs.pack(fill=tkinter.BOTH, expand=True, padx=(10, 10), pady=(10, 10))
 
 
 
     def _init_notes_tab(self):
-        self.notes_tab_searchbar = searchbar_with_icon.SearchBarWithIcon(self.notes_tab)
+        self.notes_tab_searchbar = searchbar_with_icon.SearchBarWithIcon(self.notes_tab, style="search_container.TFrame")
         self.notes_filter_button = tkinter.Button(self.notes_tab, text="Filter", command=self._filter_items_by_name)
         self.notes_advanced_filter_button = tkinter.Button(self.notes_tab, text="Advanced filter", command=self.notes_advanced_filtering)
         
-        self.notes_toggle_switch_label = tkinter.Label(self.notes_tab, text="Table view")
-        self.notes_toggle_switch_button_var = tkinter.StringVar()
-        self.notes_toggle_switch_button = tkinter.Checkbutton(self.notes_tab, onvalue="ON", offvalue="OFF", width=8,
-            indicatoron=False, variable=self.notes_toggle_switch_button_var,
-            textvariable=self.notes_toggle_switch_button_var, selectcolor="green", background="red",
-            command=self.toggle_notes_view)
-        self.notes_toggle_switch_button_var.set("ON")
+        # Using toggle_switch_button.ToggleSwitchButton this way seems to be impossible
+        # The canvas is not properly placed inside the self.notes_tab grid
+
+        self.notes_toggle_switch_label = ttk.Label(self.notes_tab, text="Table view", style="filterbar_label.TLabel")
+        self.prepare_toggle_checkbutton()
+        self.notes_toggle_switch_button = ttk.Checkbutton(self.notes_tab, image=self.toggle_on_image,
+            onvalue="ON", offvalue="OFF",
+            variable=self.notes_toggle_switch_button_var,
+            command=self.toggle_notes_view,
+            style="no_indicatoron.TCheckbutton")
         
         self.notes_tab_table = common_tree_view.CommonTreeView(
             master=self.notes_tab,
             headings=("Name", "Priority", "Time", "Text"),
             items=self.table_notes,
-            stretch=3,
             sort_col="Priority",
-            reverse=False
+            reverse=True,
+            int_cols=["Priority"]
         )
         self.notes_tab_table.bind("<<TreeviewSelect>>", self.table_update_buttons_enabling)
         self.notes_tab_accordion = notes_accordion.NotesAccordion(self.notes_tab, self.grid_notes)
         self.notes_tab_accordion.bind("<<RowCheck>>", self.notes_accordion_buttons_enabling)
+        self.notes_tab_accordion_pagination = pagination_labels.PaginationLabels(self.notes_tab, 10, len(self.table_notes))
+        self.notes_tab_accordion_pagination.bind("<<PageChanged>>", self.change_notes_tab_accordion_page)
         self.is_table_view = True
 
-        self.notes_tab_searchbar.grid(row=0, column=0, columnspan=4)
-        self.notes_filter_button.grid(row=0, column=4)
-        self.notes_advanced_filter_button.grid(row=0, column=5)
-        self.notes_toggle_switch_label.grid(row=0, column=6)
+        self.notes_tab_searchbar.grid(row=0, column=0, columnspan=4, padx=(8, 8), pady=(8, 8), sticky="nwes")
+        self.notes_filter_button.grid(row=0, column=4, sticky="w", padx=(5, 0))
+        self.notes_advanced_filter_button.grid(row=0, column=5, sticky="w")
+        self.notes_toggle_switch_label.grid(row=0, column=6, sticky="e")
         self.notes_toggle_switch_button.grid(row=0, column=7)
         
-        self.notes_tab_table.grid(row=1, column=0, columnspan=8, sticky="nsew")
+        self.notes_tab_table.grid(row=1, column=0, columnspan=8, padx=(2, 2), pady=(2, 2), sticky="nsew")
 
         self.notes_tab.grid_rowconfigure(1, weight=1)
-        self.notes_tab.grid_columnconfigure(tuple(range(8)), weight=1)
+        self.notes_tab.grid_columnconfigure(tuple(range(8)), weight=1, uniform="column") # TODO?
 
+
+    # Inspired by https://stackoverflow.com/questions/58559865/tkinter-checkbutton-different-image
+    def prepare_toggle_checkbutton(self):
+        self.notes_toggle_switch_button_var = tkinter.StringVar()
+        self.notes_toggle_switch_button_var.set("ON")
+        
+        self.toggle_on_image = tkinter.PhotoImage(width=48, height=24)
+        self.toggle_on_image.put(("#92d36e",), to=(0, 0, 23, 23))
+        
+        self.toggle_off_image = tkinter.PhotoImage(width=48, height=24)
+        self.toggle_off_image.put(("#ff8a84",), to=(24, 0, 47, 23))
 
 
     def notes_advanced_filtering(self): 
@@ -315,7 +345,7 @@ class TkinterApplication(ttk.Frame):
 
     def use_current_note_filter(self):
         filtered_notes = self.use_cases.get_filtered_notes(self.current_note_filter)
-        self.table_notes = [(note.name, f"{note.priority:03d}", note.time.strftime("%d/%m/%Y %H:%M"), note.text) for note in filtered_notes]
+        self.table_notes = [(note.name, note.priority, note.time.strftime("%d/%m/%Y %H:%M"), note.text) for note in filtered_notes]
 
         self.notes_tab_table.replace_data(list(set(self.table_notes)))
         self.update_notes_tab_accordion()
@@ -323,15 +353,18 @@ class TkinterApplication(ttk.Frame):
 
 
     def toggle_notes_view(self):
+        self.notes_toggle_switch_button['image'] = self.toggle_on_image if self.notes_toggle_switch_button.instate(['!disabled', 'selected']) else self.toggle_off_image
+        
         self.is_table_view = not self.is_table_view
         if self.is_table_view:
             self.notes_tab_accordion.grid_forget()
-            self.notes_tab_table.grid()
-            self.notes_tab_table.grid(row=1, column=0, columnspan=8, sticky="nsew")
+            self.notes_tab_accordion_pagination.grid_forget()
+            self.notes_tab_table.grid(row=1, column=0, columnspan=8, sticky="nsew", padx=(2, 2), pady=(2, 2))
             selected_rows_count = len(self.notes_tab_table.selection())
         else:
             self.notes_tab_table.grid_forget()
-            self.notes_tab_accordion.grid(row=1, column=0, columnspan=8, sticky="nsew")
+            self.notes_tab_accordion.grid(row=1, column=0, columnspan=8, sticky="nsew", padx=(2, 2), pady=(2, 2))
+            self.notes_tab_accordion_pagination.grid(row=2, column=0, columnspan=8, pady=(2, 2))
             selected_rows_count = self.count_selected_notes()
         self.edit_icon_button["state"] = "enable" if selected_rows_count == 1 else "disabled"
         self.delete_icon_button["state"] = "enable" if selected_rows_count >= 1 else "disabled"
@@ -339,84 +372,82 @@ class TkinterApplication(ttk.Frame):
 
 
     def _init_categories_tab(self):
-        self.categories_tab_searchbar = searchbar_with_icon.SearchBarWithIcon(self.categories_tab)
+        self.categories_tab_searchbar = searchbar_with_icon.SearchBarWithIcon(self.categories_tab, style="search_container.TFrame")
         self.categories_filter_button = tkinter.Button(self.categories_tab, text="Filter", command=self._filter_items_by_name)
         
         self.categories_tab_table = common_tree_view.CommonTreeView(
             master=self.categories_tab,
             headings=("Name", "Description"),
             items=self.table_categories,
-            stretch=0,
             sort_col="Name",
             reverse=False
         )
         self.categories_tab_table.bind("<<TreeviewSelect>>", self.table_update_buttons_enabling)
 
-        self.categories_tab_searchbar.grid(row=0, column=0, columnspan=4)
-        self.categories_filter_button.grid(row=0, column=4)
-        tkinter.Label(self.categories_tab).grid(row=0, column=5, columnspan=3, sticky="nsew")
+        self.categories_tab_searchbar.grid(row=0, column=0, columnspan=4, sticky="news", padx=(8, 8), pady=(8, 8))
+        self.categories_filter_button.grid(row=0, column=4, sticky="w", padx=(5, 0))
+        ttk.Label(self.categories_tab, style="filterbar_label.TLabel").grid(row=0, column=5, columnspan=3, sticky="nsew", padx=(2, 2), pady=(2, 2))
 
-        self.categories_tab_table.grid(row=1, column=0, columnspan=8, sticky="nsew")
+        self.categories_tab_table.grid(row=1, column=0, columnspan=8, sticky="nsew", padx=(2, 2), pady=(2, 2))
 
         self.categories_tab.grid_rowconfigure(1, weight=1)
-        self.categories_tab.grid_columnconfigure(tuple(range(8)), weight=1)
+        self.categories_tab.grid_columnconfigure(tuple(range(8)), weight=1, uniform="column")
 
 
 
     def _init_tags_tab(self):
-        self.tags_tab_searchbar = searchbar_with_icon.SearchBarWithIcon(self.tags_tab)
+        self.tags_tab_searchbar = searchbar_with_icon.SearchBarWithIcon(self.tags_tab, style="search_container.TFrame")
         self.tags_filter_button = tkinter.Button(self.tags_tab, text = "Filter", command=self._filter_items_by_name)
         
         self.tags_tab_table = common_tree_view.CommonTreeView(
             master=self.tags_tab,
             headings=("Name", "Description"),
             items=self.table_tags,
-            stretch=0,
             sort_col="Name",
             reverse=False
         )
         self.tags_tab_table.bind("<<TreeviewSelect>>", self.table_update_buttons_enabling)
 
-        self.tags_tab_searchbar.grid(row=0, column=0, columnspan=4)
-        self.tags_filter_button.grid(row=0, column=4)
-        tkinter.Label(self.tags_tab).grid(row=0, column=5, columnspan=3, sticky="nsew")
+        self.tags_tab_searchbar.grid(row=0, column=0, columnspan=4, sticky="news", padx=(8, 8), pady=(8, 8))
+        self.tags_filter_button.grid(row=0, column=4, sticky="w", padx=(5, 0))
+        ttk.Label(self.tags_tab, style="filterbar_label.TLabel").grid(row=0, column=5, columnspan=3, sticky="nsew", padx=(2, 2), pady=(2, 2))
 
-        self.tags_tab_table.grid(row=1, column=0, columnspan=8, sticky="nsew")
+        self.tags_tab_table.grid(row=1, column=0, columnspan=8, sticky="nsew", padx=(2, 2), pady=(2, 2))
 
         self.tags_tab.grid_rowconfigure(1, weight=1)
-        self.tags_tab.grid_columnconfigure(tuple(range(8)), weight=1)
+        self.tags_tab.grid_columnconfigure(tuple(range(8)), weight=1, uniform="column")
 
 
 
     def _init_filters_tab(self):
-        self.filters_tab_searchbar = searchbar_with_icon.SearchBarWithIcon(self.filters_tab)
+        self.filters_tab_searchbar = searchbar_with_icon.SearchBarWithIcon(self.filters_tab, style="search_container.TFrame")
         self.filters_filter_button = tkinter.Button(self.filters_tab, text = "Filter", command=self._filter_items_by_name)
         
         self.filters_tab_table = common_tree_view.CommonTreeView(
             master=self.filters_tab,
             headings=("Name", "Order", "Note name", "Description"),
             items=self.table_filters,
-            stretch=0,
             sort_col="Name",
-            reverse=False
+            reverse=False,
+            int_cols=["Order"]
         )
         self.filters_tab_table.bind("<<TreeviewSelect>>", self.table_update_buttons_enabling)
 
-        self.filters_tab_searchbar.grid(row=0, column=0, columnspan=4)
-        self.filters_filter_button.grid(row=0, column=4)
-        tkinter.Label(self.filters_tab).grid(row=0, column=5, columnspan=3, sticky="nsew")
+        self.filters_tab_searchbar.grid(row=0, column=0, columnspan=4, sticky="news", padx=(8, 8), pady=(8, 8))
+        self.filters_filter_button.grid(row=0, column=4, sticky="w", padx=(5, 0))
+        ttk.Label(self.filters_tab, style="filterbar_label.TLabel").grid(row=0, column=5, columnspan=3, sticky="nsew", padx=(2, 2), pady=(2, 2))
 
-        self.filters_tab_table.grid(row=1, column=0, columnspan=8, sticky="nsew")
+        self.filters_tab_table.grid(row=1, column=0, columnspan=8, sticky="nsew", padx=(2, 2), pady=(2, 2))
 
         self.filters_tab.grid_rowconfigure(1, weight=1)
-        self.filters_tab.grid_columnconfigure(tuple(range(8)), weight=1)
+        self.filters_tab.grid_columnconfigure(tuple(range(8)), weight=1, uniform="column")
 
 
 
     def tab_update_buttons_enabling(self, event):
         current_tab_name = self.tabs.tab(self.tabs.select(), "text")
         if current_tab_name == "Notes":
-            if True:
+            if self.is_table_view:
                 selected_rows_count = len(self.notes_tab_table.selection())
             else:
                 selected_rows_count = self.count_selected_notes()
@@ -473,12 +504,10 @@ class TkinterApplication(ttk.Frame):
         self.loading_bar.stop()
 
 
-
     def edit_item(self):
         self.loading_bar.start(8)
         self.item_action("EDIT")
         self.loading_bar.stop()
-
 
 
     def item_action(self, action_name):
@@ -562,9 +591,9 @@ class TkinterApplication(ttk.Frame):
             if self.use_cases.update_note(selected_note.id, updated_note):
                 self.remove_notes_from_todays_notes([updated_note.name])
                 self.add_note_to_todays_notes(updated_note)
-                if self._is_note_filter_accepted(updated_note):
-                    old_note_row = (selected_note.name,  f"{selected_note.priority:03d}", selected_note.time.strftime("%d/%m/%Y %H:%M"), selected_note.text)
-                    new_note_row = (updated_note.name, f"{updated_note.priority:03d}", updated_note.time.strftime("%d/%m/%Y %H:%M"), updated_note.text)
+                if self._is_note_filter_accepted(updated_note): # here
+                    old_note_row = (selected_note.name, selected_note.priority, selected_note.time.strftime("%d/%m/%Y %H:%M"), selected_note.text)
+                    new_note_row = (updated_note.name, updated_note.priority, updated_note.time.strftime("%d/%m/%Y %H:%M"), updated_note.text)
                     self.notes_tab_table.replace_row(old_note_row, new_note_row)
             else:
                 self.display_error_message_box(f"Note with {updated_note.name} already exists")
@@ -662,23 +691,23 @@ class TkinterApplication(ttk.Frame):
             new_filter.category_description = dialog.data_dict["category_description"]
             new_filter.order = int(dialog.data_dict["order"])
 
-            ordered_filters = [fast_filter for fast_filter in self.controller.find_filter_by_order_listed(updated_filter.order)]
+            ordered_filters = [fast_filter for fast_filter in self.use_cases.find_filter_by_order_listed(new_filter.order)]
 
             if self.use_cases.create_filter(new_filter):
                 new_filter_row = (new_filter.name,
-                                  f"{new_filter.order:05d}",
+                                  new_filter.order,
                                   new_filter.note_name,
                                   new_filter.category_name)
                 self.filters_tab_table.add_row(new_filter_row)
 
                 table_rows = [(row.name,
-                               f"{row.order:05d}",
+                               row.order,
                                row.note_name,
                                row.category_name) for row in ordered_filters if row.name != new_filter.name]
                 self.filters_tab_table.delete_rows(table_rows)
 
                 for i, row in enumerate(table_rows):
-                    table_rows[i] = row[0], "-00001", row[2], row[3]
+                    table_rows[i] = row[0], -1, row[2], row[3]
                     self.filters_tab_table.add_row(table_rows[i])
             else:
                 self.display_error_message_box(f"Fast filter with {new_filter.name} already exists")
@@ -706,17 +735,15 @@ class TkinterApplication(ttk.Frame):
             ordered_filters = [fast_filter for fast_filter in self.use_cases.find_filter_by_order_listed(updated_filter.order)]
 
             if self.use_cases.update_filter(selected_filter.id, updated_filter):
-                old_filter = self.filters_tab_table.get_selected_rows()[0]
-                old_filter[1] = f"{old_filter[1]:05d}"
-                old_filter = tuple(old_filter)
+                old_filter = tuple(self.filters_tab_table.get_selected_rows()[0])
                 new_filter = (updated_filter.name,
-                              f"{updated_filter.order:05d}",
+                              updated_filter.order,
                               updated_filter.note_name,
                               updated_filter.category_name)
                 self.filters_tab_table.replace_row(old_filter, new_filter)
 
                 table_rows = [(row.name,
-                               f"{row.order:05d}",
+                               row.order,
                                row.note_name,
                                row.category_name) for row in ordered_filters if row.name != updated_filter.name]
                 self.filters_tab_table.delete_rows(table_rows)
@@ -809,20 +836,20 @@ class TkinterApplication(ttk.Frame):
         return self.use_cases.find_filter_by_name(selected_filters[0][0])
 
 
-    def change_notes_tab_accordion_page(self): # TODO
-        #self.grid_page = self.notes_tab_accordion_pagination.current_page
+    def change_notes_tab_accordion_page(self, event):
+        self.grid_page = self.notes_tab_accordion_pagination.current_page
         self.update_notes_tab_accordion()
         selected_rows_count = self.count_selected_notes()
-        self.edit_icon_button.setEnabled(selected_rows_count == 1)
-        self.delete_icon_button.setEnabled(selected_rows_count >= 1)
+        self.edit_icon_button["state"] = "enable" if selected_rows_count == 1 else "disabled"
+        self.delete_icon_button["state"] = "enable" if selected_rows_count >= 1 else "disabled"
 
 
-    def update_notes_tab_accordion(self): # TODO
+    def update_notes_tab_accordion(self):
         self.grid_notes = [note for note in self.use_cases.get_filtered_notes_paged(self.current_note_filter, page=self.grid_page, size=10)]
         self.notes_tab_accordion.replace_rows(self.grid_notes)
 
-        #self.notes_tab_accordion_pagination.items_count = self.notes_tab_table.model.rowCount(index)
-        #self.notes_tab_accordion_pagination.create_labels()
+        self.notes_tab_accordion_pagination.items_count = len(self.notes_tab_table.items)
+        self.notes_tab_accordion_pagination.create_labels()
 
 
     def _filter_items_by_name(self):
@@ -831,13 +858,25 @@ class TkinterApplication(ttk.Frame):
             self.current_note_filter = self.create_default_filter()
             self.current_note_filter.note_name = self.notes_tab_searchbar.entry.get()
             self.use_current_note_filter()
+
         elif current_tab_name == "Categories":
-            self.table_categories = None
+            categories_name = self.categories_tab_searchbar.entry.get()
+            self.table_categories = [(category.name, category.description) for category in self.use_cases.find_categories_by_name(categories_name)]
+            self.categories_tab_table.replace_data(self.table_categories)
+        
         elif current_tab_name == "Tags":
-            self.table_tags = None
+            tags_name = self.tags_tab_searchbar.entry.get()
+            self.table_tags = [(tag.name, tag.description) for tag in self.use_cases.find_tags_by_name(tags_name)]
+            self.tags_tab_table.replace_data(self.table_tags)
+
         elif current_tab_name == "Fast filters":
-            self.table_filters = None
-            self.filters_tab_table.replace
+            filters_name = self.filters_tab_searchbar.entry.get()
+            self.table_filters = [(note_filter.name,
+                                   note_filter.order,
+                                   note_filter.note_name,
+                                   note_filter.category_name) for note_filter in self.use_cases.find_filters_by_name(filters_name)]
+            self.filters_tab_table.replace_data(self.table_filters)
+        
         else:
             self.display_error_message_box("Unknown tab")
         
@@ -864,18 +903,9 @@ if __name__ == "__main__":
 
     root = tkinter.Tk()
     
-    style = ttk.Style()
-    style.configure("toolbar_container.TFrame", background="#ffc957")
-    style.configure("todays_notes_container.TFrame", background="#f1f6be")
-    style.configure("tabs_content_container.TFrame", background="#f1f6be")
-    style.configure("inter.TFrame", background="black")
+    style = custom_ttk_style.CustomTtkStyle()
     
-    style.configure("today_notes_icon_button.TButton", background="#ffc957")
-    style.configure("text_link.TLabel", background="#ffc957")
-    style.configure("toolbar_icon_button.TButton", background="white")
-
-    style.configure("todays_notes_header.TLabel", background="#d7eb5a")
-    
-    app = TkinterApplication(root, use_cases)
-    app.master.minsize(800, 600)
+    app = TkinterApplication(root, use_cases, style="window.TFrame")
+    app.master.minsize(1280, 640)
+    app.master.maxsize(1280, 640)
     app.mainloop()

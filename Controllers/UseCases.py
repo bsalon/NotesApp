@@ -127,6 +127,10 @@ class UseCases():
         return self.category_service.get_by_name(category_name)
 
 
+    def find_categories_by_name(self, category_name):
+        return [category for category in self.category_service.find_all_by_name(category_name)]
+
+
     def delete_categories(self, categories_names):
         categories = []
         for category_name in categories_names:
@@ -168,6 +172,10 @@ class UseCases():
 
     def find_tag_by_name(self, tag_name):
         return self.tag_service.get_by_name(tag_name)
+
+
+    def find_tags_by_name(self, tag_name):
+        return [tag for tag in self.tag_service.find_all_by_name(tag_name)]
 
 
     def delete_tags(self, tags_names):
@@ -218,6 +226,10 @@ class UseCases():
 
     def find_filter_by_name(self, note_name):
         return self.filter_service.get_by_name(note_name)
+
+
+    def find_filters_by_name(self, name):
+        return [fast_filter for fast_filter in self.filter_service.find_all_by_name(name)]
 
 
     def find_filter_by_order(self, order):

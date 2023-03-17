@@ -3,7 +3,7 @@ from tkinter import ttk
 
 
 class CommonTreeView(ttk.Treeview):
-    def __init__(self, master, headings, items, stretch, sort_col, reverse, *args, **kwargs):
+    def __init__(self, master, headings, items, sort_col, reverse, int_cols = [], *args, **kwargs):
         super(CommonTreeView, self).__init__(master, column=headings, *args, **kwargs)
         self["show"] = "headings"
 
@@ -14,8 +14,10 @@ class CommonTreeView(ttk.Treeview):
 
         self.fill_table(items)
 
+        self.headings = headings
         self.column = sort_col
         self.reverse = reverse
+        self.int_cols = int_cols
         self._sort_column(sort_col, reverse)
 
         self.bind("<Button-1>", self._handle_separator_click)
@@ -33,7 +35,20 @@ class CommonTreeView(ttk.Treeview):
         #       * tkinter doesn't seem to support this functionality so this would require to remember
         #         the current font and its size, and also to know sizes of particular characters
         #         in that font to get the precise number
-        #   4. Use textwrap module to wrap the text to fit the column
+        #       * this makes the problem programmatically more challenging because it would be needed
+        #         to calculate the number of characters that can fit the row for each row of the text
+        #         before it is split, for example:
+        #           - row width is 200px
+        #           - string has 150 characters
+        #           - 200px can fit from 5 to 20 characters
+        #           - string has to be split accordingly to fit the maximal number of characters
+        #           - it can be split like this - www, iiiiii, ........, normal, and so on
+        #           - the string would have to be looped by character and the algorithm would
+        #             remember the current pixels taken
+        #           - after pixels exceed the row width, '\n' is inserted - this is not supported by the textwrap 
+        #             module, and would have to be programmed manually - it also doesn't take into the account
+        #             the word wrapping
+        #   4. Use textwrap module to wrap the text to fit the column (if possible)
         #   5. Count number of '\n's in the resulting text to calculate the row height
         #   6. Use the counted number to multiply the current row size
 
@@ -92,7 +107,10 @@ class CommonTreeView(ttk.Treeview):
         self.reverse = reverse
         
         items = [(self.set(k, column), k) for k in self.get_children('')]
-        items.sort(reverse=reverse)
+        if column in self.int_cols:
+            items.sort(key=lambda item: int(item[0]), reverse=reverse)
+        else:
+            items.sort(reverse=reverse)
 
         for index, (val, k) in enumerate(items):
             self.move(k, '', index)
