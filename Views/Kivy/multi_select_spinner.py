@@ -18,6 +18,7 @@ class MultiSelectSpinner(button.Button):
 
 
     def __init__(self, *args, **kwargs):
+        self.toggles = []
         self.bind(dropdown=self.update_dropdown)
         self.bind(values=self.update_dropdown)
         super(MultiSelectSpinner, self).__init__(*args, **kwargs)
@@ -31,6 +32,12 @@ class MultiSelectSpinner(button.Button):
             self.dropdown.open(self)
 
 
+    def update_selected_values(self, selected_values):
+        self.selected_values = selected_values
+        for toggle in self.toggles:
+            toggle.state = "down" if toggle.text in self.selected_values else "normal"
+
+
     def update_dropdown(self, *args):
         if not self.dropdown:
             self.dropdown = dropdown.DropDown()
@@ -41,11 +48,12 @@ class MultiSelectSpinner(button.Button):
             for value in values:
                 toggle = togglebutton.ToggleButton(text=value, size_hint=(1, None), height=metrics.dp(48))
                 toggle.bind(state=self.select_value)
+                self.toggles.append(toggle)
                 self.dropdown.add_widget(toggle)
 
 
     def select_value(self, instance, value):
-        if value == 'down':
+        if value == "down":
             if instance.text not in self.selected_values:
                 self.selected_values.append(instance.text)
         else:
@@ -55,9 +63,9 @@ class MultiSelectSpinner(button.Button):
 
     def on_selected_values(self, instance, value):
         if value:
-            self.text = ', '.join(value)
+            self.text = ", ".join(value)
         else:
-            self.text = ''
+            self.text = ""
 
 
 #kv = '''

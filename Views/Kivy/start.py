@@ -10,7 +10,7 @@ from datetime import datetime
 
 from Controllers import UseCases
 
-from dialogs import note_dialog
+from dialogs import category_dialog, note_dialog, tag_dialog
 
 # import clickable_label
 import custom_mddatatable
@@ -69,7 +69,7 @@ class KivyApplicationLayout(boxlayout.BoxLayout):
 
     def _init_toolbar_layout(self):
         # Today's notes icon button
-        self.todays_notes_icon_button = styled_widgets.TodaysNotesButton()
+        self.todays_notes_icon_button = styled_widgets.TodaysNotesButton(on_release=self.toggle_todays_notes_pane)
         todays_notes_icon = image.Image(source = "/home/benjaminsalon/diplom/NotesApp/Views/PyQt6/icons/TodaysNotesIcon.png", size_hint=(1, 3/4))
 
         todays_notes_icon_button_layout = boxlayout.BoxLayout(orientation="vertical", size_hint=(4/32, 1))
@@ -102,7 +102,7 @@ class KivyApplicationLayout(boxlayout.BoxLayout):
         self.toolbar_layout.add_widget(self.edit_icon_button)
 
         # Delete icon button
-        self.delete_icon_button = styled_widgets.ToolbarButton(background_normal="/home/benjaminsalon/diplom/NotesApp/Views/PyQt6/icons/DeleteIcon.png", disabled=True)
+        self.delete_icon_button = styled_widgets.ToolbarButton(background_normal="/home/benjaminsalon/diplom/NotesApp/Views/PyQt6/icons/DeleteIcon.png", disabled=True, on_release=self.delete_items)
         self.toolbar_layout.add_widget(self.delete_icon_button)
 
         # Loading bar
@@ -115,11 +115,18 @@ class KivyApplicationLayout(boxlayout.BoxLayout):
 
 
 
-    def toggle_todays_notes_pane(self): # TODO
+    def toggle_todays_notes_pane(self, button_instance):
+        w = self.todays_notes_layout
         if self.todays_notes_pane_visible:
-            self.todays_notes_layout.grid_forget()
+            w.saved_attrs = w.height, w.width, w.size_hint_x, w.size_hint_y, w.opacity, w.disabled
+            w.height, w.width, w.size_hint_x, w.size_hint_y, w.opacity, w.disabled = 0, 0, None, None, 0, True
+            self.tabs_content_layout.size_hint = 1, 1
+            
         else:
-            self.todays_notes_layout.grid(row=1, column=0, rowspan=14, columnspan=1, sticky="news")
+            w.height, w.width, w.size_hint_x, w.size_hint_y, w.opacity, w.disabled = w.saved_attrs
+            del w.saved_attrs
+            self.tabs_content_layout.size_hint = 7/8, 1
+
         self.todays_notes_pane_visible = not self.todays_notes_pane_visible
 
 
@@ -140,6 +147,23 @@ class KivyApplicationLayout(boxlayout.BoxLayout):
         self.todays_notes_recycleview = todays_notes_recycleview.TodaysNotesRecycleview(self.today_notes)
         self.todays_notes_layout.add_widget(self.todays_notes_recycleview)
 
+
+    def remove_notes_from_todays_notes(self, notes):
+        todays_notes = self.todays_notes_recycleview.data
+        for note in notes:
+            index = next((i for i, v in enumerate(todays_notes) if v["name"] == note), None)
+            if index:
+                del todays_notes[index]
+
+
+    def add_note_to_todays_notes(self, note):
+        note_dict = {"time": note.time.strftime("%H:%M"), "name": note.name}
+        for i, val in enumerate(self.todays_notes_recycleview.data):
+            if val["time"] > note_dict["time"]:
+                self.todays_notes_recycleview.data.insert(i, note_dict)
+                return
+
+        self.todays_notes_recycleview.data.append(note_dict)
 
 
     def _init_tabs_content_layout(self):
@@ -204,7 +228,6 @@ class KivyApplicationLayout(boxlayout.BoxLayout):
 
         self.notes_tab.add_widget(self.notes_tab_layout)
 
-        #self.notes_tab_table.bind("<<TreeviewSelect>>", self.table_update_buttons_enabling)
         #self.notes_tab_accordion = notes_accordion.NotesAccordion(self.notes_tab, self.grid_notes)
         #self.notes_tab_accordion.bind("<<RowCheck>>", self.notes_accordion_buttons_enabling)
         #self.notes_tab_accordion_pagination = pagination_labels.PaginationLabels(self.notes_tab, 10, len(self.table_notes))
@@ -391,8 +414,13 @@ class KivyApplicationLayout(boxlayout.BoxLayout):
 
 
 
-    def display_error_message_box(self, text):
-        pass # TODO
+    def display_error_message_box(self, text): # TODO
+        message_box = popup.Popup(
+            title=text,
+            content=button.Button(text="Close")
+        )
+        message_box.content.bind(on_press=message_box.dismiss)
+        message_box.open()
 
 
 
@@ -417,7 +445,7 @@ class KivyApplicationLayout(boxlayout.BoxLayout):
             new_note.category_name = dialog.data_dict["category"]
             new_note.tags_names = dialog.data_dict["tags"]
             if self.use_cases.create_note(new_note):
-                # TODO self.add_note_to_todays_notes(new_note)
+                self.add_note_to_todays_notes(new_note)
                 if self._is_note_filter_accepted(new_note):
                     new_note_row = (new_note.name, new_note.priority, new_note.time.strftime("%d/%m/%Y %H:%M"), new_note.text)
                     self.notes_tab_table.add_row(new_note_row)
@@ -448,9 +476,8 @@ class KivyApplicationLayout(boxlayout.BoxLayout):
             updated_note.category_name = dialog.data_dict["category"]
             updated_note.tags_names = dialog.data_dict["tags"]
             if self.use_cases.update_note(selected_note.id, updated_note):
-                # TODO
-                #self.remove_notes_from_todays_notes([updated_note.name])
-                #self.add_note_to_todays_notes(updated_note)
+                self.remove_notes_from_todays_notes([selected_note.name]) # TODO repair in Tk and PyQt
+                self.add_note_to_todays_notes(updated_note)
                 if self._is_note_filter_accepted(updated_note):
                     old_note_row = (selected_note.name, selected_note.priority, selected_note.time.strftime("%d/%m/%Y %H:%M"), selected_note.text)
                     new_note_row = (updated_note.name, updated_note.priority, updated_note.time.strftime("%d/%m/%Y %H:%M"), updated_note.text)
@@ -475,37 +502,160 @@ class KivyApplicationLayout(boxlayout.BoxLayout):
 
 
     def _add_category(self):
-        pass # TODO
+        dialog = category_dialog.CategoryDialog()
+        dialog.bind(on_dismiss=self._add_category_dialog_closed)
+        dialog.open()
+
+
+    def _add_category_dialog_closed(self, dialog):
+        if dialog.accepted:
+            new_category = lambda: None
+            new_category.name = dialog.data_dict["name"]
+            new_category.description = dialog.data_dict["description"]
+            if self.use_cases.create_category(new_category):
+                new_category_row = (new_category.name, new_category.description)
+                self.categories_tab_table.add_row(new_category_row)
+            else:
+                self.display_error_message_box(f"Category with {new_category.name} already exists")
 
 
     def _edit_category(self):
-        pass # TODO
+        selected_category = self._get_selected_category()
+
+        dialog = category_dialog.CategoryDialog()
+        dialog.fill_dialog(selected_category)
+        dialog.bind(on_dismiss=self._edit_category_dialog_closed)
+        dialog.open()
+
+
+    def _edit_category_dialog_closed(self, dialog):
+        selected_category = self._get_selected_category()
+        if dialog.accepted:
+            updated_category = lambda: None
+            updated_category.name = dialog.data_dict["name"]
+            updated_category.description = dialog.data_dict["description"]
+            if self.use_cases.update_category(selected_category.id, updated_category):
+                old_category = tuple(self.categories_tab_table.selected_rows[0])
+                new_category = (updated_category.name, updated_category.description)
+                self.categories_tab_table.update_row(old_category, new_category)
+            else:
+                self.display_error_message_box(f"Category with {updated_category.name} already exists")
+
 
 
     def _add_tag(self):
-        pass # TODO
+        dialog = tag_dialog.TagDialog()
+        dialog.bind(on_dismiss=self._add_tag_dialog_closed)
+        dialog.open()
+
+
+    def _add_tag_dialog_closed(self, dialog):
+        if dialog.accepted:
+            new_tag = lambda: None
+            new_tag.name = dialog.data_dict["name"]
+            new_tag.description = dialog.data_dict["description"]
+            if self.use_cases.create_tag(new_tag):
+                new_tag_row = (new_tag.name, new_tag.description)
+                self.tags_tab_table.add_row(new_tag_row)
+            else:
+                self.display_error_message_box(f"Tag with {new_tag.name} already exists")
 
 
     def _edit_tag(self):
-        pass # TODO
+        selected_tag = self._get_selected_tag()
+        
+        dialog = tag_dialog.TagDialog()
+        dialog.fill_dialog(selected_tag)
+        dialog.bind(on_dismiss=self._edit_tag_dialog_closed)
+        dialog.open()
+
+
+    def _edit_tag_dialog_closed(self, dialog):
+        selected_tag = self._get_selected_tag()
+        if dialog.accepted:
+            updated_tag = lambda: None
+            updated_tag.name = dialog.data_dict["name"]
+            updated_tag.description = dialog.data_dict["description"]
+            if self.use_cases.update_tag(selected_tag.id, updated_tag):
+                old_tag = tuple(self.tags_tab_table.selected_rows[0])
+                new_tag = (updated_tag.name, updated_tag.description)
+                self.tags_tab_table.update_row(old_tag, new_tag)
+            else:
+                self.display_error_message_box(f"Tag with {updated_tag.name} already exists")
 
 
     def _add_filter(self):
-        pass # TODO
+        dialog = filter_dialog.FilterDialog()
+        dialog.bind(on_dismiss=self._add_filter_dialog_closed)
+        dialog.open()
+
+
+    def _add_filter_dialog_closed(self, dialog):
+        pass
 
 
     def _edit_filter(self):
-        pass # TODO
+        selected_filter = self._get_selected_filter()
+
+        dialog = filter_dialog.FilterDialog()
+        dialog.fill_dialog(selected_filter)
+        dialog.bind(on_dismiss=self._edit_filter_dialog_closed)
+        dialog.open()
 
 
+    def _edit_filter_dialog_closed(self, dialog):
+        pass
 
-    def delete_items(self):
-        pass # TODO
+
+    def delete_items(self, button_instance):
+        current_tab_name = self.tabs.current_tab.text
+        if current_tab_name == "Notes":
+            if self.is_table_view:
+                selected_rows = self.notes_tab_table.selected_rows
+                selected_notes = [note[0] for note in selected_rows]
+                self.notes_tab_table.delete_selection()
+            else:
+                selected_rows = self.notes_tab_accordion.selected_rows
+                selected_notes = [note.name for note in selected_rows]
+                table_rows = [(note.name, note.priority, note.time.strftime("%d/%m/%Y %H:%M"), note.text) for note in selected_rows]
+                self.notes_tab_table.delete_rows(table_rows)
+            self.use_cases.delete_notes(selected_notes)
+            self.remove_notes_from_todays_notes(selected_notes)
+
+        elif current_tab_name == "Categories":
+            selected_rows = self.categories_tab_table.selected_rows
+            selected_categories = [category[0] for category in selected_rows]
+            if self.use_cases.delete_categories(selected_categories):
+                self.categories_tab_table.delete_selection()
+            else:
+                self.display_error_message_box("Can not delete categories with assigned notes")
+
+        elif current_tab_name == "Tags":
+            selected_rows = self.tags_tab_table.selected_rows
+            selected_tags = [tag[0] for tag in selected_rows]
+            self.use_cases.delete_tags(selected_tags)
+            self.tags_tab_table.delete_selection()
+
+        elif current_tab_name == "Fast filters":
+            selected_rows = self.filters_tab_table.selected_rows
+            selected_filters = [fast_filter[0] for fast_filter in selected_rows]
+            self.use_cases.delete_filters(selected_filters)
+            self.filters_tab_table.delete_selection()
+
+        else:
+            self.display_error_message_box("Unknown tab")
+        
+        # TODO with # #
+        self.edit_icon_button.disabled = True
+        self.delete_icon_button.disabled = True
+
+        # self.update_notes_tab_accordion()
+        # self.notes_accordion_buttons_enabling(None)
 
 
     def _get_selected_note(self):
         if self.is_table_view:
-            selected_notes = self.notes_tab_table.get_row_checks()
+            selected_notes = self.notes_tab_table.selected_rows
             if len(selected_notes) != 1:
                 return None
             return self.use_cases.find_detailed_note_by_name(selected_notes[0][0])
@@ -516,7 +666,28 @@ class KivyApplicationLayout(boxlayout.BoxLayout):
             return selected_notes[0]
 
 
-    # TODO
+
+    def _get_selected_category(self):
+        selected_categories = self.categories_tab_table.selected_rows
+        if len(selected_categories) != 1:
+            return None
+        return self.use_cases.find_category_by_name(selected_categories[0][0])
+
+
+
+    def _get_selected_tag(self):
+        selected_tags = self.tags_tab_table.selected_rows
+        if len(selected_tags) != 1:
+            return None
+        return self.use_cases.find_tag_by_name(selected_tags[0][0])
+
+
+
+    def _get_selected_filter(self):
+        selected_filters = self.filters_tab_table.selected_rows
+        if len(selected_filters) != 1:
+            return None
+        return self.use_cases.find_filter_by_name(selected_filters[0][0])
 
 
 
