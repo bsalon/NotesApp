@@ -1,16 +1,19 @@
-import kivy
-
 from kivy.lang import Builder
 from kivy.uix import button, label
 
 
-# Builder.load_file("styled_widgets.kv")
+import clickable_label
+import time_label
+
+
+Builder.load_file("styled_widgets.kv")
+
 
 # LABELS
 
-class ClickableLabel(label.Label):
+class ClickableLabel(clickable_label.ClickableLabel):
     def __init__(self, *args, **kwargs):
-        super(ClickalbeLabel, self).__init__(*args, **kwargs)
+        super(ClickableLabel, self).__init__(*args, **kwargs)
 
 
 class FastFilterLabel(label.Label):
@@ -18,10 +21,14 @@ class FastFilterLabel(label.Label):
         super(FastFilterLabel, self).__init__(*args, **kwargs)
 
 
-class TimeLabel(label.Label):
+class TimeLabel(time_label.TimeLabel):
     def __init__(self, *args, **kwargs):
         super(TimeLabel, self).__init__(*args, **kwargs)
 
+
+class TodaysNotesLabel(label.Label):
+    def __init__(self, *args, **kwargs):
+        super(TodaysNotesLabel, self).__init__(*args, **kwargs)
 
 
 # BUTTONS

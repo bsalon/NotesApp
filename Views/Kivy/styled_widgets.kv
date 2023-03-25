@@ -1,27 +1,35 @@
 # LABELS
 
-<ClickableLabel@Label>:
+<ClickableLabel>:
+    markup: True
     color: "black"
     size_hint: (2/32, 1)
 
-<FastFilterLabel@Label>:
+<FastFilterLabel>:
     color: "black"
     size_hint: (3/32, 1)
     text: "Use fast filters:"
 
-<TimeLabel@Label>:
+<TimeLabel>:
     color: "black"
     halign: "center"
     valign: "center"
     size_hint: (6/32, 1)
 
+<TodaysNotesLabel>:
+    color: "black"
+    halign: "center"
+    valign: "center"
+    text: "Today's notes"
+    size_hint: (1, 1/10)
+
 
 # BUTTONS
 
-<TodaysNotesButton@Button>:
+<TodaysNotesButton>:
     size_hint: (1, 1/4)
     text: "Today's notes"
 
-<ToolbarButton@Button>:
+<ToolbarButton>:
     border: (0, 0, 0, 0)
     size_hint: (2/32, 1)

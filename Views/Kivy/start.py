@@ -1,17 +1,23 @@
 import kivy
 
-from kivy import app, lang
+from kivy import app, lang, metrics
 from kivy.core import window
-from kivy.uix import boxlayout, button, image, label
+from kivy.uix import boxlayout, button, image, label, recycleview, switch, tabbedpanel
+
+from kivymd import app
 
 from datetime import datetime
 
 from Controllers import UseCases
 
-import clickable_label
+from dialogs import note_dialog
+
+# import clickable_label
+import custom_mddatatable
 import loading_bar
+import searchbar_with_icon
 import styled_widgets
-import time_label
+import todays_notes_recycleview
 
 
 class KivyApplicationLayout(boxlayout.BoxLayout):
@@ -64,7 +70,6 @@ class KivyApplicationLayout(boxlayout.BoxLayout):
     def _init_toolbar_layout(self):
         # Today's notes icon button
         self.todays_notes_icon_button = styled_widgets.TodaysNotesButton()
-        #self.todays_notes_icon_button = button.Button(text="Today's notes", size_hint=(1, 1/4))
         todays_notes_icon = image.Image(source = "/home/benjaminsalon/diplom/NotesApp/Views/PyQt6/icons/TodaysNotesIcon.png", size_hint=(1, 3/4))
 
         todays_notes_icon_button_layout = boxlayout.BoxLayout(orientation="vertical", size_hint=(4/32, 1))
@@ -72,34 +77,32 @@ class KivyApplicationLayout(boxlayout.BoxLayout):
         todays_notes_icon_button_layout.add_widget(self.todays_notes_icon_button)
 
         self.toolbar_layout.add_widget(todays_notes_icon_button_layout)
-        
         self.todays_notes_pane_visible = True
 
-
         # Use fast filter section
-        self.toolbar_layout.add_widget(label.Label(text = "Use fast filters:", size_hint=(3/32, 1), color="black"))
+        self.toolbar_layout.add_widget(styled_widgets.FastFilterLabel())
 
-        self.fast_filters_text_links = [clickable_label.ClickableLabel(text="#1", size_hint=(2/32, 1), color="black"),
-                                        clickable_label.ClickableLabel(text="#2", size_hint=(2/32, 1), color="black"),
-                                        clickable_label.ClickableLabel(text="#3", size_hint=(2/32, 1), color="black")]
+        self.fast_filters_text_links = [styled_widgets.ClickableLabel(text="[ref=1]#1[/ref]"),
+                                        styled_widgets.ClickableLabel(text="[ref=2]#2[/ref]"),
+                                        styled_widgets.ClickableLabel(text="[ref=3]#3[/ref]")]
         for order, fast_filter_text_link in enumerate(self.fast_filters_text_links):
             self.toolbar_layout.add_widget(fast_filter_text_link)
-            fast_filter_text_link.click_command = lambda o=order: print(f"{o}") # TODO self.use_fast_filter(o+1)
+            fast_filter_text_link.click_command = lambda o=order: print(f"{o + 1}") # TODO self.use_fast_filter(o+1)
 
         # Time widget
-        self.time_widget = time_label.TimeLabel(halign="center", valign="center", size_hint=(6/32, 1), color="black")
+        self.time_widget = styled_widgets.TimeLabel()
         self.toolbar_layout.add_widget(self.time_widget)
 
         # Add icon button
-        self.add_icon_button = button.Button(background_normal="/home/benjaminsalon/diplom/NotesApp/Views/PyQt6/icons/AddIcon.png", border=(0, 0, 0, 0), size_hint=(2/32, 1))
+        self.add_icon_button = styled_widgets.ToolbarButton(background_normal="/home/benjaminsalon/diplom/NotesApp/Views/PyQt6/icons/AddIcon.png", on_release=self.add_item)
         self.toolbar_layout.add_widget(self.add_icon_button)
 
         # Edit icon button
-        self.edit_icon_button = button.Button(background_normal="/home/benjaminsalon/diplom/NotesApp/Views/PyQt6/icons/EditIcon.png", border=(0, 0, 0, 0), size_hint=(2/32, 1))
+        self.edit_icon_button = styled_widgets.ToolbarButton(background_normal="/home/benjaminsalon/diplom/NotesApp/Views/PyQt6/icons/EditIcon.png", disabled=True, on_release=self.edit_item)
         self.toolbar_layout.add_widget(self.edit_icon_button)
 
         # Delete icon button
-        self.delete_icon_button = button.Button(background_normal="/home/benjaminsalon/diplom/NotesApp/Views/PyQt6/icons/DeleteIcon.png", border=(0, 0, 0, 0), size_hint=(2/32, 1))
+        self.delete_icon_button = styled_widgets.ToolbarButton(background_normal="/home/benjaminsalon/diplom/NotesApp/Views/PyQt6/icons/DeleteIcon.png", disabled=True)
         self.toolbar_layout.add_widget(self.delete_icon_button)
 
         # Loading bar
@@ -107,19 +110,413 @@ class KivyApplicationLayout(boxlayout.BoxLayout):
         self.toolbar_layout.add_widget(self.loading_bar)
 
         # Settings icon button
-        self.settings_icon_button = button.Button(background_normal="/home/benjaminsalon/diplom/NotesApp/Views/PyQt6/icons/SettingsIcon.png", border=(0, 0, 0, 0), size_hint=(2/32, 1))
+        self.settings_icon_button = styled_widgets.ToolbarButton(background_normal="/home/benjaminsalon/diplom/NotesApp/Views/PyQt6/icons/SettingsIcon.png")
         self.toolbar_layout.add_widget(self.settings_icon_button)
+
+
+
+    def toggle_todays_notes_pane(self): # TODO
+        if self.todays_notes_pane_visible:
+            self.todays_notes_layout.grid_forget()
+        else:
+            self.todays_notes_layout.grid(row=1, column=0, rowspan=14, columnspan=1, sticky="news")
+        self.todays_notes_pane_visible = not self.todays_notes_pane_visible
+
+
+
+    def use_fast_filter(self, order): # TODO
+        self.current_note_filter = self.use_cases.find_filter_by_order(order)
+        if self.current_note_filter == None:
+            self.current_note_filter = self.create_default_filter()
+            self.display_error_message_box(f"Fast filter with order={order} is not available")
+        self.use_current_note_filter()
 
     
 
     def _init_todays_notes_layout(self):
-        pass
+        self.todays_notes_header = styled_widgets.TodaysNotesLabel()
+        self.todays_notes_layout.add_widget(self.todays_notes_header)
+
+        self.todays_notes_recycleview = todays_notes_recycleview.TodaysNotesRecycleview(self.today_notes)
+        self.todays_notes_layout.add_widget(self.todays_notes_recycleview)
 
 
 
     def _init_tabs_content_layout(self):
+        self.tabs = tabbedpanel.TabbedPanel(do_default_tab=False)
+
+        self.notes_tab = tabbedpanel.TabbedPanelItem(text="Notes")
+        self._init_notes_tab()
+        self.categories_tab = tabbedpanel.TabbedPanelItem(text="Categories")
+        self._init_categories_tab()
+        self.tags_tab = tabbedpanel.TabbedPanelItem(text="Tags")
+        self._init_tags_tab()
+        self.filters_tab = tabbedpanel.TabbedPanelItem(text="Fast filters")
+        self._init_filters_tab()
+
+        self.tabs.add_widget(self.notes_tab)
+        self.tabs.add_widget(self.categories_tab)
+        self.tabs.add_widget(self.tags_tab)
+        self.tabs.add_widget(self.filters_tab)
+        self.tabs.bind(current_tab=self.tab_update_buttons_enabling)
+
+        self.tabs_content_layout.add_widget(self.tabs)
+
+
+
+    def _init_notes_tab(self):
+        self.notes_tab_searchbar = searchbar_with_icon.SearchBarWithIcon(size_hint=(4/8, 1))
+        self.notes_filter_button = button.Button(text="Filter", size_hint=(1/8, 1))
+        # TODO command=self._filter_items_by_name
+        self.notes_advanced_filter_button = button.Button(text="Advanced filter", size_hint=(1/8, 1))
+        # TODO command=self.notes_advanced_filtering
+        self.notes_toggle_switch_label = label.Label(text="Table view", size_hint=(1/8, 1))
+        self.notes_toggle_switch_button = switch.Switch(active=True, size_hint=(1/8, 1))
+        # TODO command=self.toggle_notes_view
+
+        self.notes_tab_toolbar_layout = boxlayout.BoxLayout(orientation="horizontal", size_hint=(1, 1/9))
+        self.notes_tab_toolbar_layout.add_widget(self.notes_tab_searchbar)
+        self.notes_tab_toolbar_layout.add_widget(self.notes_filter_button)
+        self.notes_tab_toolbar_layout.add_widget(self.notes_advanced_filter_button)
+        self.notes_tab_toolbar_layout.add_widget(self.notes_toggle_switch_label)
+        self.notes_tab_toolbar_layout.add_widget(self.notes_toggle_switch_button)
+
+        self.notes_tab_table = custom_mddatatable.CustomMDDataTable(
+            check=True,
+            elevation=0,
+            size_hint=(1, 8/9),
+            rows_num=100000,
+            column_data=[
+                ("Name", metrics.dp(30), lambda data: zip(*sorted(enumerate(data), key=lambda x:x[1][0]))),
+                ("Priority", metrics.dp(30), lambda data: zip(*sorted(enumerate(data), key=lambda x:x[1][1]))),
+                ("Time", metrics.dp(30), lambda data: zip(*sorted(enumerate(data), key=lambda x:x[1][2]))),
+                ("Text", metrics.dp(50), lambda data: zip(*sorted(enumerate(data), key=lambda x:x[1][3])))
+            ],
+            row_data=self.table_notes
+        )
+        self.notes_tab_table.bind(on_row_press=self.table_update_buttons_enabling)
+
+        # TODO accordion
+
+        self.notes_tab_layout = boxlayout.BoxLayout(orientation="vertical", size_hint=(1, 1))
+        self.notes_tab_layout.add_widget(self.notes_tab_toolbar_layout)
+        self.notes_tab_layout.add_widget(self.notes_tab_table)
+
+        self.notes_tab.add_widget(self.notes_tab_layout)
+
+        #self.notes_tab_table.bind("<<TreeviewSelect>>", self.table_update_buttons_enabling)
+        #self.notes_tab_accordion = notes_accordion.NotesAccordion(self.notes_tab, self.grid_notes)
+        #self.notes_tab_accordion.bind("<<RowCheck>>", self.notes_accordion_buttons_enabling)
+        #self.notes_tab_accordion_pagination = pagination_labels.PaginationLabels(self.notes_tab, 10, len(self.table_notes))
+        #self.notes_tab_accordion_pagination.bind("<<PageChanged>>", self.change_notes_tab_accordion_page)
+        self.is_table_view = True
+
+
+    def _init_categories_tab(self):
+        self.categories_tab_searchbar = searchbar_with_icon.SearchBarWithIcon(size_hint=(4/8, 1))
+        self.categories_filter_button = button.Button(text="Filter", size_hint=(1/8, 1))
+        # TODO command=self._filter_items_by_name)
+
+        self.categories_tab_toolbar_layout = boxlayout.BoxLayout(orientation="horizontal", size_hint=(1, 1/9))
+        self.categories_tab_toolbar_layout.add_widget(self.categories_tab_searchbar)
+        self.categories_tab_toolbar_layout.add_widget(self.categories_filter_button)
+        self.categories_tab_toolbar_layout.add_widget(label.Label(size_hint=(3/8, 1)))
+
+        self.categories_tab_table = custom_mddatatable.CustomMDDataTable(
+            check=True,
+            elevation=0,
+            size_hint=(1, 8/9),
+            rows_num=100000,
+            column_data=[
+                ("Name", metrics.dp(30), lambda data: zip(*sorted(enumerate(data), key=lambda x:x[1][0]))),
+                ("Description", metrics.dp(100), lambda data: zip(*sorted(enumerate(data), key=lambda x:x[1][1]))),
+            ],
+            row_data=self.table_categories
+        )
+        self.categories_tab_table.bind(on_row_press=self.table_update_buttons_enabling)
+
+        self.categories_tab_layout = boxlayout.BoxLayout(orientation="vertical", size_hint=(1, 1))
+        self.categories_tab_layout.add_widget(self.categories_tab_toolbar_layout)
+        self.categories_tab_layout.add_widget(self.categories_tab_table)
+
+        self.categories_tab.add_widget(self.categories_tab_layout)
+
+
+
+
+    def _init_tags_tab(self):
+        self.tags_tab_searchbar = searchbar_with_icon.SearchBarWithIcon(size_hint=(4/8, 1))
+        self.tags_filter_button = button.Button(text="Filter", size_hint=(1/8, 1))
+        # TODO command=self._filter_items_by_name)
+
+        self.tags_tab_toolbar_layout = boxlayout.BoxLayout(orientation="horizontal", size_hint=(1, 1/9))
+        self.tags_tab_toolbar_layout.add_widget(self.tags_tab_searchbar)
+        self.tags_tab_toolbar_layout.add_widget(self.tags_filter_button)
+        self.tags_tab_toolbar_layout.add_widget(label.Label(size_hint=(3/8, 1)))
+
+        self.tags_tab_table = custom_mddatatable.CustomMDDataTable(
+            check=True,
+            elevation=0,
+            size_hint=(1, 8/9),
+            rows_num=100000,
+            column_data=[
+                ("Name", metrics.dp(30), lambda data: zip(*sorted(enumerate(data), key=lambda x:x[1][0]))),
+                ("Description", metrics.dp(100), lambda data: zip(*sorted(enumerate(data), key=lambda x:x[1][1]))),
+            ],
+            row_data=self.table_tags
+        )
+        self.tags_tab_table.bind(on_row_press=self.table_update_buttons_enabling)
+
+        self.tags_tab_layout = boxlayout.BoxLayout(orientation="vertical", size_hint=(1, 1))
+        self.tags_tab_layout.add_widget(self.tags_tab_toolbar_layout)
+        self.tags_tab_layout.add_widget(self.tags_tab_table)
+
+        self.tags_tab.add_widget(self.tags_tab_layout)
+
+
+
+    def _init_filters_tab(self): # TODO
+        self.filters_tab_searchbar = searchbar_with_icon.SearchBarWithIcon(size_hint=(4/8, 1))
+        self.filters_filter_button = button.Button(text="Filter", size_hint=(1/8, 1))
+        # TODO command=self._filter_items_by_name)
+
+        self.filters_tab_toolbar_layout = boxlayout.BoxLayout(orientation="horizontal", size_hint=(1, 1/9))
+        self.filters_tab_toolbar_layout.add_widget(self.filters_tab_searchbar)
+        self.filters_tab_toolbar_layout.add_widget(self.filters_filter_button)
+        self.filters_tab_toolbar_layout.add_widget(label.Label(size_hint=(3/8, 1)))
+
+        self.filters_tab_table = custom_mddatatable.CustomMDDataTable(
+            check=True,
+            elevation=0,
+            size_hint=(1, 8/9),
+            rows_num=100000,
+            column_data=[
+                ("Name", metrics.dp(30), lambda data: zip(*sorted(enumerate(data), key=lambda x:x[1][0]))),
+                ("Order", metrics.dp(25), lambda data: zip(*sorted(enumerate(data), key=lambda x:x[1][1]))),
+                ("Note name", metrics.dp(30), lambda data: zip(*sorted(enumerate(data), key=lambda x:x[1][2]))),
+                ("Description", metrics.dp(60), lambda data: zip(*sorted(enumerate(data), key=lambda x:x[1][3]))),
+            ],
+            row_data=self.table_filters
+        )
+        self.filters_tab_table.bind(on_row_press=self.table_update_buttons_enabling)
+
+
+        self.filters_tab_layout = boxlayout.BoxLayout(orientation="vertical", size_hint=(1, 1))
+        self.filters_tab_layout.add_widget(self.filters_tab_toolbar_layout)
+        self.filters_tab_layout.add_widget(self.filters_tab_table)
+
+        self.filters_tab.add_widget(self.filters_tab_layout)
+
+
+    def tab_update_buttons_enabling(self, instance, value):
+        current_tab_name = self.tabs.current_tab.text
+        if current_tab_name == "Notes":
+            if self.is_table_view:
+                selected_rows_count = len(self.notes_tab_table.selected_rows)
+            else:
+                selected_rows_count = self.count_selected_notes()
+        elif current_tab_name == "Categories":
+            selected_rows_count = len(self.categories_tab_table.selected_rows)
+        elif current_tab_name == "Tags":
+            selected_rows_count = len(self.tags_tab_table.selected_rows)
+        elif current_tab_name == "Fast filters":
+            selected_rows_count = len(self.filters_tab_table.selected_rows)
+        else:
+            self.edit_icon_button.disabled = True
+            self.delete_icon_button.disabled = True
+        self.edit_icon_button.disabled = selected_rows_count != 1
+        self.delete_icon_button.disabled = selected_rows_count < 1
+
+
+    def count_selected_notes(self):
+        return 0 # TODO
+
+
+    def table_update_buttons_enabling(self, table_instance, row_instance):
+        selected_rows_count = len(table_instance.selected_rows)
+        self.edit_icon_button.disabled = selected_rows_count != 1
+        self.delete_icon_button.disabled = selected_rows_count < 1
+        
+
+
+    def notes_accordion_buttons_enabling(self): # TODO
         pass
 
+
+    # Operations on items
+
+    def add_item(self, instance):
+        # TODO start loading bar
+        self.item_action("ADD")
+        # TODO stop loading bar
+
+
+    def edit_item(self, instance):
+        # TODO start loading bar
+        self.item_action("EDIT")
+        # TODO stop loading bar
+
+
+    def item_action(self, action_name):
+        current_tab_name = self.tabs.current_tab.text
+        if current_tab_name == "Notes":
+            if action_name == "EDIT":
+                self._edit_note()
+            elif action_name == "ADD":
+                self._add_note()
+
+        elif current_tab_name == "Categories":
+            if action_name == "EDIT":
+                self._edit_category()
+            elif action_name == "ADD":
+                self._add_category()
+
+        elif current_tab_name == "Tags":
+            if action_name == "EDIT":
+                self._edit_tag()
+            elif action_name == "ADD":
+                self._add_tag()
+
+        elif current_tab_name == "Fast filters":
+            if action_name == "EDIT":
+                self._edit_filter()
+
+            elif action_name == "ADD":
+                self._add_filter()
+        else:
+            self.display_error_message_box("Unknown tab")
+
+        # TODO self.update_notes_tab_accordion()
+        # TODO self.notes_accordion_buttons_enabling(None)
+
+
+
+    def display_error_message_box(self, text):
+        pass # TODO
+
+
+
+    # CRUD operations for all items
+
+    def _add_note(self):
+        categories_names = [category.name for category in self.use_cases.get_categories()]
+        tags_names = [tag.name for tag in self.use_cases.get_tags()]
+
+        dialog = note_dialog.NoteDialog(categories_names, tags_names)
+        dialog.bind(on_dismiss=self._add_note_dialog_closed)
+        dialog.open()
+
+
+    def _add_note_dialog_closed(self, dialog):
+        if dialog.accepted:
+            new_note = lambda: None
+            new_note.name = dialog.data_dict["name"]
+            new_note.time = dialog.data_dict["time"]
+            new_note.text = dialog.data_dict["text"]
+            new_note.priority = int(dialog.data_dict["priority"])
+            new_note.category_name = dialog.data_dict["category"]
+            new_note.tags_names = dialog.data_dict["tags"]
+            if self.use_cases.create_note(new_note):
+                # TODO self.add_note_to_todays_notes(new_note)
+                if self._is_note_filter_accepted(new_note):
+                    new_note_row = (new_note.name, new_note.priority, new_note.time.strftime("%d/%m/%Y %H:%M"), new_note.text)
+                    self.notes_tab_table.add_row(new_note_row)
+            else:
+                self.display_error_message_box(f"Note with {new_note.name} already exists")
+
+
+    
+    def _edit_note(self):
+        categories_names = [category.name for category in self.use_cases.get_categories()]
+        tags_names = [tag.name for tag in self.use_cases.get_tags()]
+        selected_note = self._get_selected_note()
+
+        dialog = note_dialog.NoteDialog(categories_names, tags_names)
+        dialog.fill_dialog(selected_note)
+        dialog.bind(on_dismiss=self._edit_note_dialog_closed)
+        dialog.open()
+
+
+    def _edit_note_dialog_closed(self, dialog):
+        selected_note = self._get_selected_note()
+        if dialog.accepted:
+            updated_note = lambda: None
+            updated_note.name = dialog.data_dict["name"]
+            updated_note.time = dialog.data_dict["time"]
+            updated_note.text = dialog.data_dict["text"]
+            updated_note.priority = int(dialog.data_dict["priority"])
+            updated_note.category_name = dialog.data_dict["category"]
+            updated_note.tags_names = dialog.data_dict["tags"]
+            if self.use_cases.update_note(selected_note.id, updated_note):
+                # TODO
+                #self.remove_notes_from_todays_notes([updated_note.name])
+                #self.add_note_to_todays_notes(updated_note)
+                if self._is_note_filter_accepted(updated_note):
+                    old_note_row = (selected_note.name, selected_note.priority, selected_note.time.strftime("%d/%m/%Y %H:%M"), selected_note.text)
+                    new_note_row = (updated_note.name, updated_note.priority, updated_note.time.strftime("%d/%m/%Y %H:%M"), updated_note.text)
+                    self.notes_tab_table.update_row(old_note_row, new_note_row)
+            else:
+                self.display_error_message_box(f"Note with {updated_note.name} already exists")
+
+
+
+    def _is_note_filter_accepted(self, note):
+        if self.current_note_filter == None:
+            return True
+        return self.current_note_filter.note_name in note.name and \
+               self.current_note_filter.note_min_time <= note.time and \
+               self.current_note_filter.note_max_time >= note.time and \
+               self.current_note_filter.note_text in note.text and \
+               self.current_note_filter.note_min_priority <= note.priority and \
+               self.current_note_filter.note_max_priority >= note.priority and \
+               self.current_note_filter.category_name in note.category_name and \
+               (len([tag for tag in note.tags_names if self.current_note_filter.tag_name in tag]) > 0 or \
+                self.current_note_filter.tag_name == "")
+
+
+    def _add_category(self):
+        pass # TODO
+
+
+    def _edit_category(self):
+        pass # TODO
+
+
+    def _add_tag(self):
+        pass # TODO
+
+
+    def _edit_tag(self):
+        pass # TODO
+
+
+    def _add_filter(self):
+        pass # TODO
+
+
+    def _edit_filter(self):
+        pass # TODO
+
+
+
+    def delete_items(self):
+        pass # TODO
+
+
+    def _get_selected_note(self):
+        if self.is_table_view:
+            selected_notes = self.notes_tab_table.get_row_checks()
+            if len(selected_notes) != 1:
+                return None
+            return self.use_cases.find_detailed_note_by_name(selected_notes[0][0])
+        else:
+            selected_notes = self.notes_tab_accordion.get_selected_notes()
+            if len(selected_notes) != 1:
+                return None
+            return selected_notes[0]
+
+
+    # TODO
 
 
 
@@ -139,7 +536,7 @@ class KivyApplicationLayout(boxlayout.BoxLayout):
 
 
 
-class KivyApplication(app.App):
+class KivyApplication(app.MDApp):
     def build(self):
         window.Window.clearcolor = (50, 50, 50, 50)
         use_cases = UseCases.UseCases()

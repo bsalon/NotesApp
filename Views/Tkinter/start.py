@@ -282,7 +282,8 @@ class TkinterApplication(ttk.Frame):
             onvalue="ON", offvalue="OFF",
             variable=self.notes_toggle_switch_button_var,
             command=self.toggle_notes_view,
-            style="no_indicatoron.TCheckbutton")
+            style="no_indicatoron.TCheckbutton"
+        )
         
         self.notes_tab_table = common_tree_view.CommonTreeView(
             master=self.notes_tab,
