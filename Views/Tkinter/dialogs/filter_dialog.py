@@ -67,7 +67,7 @@ class FilterDialog(tkinter.simpledialog.Dialog):
         self.note_text_entry = tkinter.Entry(frame, width=25)
         self.note_text_entry.grid(row=5, column=1, columnspan=5, pady=(5, 20), sticky="news")
 
-        # Priority
+        # Note priority
         note_priority_label = tkinter.Label(frame, text="Note priority range:", anchor="e", bg="#d7eb5a")
         note_priority_label.grid(row=6, column=0, pady=(5, 20), sticky="news")
         self.note_min_priority_entry = tkinter.Entry(frame, width=25)

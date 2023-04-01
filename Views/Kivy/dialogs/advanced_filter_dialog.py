@@ -9,24 +9,12 @@ import multi_select_spinner
 
 
 
-class FilterDialog(popup.Popup):
+class AdvancedFilterDialog(popup.Popup):
     def __init__(self, **kwargs):
-        super(FilterDialog, self).__init__(**kwargs)
+        super(AdvancedFilterDialog, self).__init__(**kwargs)
+        self.accepted = False
 
         layout = boxlayout.BoxLayout(orientation="vertical")
-
-        # Filter
-        filter_name_label = label.Label(text="Name:", color="black", size_hint=(1/2, 1))
-        self.filter_name_input = textinput.TextInput(size_hint=(1/2, 1), multiline=False)
-        filter_name_layout = boxlayout.BoxLayout(orientation="horizontal")
-        filter_name_layout.add_widget(filter_name_label)
-        filter_name_layout.add_widget(self.filter_name_input)
-        
-        filter_order_label = label.Label(text="Order:", color="black", size_hint=(1/2, 1))
-        self.filter_order_input = textinput.TextInput(size_hint=(1/2, 1), multiline=False)
-        filter_order_layout = boxlayout.BoxLayout(orientation="horizontal")
-        filter_order_layout.add_widget(filter_order_label)
-        filter_order_layout.add_widget(self.filter_order_input)
 
         # Note Name
         note_name_label = label.Label(text="Note name:", color="black", size_hint=(1/2, 1))
@@ -114,8 +102,6 @@ class FilterDialog(popup.Popup):
         buttons_layout.add_widget(close_button)
 
         # Layout
-        layout.add_widget(filter_name_layout)
-        layout.add_widget(filter_order_layout)
         layout.add_widget(note_name_layout)
         layout.add_widget(note_date_layout)
         layout.add_widget(note_time_layout)
@@ -128,23 +114,6 @@ class FilterDialog(popup.Popup):
         layout.add_widget(buttons_layout)
 
         self.content = layout
-
-
-    def fill_dialog(self, fast_filter):
-        self.filter_name_input.text = fast_filter.name
-        self.filter_order_input.text = str(fast_filter.order)
-        self.note_name_input.text = fast_filter.note_name
-        self.date_from_button.text = self._create_str_date(fast_filter.note_min_time.date())
-        self.date_to_button.text = self._create_str_date(fast_filter.note_max_time.date())
-        self.time_from_button.text = fast_filter.note_min_time.time().strftime("%H:%M")
-        self.time_to_button.text = fast_filter.note_max_time.time().strftime("%H:%M")
-        self.note_text_input.text = fast_filter.note_text
-        self.note_min_priority_input.text = str(fast_filter.note_min_priority)
-        self.note_max_priority_input.text = str(fast_filter.note_max_priority)
-        self.category_name_input.text = fast_filter.category_name
-        self.category_description_input.text = fast_filter.category_description
-        self.tag_name_input.text = fast_filter.tag_name
-        self.category_description_input.text = fast_filter.tag_description
 
 
     def _create_str_date(self, datepicker):
@@ -212,11 +181,9 @@ class FilterDialog(popup.Popup):
     def _save(self, instance):
         self.accepted = True
         self.data_dict = {
-            "name": self.filter_name_input.text,
-            "order": self.filter_order_input.text,
             "note_name" : self.note_name_input.text,
-            "note_from_time" : datetime.datetime.strptime(f"{self.date_from_button.text} {self.time_from_button.text}", "%d-%m-%Y %H:%M"),
-            "note_to_time" : datetime.datetime.strptime(f"{self.date_to_button.text} {self.time_to_button.text}", "%d-%m-%Y %H:%M"),
+            "note_from_date" : datetime.datetime.strptime(f"{self.date_from_button.text} {self.time_from_button.text}", "%d-%m-%Y %H:%M"),
+            "note_to_date" : datetime.datetime.strptime(f"{self.date_to_button.text} {self.time_to_button.text}", "%d-%m-%Y %H:%M"),
             "note_min_priority" : self.note_min_priority_input.text,
             "note_max_priority" : self.note_max_priority_input.text,
             "note_text" : self.note_text_input.text,
@@ -231,7 +198,5 @@ class FilterDialog(popup.Popup):
     def _close(self, instance):
         self.accepted = False
         self.dismiss()
-
-
 
 

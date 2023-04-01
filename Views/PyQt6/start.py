@@ -908,7 +908,7 @@ if __name__ == "__main__":
 
     use_cases = UseCases.UseCases()
     widget = MainWindow(use_cases)
-    widget.resize(800, 600)
+    widget.resize(1280, 640)
     widget.show()
 
     sys.exit(app.exec())

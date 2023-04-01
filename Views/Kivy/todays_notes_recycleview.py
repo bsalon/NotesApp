@@ -5,13 +5,14 @@ from kivy.uix.recycleview.views import RecycleDataViewBehavior
 from kivy.uix.label import Label
 from kivy.uix.gridlayout import GridLayout
 from kivy.uix.recycleboxlayout import RecycleBoxLayout
+from kivy.uix import boxlayout
 
 
 Builder.load_string('''
 <TodaysNotesRecycleview>:
     canvas.before:
         Color:
-            rgba: (0, 0, 0, 1)
+            rgba: (241/255, 246/255, 190/255, 255/255)
         Rectangle:
             pos: self.pos
             size: self.size
@@ -32,9 +33,16 @@ class TodaysNotesRow(RecycleDataViewBehavior, GridLayout):
         self.index = None
         self.padding = (0, 10, 0, 20)
 
-        self.time_label = Label(bold=True)
+        self.time_label = Label(bold=True, color="black")
         self.add_widget(self.time_label)
-        self.name_label = Label()
+        
+        self.name_label = Label(halign="center", color="black")
+        
+        # Taken from https://stackoverflow.com/questions/43666381/wrapping-the-text-of-a-kivy-label
+        self.name_label.bind(
+            width=lambda *x: self.name_label.setter('text_size')(self.name_label, (self.name_label.width, None)),
+            texture_size=lambda *x: self.name_label.setter('height')(self.name_label, self.name_label.texture_size[1])
+        )
         self.add_widget(self.name_label)
 
 

@@ -1,22 +1,21 @@
 from kivy.uix import boxlayout, button, label, popup, textinput
 
 
-class TagDialog(popup.Popup): # AUTO DISMISS
+class TagDialog(popup.Popup):
     def __init__(self, **kwargs):
         super(TagDialog, self).__init__(**kwargs)
-        self.title = "Tag dialog"
 
         layout = boxlayout.BoxLayout(orientation="vertical")
 
         # Name
-        name_label = label.Label(text="Name:", size_hint=(1/2, 1))
+        name_label = label.Label(text="Name:", color="black", size_hint=(1/2, 1))
         self.name_input = textinput.TextInput(size_hint=(1/2, 1), multiline=False)
         name_layout = boxlayout.BoxLayout(orientation="horizontal")
         name_layout.add_widget(name_label)
         name_layout.add_widget(self.name_input)
 
         # Text
-        description_label = label.Label(text="Description:", size_hint=(1/2, 1))
+        description_label = label.Label(text="Description:", color="black", size_hint=(1/2, 1))
         self.description_input = textinput.TextInput(size_hint=(1/2, 1), multiline=False)
         description_layout = boxlayout.BoxLayout(orientation="horizontal")
         description_layout.add_widget(description_label)

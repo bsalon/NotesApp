@@ -10,22 +10,22 @@ class LoadingBar(progressbar.ProgressBar):
         self.increase = True
 
 
-    def stop(self):
+    def start(self):
         self.value = 0
         clock.Clock.unschedule(self.load)
         clock.Clock.schedule_interval(self.load, 0.1)
 
 
-    def start(self):
+    def stop(self):
         clock.Clock.unschedule(self.load)
-        
+        self.value = 0
 
 
     def load(self, deltatime):
-        if self.value == self.max:
+        if self.value >= self.max:
             self.increase = False
-        if self.value == 0:
+        if self.value <= 0:
             self.increase = True
 
-        self.value = self.value + self.max // 10 if self.increase else self.value + self.max // 10
+        self.value = self.value + self.max // 10 if self.increase else self.value - self.max // 10
 

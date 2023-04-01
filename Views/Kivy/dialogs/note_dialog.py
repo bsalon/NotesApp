@@ -8,16 +8,14 @@ import math
 import multi_select_spinner
 
 
-
-class NoteDialog(popup.Popup): # AUTO DISMISS
+class NoteDialog(popup.Popup):
     def __init__(self, categories_names, tags_names, **kwargs):
         super(NoteDialog, self).__init__(**kwargs)
-        self.title = "Note dialog"
 
         layout = boxlayout.BoxLayout(orientation="vertical")
 
         # Name
-        name_label = label.Label(text="Name:", size_hint=(1/2, 1))
+        name_label = label.Label(text="Name:", color="black", size_hint=(1/2, 1))
         self.name_input = textinput.TextInput(size_hint=(1/2, 1), multiline=False)
         name_layout = boxlayout.BoxLayout(orientation="horizontal")
         name_layout.add_widget(name_label)
@@ -26,31 +24,31 @@ class NoteDialog(popup.Popup): # AUTO DISMISS
         # Date
         today = datetime.date.today()
 
-        date_label = label.Label(text="Date:", size_hint=(1/2, 1))
+        date_label = label.Label(text="Date:", color="black", size_hint=(1/2, 1))
         self.date_button = button.Button(text=today.strftime("%d-%m-%Y"), size_hint=(1/2, 1), on_release=self._show_date_picker)
         date_layout = boxlayout.BoxLayout(orientation="horizontal")
         date_layout.add_widget(date_label)
         date_layout.add_widget(self.date_button)
 
         # Time
-        time_label = label.Label(text="Time:", size_hint=(1/2, 1))
+        time_label = label.Label(text="Time:", color="black", size_hint=(1/2, 1))
         self.time_button = button.Button(text="00:00", size_hint=(1/2, 1), on_release=self._show_time_picker)
         time_layout = boxlayout.BoxLayout(orientation="horizontal")
         time_layout.add_widget(time_label)
         time_layout.add_widget(self.time_button)
 
         # Text
-        text_label = label.Label(text="Text:", size_hint=(1/2, 1))
+        text_label = label.Label(text="Text:", color="black", size_hint=(1/2, 1))
         self.text_input = textinput.TextInput(size_hint=(1/2, 1), multiline=False)
         text_layout = boxlayout.BoxLayout(orientation="horizontal")
         text_layout.add_widget(text_label)
         text_layout.add_widget(self.text_input)
 
         # Priority
-        priority_label = label.Label(text="Assign priority:", size_hint=(1/2, 1))
-        priority_yes_label = label.Label(text="Yes", size_hint=(1/8, 1))
+        priority_label = label.Label(text="Assign priority:", color="black", size_hint=(1/2, 1))
+        priority_yes_label = label.Label(text="Yes", color="black", size_hint=(1/8, 1))
         self.priority_yes_radiobutton = checkbox.CheckBox(group="priority", active=True, size_hint=(1/8, 1))
-        priority_no_label = label.Label(text="No", size_hint=(1/8, 1))
+        priority_no_label = label.Label(text="No", color="black", size_hint=(1/8, 1))
         self.priority_no_radiobutton = checkbox.CheckBox(group="priority", size_hint=(1/8, 1))
         self.priority_no_radiobutton.bind(state=self._slider_enabling)
  
@@ -62,7 +60,7 @@ class NoteDialog(popup.Popup): # AUTO DISMISS
         priority_layout.add_widget(self.priority_no_radiobutton)
 
         # Priority slider
-        priority_value = label.Label(text="0", size_hint=(1/2, 1))
+        priority_value = label.Label(text="0", color="black", size_hint=(1/2, 1))
         priority_slider_value = properties.NumericProperty(0)
         self.priority_slider = slider.Slider(min=0, max=100, value_track=True, size_hint=(1/2, 1))
         self.priority_slider.fbind("value", lambda ins, val: setattr(priority_value, "text", "{:02.0f}".format(val)))
@@ -72,7 +70,7 @@ class NoteDialog(popup.Popup): # AUTO DISMISS
         self.priority_slider_layout.add_widget(self.priority_slider)
 
         # Categories
-        categories_label = label.Label(text="Select category:", size_hint=(1/2, 1))
+        categories_label = label.Label(text="Select category:", color="black", size_hint=(1/2, 1))
         self.categories_spinner = spinner.Spinner(
             text=categories_names[0],
             values=categories_names,
@@ -84,7 +82,7 @@ class NoteDialog(popup.Popup): # AUTO DISMISS
 
 
         # Tags
-        tags_label = label.Label(text="Select tags:", size_hint=(1/2, 1))
+        tags_label = label.Label(text="Select tags:", color="black", size_hint=(1/2, 1))
         self.tags_spinner = multi_select_spinner.MultiSelectSpinner(
             values=tags_names,
             size_hint=(1/2, 1)
