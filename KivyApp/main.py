@@ -541,7 +541,7 @@ class KivyApplicationLayout(boxlayout.BoxLayout):
                     new_note_row = (new_note.name, new_note.priority, new_note.time.strftime("%d/%m/%Y %H:%M"), new_note.text)
                     self.notes_tab_table.add_row(new_note_row)
             else:
-                self.display_error_message_box(f"Note with {new_note.name} already exists")
+                self.display_error_message_box(f"Note with name={new_note.name} already exists")
             self.update_notes_tab_accordion()
         self.loading_bar.stop()
 
@@ -575,7 +575,7 @@ class KivyApplicationLayout(boxlayout.BoxLayout):
                     new_note_row = (updated_note.name, updated_note.priority, updated_note.time.strftime("%d/%m/%Y %H:%M"), updated_note.text)
                     self.notes_tab_table.update_row(old_note_row, new_note_row)
             else:
-                self.display_error_message_box(f"Note with {updated_note.name} already exists")
+                self.display_error_message_box(f"Note with name={updated_note.name} already exists")
             self.update_notes_tab_accordion()
         self.loading_bar.stop()
 
@@ -610,7 +610,7 @@ class KivyApplicationLayout(boxlayout.BoxLayout):
                 new_category_row = (new_category.name, new_category.description)
                 self.categories_tab_table.add_row(new_category_row)
             else:
-                self.display_error_message_box(f"Category with {new_category.name} already exists")
+                self.display_error_message_box(f"Category with name={new_category.name} already exists")
             self.update_notes_tab_accordion()
         self.loading_bar.stop()
 
@@ -637,7 +637,7 @@ class KivyApplicationLayout(boxlayout.BoxLayout):
                 new_category = (updated_category.name, updated_category.description)
                 self.categories_tab_table.update_row(old_category, new_category)
             else:
-                self.display_error_message_box(f"Category with {updated_category.name} already exists")
+                self.display_error_message_box(f"Category with name={updated_category.name} already exists")
             self.update_notes_tab_accordion()
         self.loading_bar.stop()
 
@@ -658,7 +658,7 @@ class KivyApplicationLayout(boxlayout.BoxLayout):
                 new_tag_row = (new_tag.name, new_tag.description)
                 self.tags_tab_table.add_row(new_tag_row)
             else:
-                self.display_error_message_box(f"Tag with {new_tag.name} already exists")
+                self.display_error_message_box(f"Tag with name={new_tag.name} already exists")
             self.update_notes_tab_accordion()
         self.loading_bar.stop()
 
@@ -683,7 +683,7 @@ class KivyApplicationLayout(boxlayout.BoxLayout):
                 new_tag = (updated_tag.name, updated_tag.description)
                 self.tags_tab_table.update_row(old_tag, new_tag)
             else:
-                self.display_error_message_box(f"Tag with {updated_tag.name} already exists")
+                self.display_error_message_box(f"Tag with name={updated_tag.name} already exists")
             self.update_notes_tab_accordion()
         self.loading_bar.stop()
 
@@ -729,7 +729,7 @@ class KivyApplicationLayout(boxlayout.BoxLayout):
                     table_rows[i] = row[0], -1, row[2], row[3]
                     self.filters_tab_table.add_row(table_rows[i])
             else:
-                self.display_error_message_box(f"Fast filter with {new_filter.name} already exists")
+                self.display_error_message_box(f"Fast filter with name={new_filter.name} already exists")
             self.update_notes_tab_accordion()
         self.loading_bar.stop()
 
@@ -786,7 +786,7 @@ class KivyApplicationLayout(boxlayout.BoxLayout):
                 self.edit_icon_button.disabled = True
                 self.delete_icon_button.disabled = True
             else:
-                self.display_error_message_box(f"Fast filter with {updated_filter.name} already exists")
+                self.display_error_message_box(f"Fast filter with name={updated_filter.name} already exists")
             self.update_notes_tab_accordion()
         self.loading_bar.stop()
 
