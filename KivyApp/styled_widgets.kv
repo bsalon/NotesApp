@@ -1,0 +1,283 @@
+# LABELS
+
+<FastFilterRefLabel>:
+    markup: True
+    color: (0/255, 108/255, 229/255, 255/255)
+    size_hint: (2/32, 1)
+
+<FastFilterLabel>:
+    color: "black"
+    size_hint: (3/32, 1)
+    text: "Use fast filters:"
+
+<TimeLabel>:
+    color: "black"
+    halign: "center"
+    valign: "center"
+    size_hint: (6/32, 1)
+
+<TodaysNotesLabel>:
+    color: "black"
+    halign: "center"
+    valign: "center"
+    text: "Today's notes"
+    bold: True
+    size_hint: (1, 1/10)
+    canvas.before:
+        Color:
+            rgba: (215/255, 235/255, 90/255, 255/255)
+        Rectangle:
+            pos: self.pos
+            size: self.size
+        Color:
+            rgba: 0, 0, 0, 1
+        Line:
+            width: 1
+            rectangle: self.x, self.y, self.width, self.height
+
+
+# BUTTONS
+
+<TodaysNotesButton>:
+    size_hint: (9/10, 2/5)
+    pos_hint: {"x": 0.05, "y": 0}
+    text: "Today's notes"
+    background_color: (255/255, 201/255, 87/255, 255/255)
+    background_normal: ""
+    background_down: ""
+    color: (0, 0, 0, 1)
+    canvas.before:
+        Color:
+            rgba: root.background_color
+        Rectangle:
+            pos: self.pos
+            size: self.size
+
+<ToolbarButton>:
+    border: (0, 0, 0, 0)
+    size_hint: (None, None)
+    size: (28, 28)
+    pos_hint: {"center_x": 0.5, "center_y": 0.5}
+    background_color: (255/255, 201/255, 87/255, 255/255) if not self.disabled else (255/255, 201/255, 87/255, 60/255)
+    background_down: ""
+    canvas.before:
+        Color:
+            rgba: root.background_color
+        Rectangle:
+            pos: self.pos
+            size: self.size
+
+
+# SWITCH
+
+<NotesToggleSwitch>:
+    active: True
+    size_hint: (1/8, 1)
+    canvas:
+        Color:
+            rgb: 146/255, 211/255, 110/255, 255/255
+        Rectangle:
+            size: sp(41.5), sp(20)
+            pos: self.center_x - sp(40.0), self.center_y - sp(10)
+        Color:
+            rgb: 255/255, 138/255, 132/255, 255/255
+        Rectangle:
+            size: sp(41.0), sp(20)
+            pos: self.center_x, self.center_y - sp(10)
+    Label:
+        color: 0, 0, 0, 1
+        text: 'ON'
+        bold: True
+        font_size: 13
+        pos: self.parent.center_x - sp(70), self.parent.center_y - sp(50)
+    Label:
+        color: 0, 0, 0, 1
+        text: 'OFF'
+        bold: True
+        font_size: 13
+        pos: self.parent.center_x - sp(30), self.parent.center_y - sp(50)
+
+
+# LAYOUTS
+
+<ToolbarButtonBox>:
+    size_hint: (2/32, 1)
+
+<ToolbarLayout>:
+    spacing: 10
+    canvas.before:
+        Color:
+            rgba: (255/255, 201/255, 87/255, 255/255)
+        Rectangle:
+            pos: self.pos
+            size: self.size
+        Color:
+            rgba: 0, 0, 0, 1
+        Line:
+            width: 1
+            rectangle: self.x, self.y, self.width, self.height
+    size_hint: (1, 1/15)
+    orientation: "horizontal"
+
+<TodaysNotesLayout>:
+    canvas.before:
+        Color:
+            rgba: (215/255, 235/255, 90/255, 255/255)
+        Rectangle:
+            pos: self.pos
+            size: self.size
+        Color:
+            rgba: 0, 0, 0, 1
+        Line:
+            width: 1
+            rectangle: self.x, self.y, self.width, self.height
+    size_hint: (1/8, 1)
+    orientation: "vertical"
+
+<TabsContentLayout>:
+    canvas.before:
+        Color:
+            rgba: (241/255, 246/255, 190/255, 255/255)
+        Rectangle:
+            pos: self.pos
+            size: self.size
+        Color:
+            rgba: 0, 0, 0, 1
+        Line:
+            width: 1
+            rectangle: self.x, self.y, self.width, self.height
+    size_hint: (7/8, 1)
+    orientation: "vertical"
+
+<TabToolbarLayout>:
+    padding: 5, 3
+    spacing: 5
+    canvas.before:
+        Color:
+            rgba: (241/255, 246/255, 190/255, 255/255)
+        Rectangle:
+            pos: self.pos
+            size: self.size
+    size_hint: (1, 3/36)
+    orientation: "horizontal"
+    canvas.after:
+        Color:
+            rgba: 0, 0, 0, 1
+        Line:
+            width: 1
+            rectangle: self.x, self.y, self.width, self.height
+
+<SearchbarWithIcon>:
+    padding: 5, 0
+    size_hint: 4/8, 1
+    canvas.before:
+        Color:
+            rgba: (255/255, 255/255, 255/255, 255/255)
+        RoundedRectangle:
+            pos: self.pos
+            size: self.size
+            radius: [(self.size[1] // 2) - 5]
+        Color:
+            rgba: 0, 0, 0, 1
+        Line:
+            width: 1
+            rounded_rectangle: self.x, self.y, self.width, self.height, (self.size[1] // 2) - 5
+
+<NotesTabLayout>:
+    size_hint: (1, 1)
+    orientation: "vertical"
+    canvas.before:
+        Color:
+            rgba: (241/255, 246/255, 190/255, 255/255)
+        Rectangle:
+            pos: self.pos
+            size: self.size
+
+<PaginationLabels>:
+    rows: 1
+    size_hint: (1/6, 1/36)
+    pos_hint: {"center_x": 0.5, "center_y": 0.5}
+    canvas.before:
+        Color:
+            rgba: (241/255, 246/255, 190/255, 255/255)
+        Rectangle:
+            pos: self.pos
+            size: self.size
+
+
+# TABS
+
+<NotesTabbedPanel>:
+    do_default_tab: False
+    padding: (5, 5)
+    canvas.before:
+        Color:
+            rgba: 0, 0, 0, 1
+        Line:
+            width: 1
+            rectangle: self.x, self.y, self.width, self.height
+    
+
+<NotesTabbedPanelItem>:
+    background_color: (241/255, 246/255, 190/255, 255/255) if self.state != "down" else (215/255, 235/255, 90/255, 255/255)
+    background_normal: ""
+    background_down: ""
+    color: (0, 0, 0, 1)
+    padding: (5, 5)
+    canvas:
+        Color:
+            rgba: 0, 0, 0, 1
+        Line:
+            width: 1
+            rectangle: self.x, self.y, self.width, self.height
+
+# TABLE
+
+<CustomMDDataTable>:
+    background_color_header: "#d7eb5a"
+    background_color_cell: "#e9f29b"
+    background_color_selected_cell: "#d7eb5a"
+
+
+# POPUPS / DIALOGS
+
+<AdvancedFilterDialog>:
+    auto_dismiss: False
+    size_hint: (2/3, 2/3)
+    background_color: (215/255, 235/255, 90/255, 255/255)
+    background: ""
+    title: "Advanced filter dialog"
+    title_color: "black"
+
+<NoteDialog>:
+    auto_dismiss: False
+    size_hint: (2/3, 2/3)
+    background_color: (215/255, 235/255, 90/255, 255/255)
+    background: ""
+    title: "Note dialog"
+    title_color: "black"
+
+<CategoryDialog>:
+    auto_dismiss: False
+    size_hint: (2/3, 1/3)
+    background_color: (215/255, 235/255, 90/255, 255/255)
+    background: ""
+    title: "Category dialog"
+    title_color: "black"
+
+<TagDialog>:
+    auto_dismiss: False
+    size_hint: (2/3, 1/3)
+    background_color: (215/255, 235/255, 90/255, 255/255)
+    background: ""
+    title: "Tag dialog"
+    title_color: "black"
+
+<FilterDialog>:
+    auto_dismiss: False
+    size_hint: (2/3, 2/3)
+    background_color: (215/255, 235/255, 90/255, 255/255)
+    background: ""
+    title: "Filter dialog"
+    title_color: "black"
+
