@@ -11,7 +11,7 @@ class AdvancedFilterDialog(popup.Popup):
     def __init__(self, **kwargs):
         super(AdvancedFilterDialog, self).__init__(**kwargs)
         self.accepted = False
-
+        self.title = "Advanced filter dialog"
         layout = boxlayout.BoxLayout(orientation="vertical")
 
         # Note Name

@@ -11,7 +11,7 @@ class FilterDialog(tkinter.simpledialog.Dialog):
     def __init__(self, master, fast_filter=None, *args, **kwargs):
         self.accepted = False
         self.fast_filter = fast_filter
-        super(FilterDialog, self).__init__(master, *args, **kwargs)
+        super(FilterDialog, self).__init__(master, title="Fast filter dialog", *args, **kwargs)
 
 
     def body(self, frame):

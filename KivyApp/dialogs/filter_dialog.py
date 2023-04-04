@@ -10,7 +10,7 @@ import math
 class FilterDialog(popup.Popup):
     def __init__(self, **kwargs):
         super(FilterDialog, self).__init__(**kwargs)
-
+        self.title = "Fast filter dialog"
         layout = boxlayout.BoxLayout(orientation="vertical")
 
         # Filter

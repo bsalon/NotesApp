@@ -11,7 +11,7 @@ class CategoryDialog(tkinter.simpledialog.Dialog):
     def __init__(self, master, category=None, *args, **kwargs):
         self.accepted = False
         self.category = category
-        super(CategoryDialog, self).__init__(master, *args, **kwargs)
+        super(CategoryDialog, self).__init__(master, title="Category dialog", *args, **kwargs)
 
 
     def body(self, frame):

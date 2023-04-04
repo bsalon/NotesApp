@@ -4,7 +4,7 @@ from kivy.uix import boxlayout, button, label, popup, textinput
 class TagDialog(popup.Popup):
     def __init__(self, **kwargs):
         super(TagDialog, self).__init__(**kwargs)
-
+        self.title = "Tag dialog"
         layout = boxlayout.BoxLayout(orientation="vertical")
 
         # Name

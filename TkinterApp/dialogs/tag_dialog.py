@@ -11,7 +11,7 @@ class TagDialog(tkinter.simpledialog.Dialog):
     def __init__(self, master, tag=None, *args, **kwargs):
         self.accepted = False
         self.tag = tag
-        super(TagDialog, self).__init__(master, *args, **kwargs)
+        super(TagDialog, self).__init__(master, title="Tag dialog", *args, **kwargs)
 
 
     def body(self, frame):

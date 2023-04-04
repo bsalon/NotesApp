@@ -11,7 +11,7 @@ from KivyApp.widgets import multi_select_spinner
 class NoteDialog(popup.Popup):
     def __init__(self, categories_names, tags_names, **kwargs):
         super(NoteDialog, self).__init__(**kwargs)
-
+        self.title = "Note dialog"
         layout = boxlayout.BoxLayout(orientation="vertical")
 
         # Name

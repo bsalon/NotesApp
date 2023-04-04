@@ -13,7 +13,7 @@ class NoteDialog(tkinter.simpledialog.Dialog):
         self.categories_names = categories_names
         self.tags_names = tags_names
         self.note = note
-        super(NoteDialog, self).__init__(master, *args, **kwargs)
+        super(NoteDialog, self).__init__(master, title="Note dialog", *args, **kwargs)
 
 
     def body(self, frame):

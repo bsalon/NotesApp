@@ -10,7 +10,7 @@ import datetime
 class AdvancedFilterDialog(tkinter.simpledialog.Dialog):
     def __init__(self, master, *args, **kwargs):
         self.accepted = False
-        super(AdvancedFilterDialog, self).__init__(master, *args, **kwargs)
+        super(AdvancedFilterDialog, self).__init__(master, title="Advanced filter dialog", *args, **kwargs)
 
 
     def body(self, frame):

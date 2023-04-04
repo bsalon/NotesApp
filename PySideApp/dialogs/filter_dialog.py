@@ -8,7 +8,7 @@ from PySideApp.dialogs import reg_exp_validator
 class FilterDialog(QtWidgets.QDialog):
     def __init__(self, *args, **kwargs):
         super(FilterDialog, self).__init__(*args, **kwargs)
-        self.setWindowTitle("Note dialog window")
+        self.setWindowTitle("Fast filter dialog")
         self.setAttribute(QtCore.Qt.WA_DeleteOnClose)
 
         dialog_layout = QtWidgets.QVBoxLayout()

@@ -6,7 +6,7 @@ from PySide6 import QtWidgets, QtCore, QtGui
 class NoteDialog(QtWidgets.QDialog):
     def __init__(self, categories, tags, *args, **kwargs):
         super(NoteDialog, self).__init__(*args, **kwargs)
-        self.setWindowTitle("Note dialog window")
+        self.setWindowTitle("Note dialog")
 
         dialog_layout = QtWidgets.QVBoxLayout()
         form_layout = QtWidgets.QFormLayout()

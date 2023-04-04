@@ -6,7 +6,7 @@ from PySide6 import QtWidgets, QtCore, QtGui
 class CategoryDialog(QtWidgets.QDialog):
     def __init__(self, *args, **kwargs):
         super(CategoryDialog, self).__init__(*args, **kwargs)
-        self.setWindowTitle("Tag")
+        self.setWindowTitle("Category dialog")
 
         dialog_layout = QtWidgets.QVBoxLayout()
         form_layout = QtWidgets.QFormLayout()

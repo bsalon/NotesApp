@@ -4,7 +4,7 @@ from kivy.uix import boxlayout, button, label, popup, textinput
 class CategoryDialog(popup.Popup):
     def __init__(self, **kwargs):
         super(CategoryDialog, self).__init__(**kwargs)
-
+        self.title = "Category dialog"
         layout = boxlayout.BoxLayout(orientation="vertical")
 
         # Name
