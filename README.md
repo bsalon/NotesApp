@@ -48,3 +48,8 @@ options:
   --create-data         if there is no data, create test data for the application
 ```
 
+You can also run the application using individual libraries running the *main.py* file of a specific subproject, i.e.:
+``` console
+$ cd TkinterApp
+$ python3.10 main.py
+```
