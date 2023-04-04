@@ -183,8 +183,9 @@ class TkinterApplication(ttk.Frame):
 
     def _fill_todays_notes_list(self):
         for note in self.today_notes:
-            font = tkinter.font.nametofont("TkDefaultFont")
-            time_label = tkinter.Label(self.todays_notes_list_frame.interior, text=note[0], bg="#f1f6be", font=f"{font.cget('family')} {font.cget('size')} bold")
+            default_font = tkinter.font.nametofont("TkDefaultFont")
+            time_label = tkinter.Label(self.todays_notes_list_frame.interior, text=note[0], bg="#f1f6be")
+            time_label.configure(font=(default_font.cget("family"), default_font.cget("size"), "bold"))
             time_label.grid(pady=(5, 5))
 
             # Fixed width of 12 characters
