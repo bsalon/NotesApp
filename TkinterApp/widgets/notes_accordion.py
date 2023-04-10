@@ -54,7 +54,7 @@ class CollapsableFrameRow(ttk.Frame):
         self.title_frame = ttk.Frame(self, style="collapsable_frame_row.TFrame")
         self.title_frame.grid(sticky="news")
         
-        self.title_frame.grid_columnconfigure((0, 1), weight=1)
+        self.title_frame.grid_columnconfigure((0, 1), weight=1, uniform="row")
         self.title_frame.grid_rowconfigure(0, weight=1)
 
         self.content_frame = ttk.Frame(self, relief="sunken", borderwidth=1)
@@ -66,16 +66,32 @@ class CollapsableFrameRow(ttk.Frame):
 
 
     def add_title_content(self, note):
-        name_label = ttk.Label(self.title_frame, text=note.name, style="collapsable_frame_label.TLabel", anchor="w")
-        note_time = ttk.Label(self.title_frame, text=note.time.strftime("%d/%m/%Y %H:%M"), style="collapsable_frame_label.TLabel")
+        self.name_label = ttk.Label(self.title_frame, text=note.name, wraplength=400, justify="left", style="collapsable_frame_label.TLabel", anchor="w")
+        self.note_time = ttk.Label(self.title_frame, text=note.time.strftime("%d/%m/%Y %H:%M"), style="collapsable_frame_label.TLabel")
         self.checked_row = tkinter.IntVar()
-        self.check_button = ttk.Checkbutton(self.title_frame, variable=self.checked_row, style="collapsable_frame_checkbutton.TCheckbutton", command = lambda: self.event_generate("<<CollapsableFrameRowCheck>>"))
+        self.check_button = ttk.Checkbutton(self.title_frame, variable=self.checked_row, style="collapsable_frame_checkbutton.TCheckbutton", command = self._row_check) # lambda: )
         self.toggle_button = ttk.Button(self.title_frame, text=" + ", command=self.toggle, style="collapsable_frame_button.TButton")
 
-        name_label.grid(row=0, column=0, sticky="news", padx=(5, 0), pady=(2, 2))
-        note_time.grid(row=0, column=1, sticky="news", pady=(2, 2))
+        self.name_label.grid(row=0, column=0, sticky="news", padx=(5, 0), pady=(2, 2))
+        self.note_time.grid(row=0, column=1, sticky="news", pady=(2, 2))
         self.check_button.grid(row=0, column=2, sticky="news", pady=(2, 2))
         self.toggle_button.grid(row=0, column=3, sticky="news", padx=(4, 4), pady=(4, 4))
+
+
+    def _row_check(self):
+        self.event_generate("<<CollapsableFrameRowCheck>>")
+        if self.checked_row.get() == 1:
+            self.name_label.configure(style="collapsable_frame_label_check.TLabel")
+            self.note_time.configure(style="collapsable_frame_label_check.TLabel")
+            self.check_button.configure(style="collapsable_frame_checkbutton_check.TCheckbutton")
+            self.toggle_button.configure(style="collapsable_frame_button_check.TButton")
+            self.title_frame.configure(style="collapsable_frame_row_check.TFrame")
+        else:
+            self.name_label.configure(style="collapsable_frame_label.TLabel")
+            self.note_time.configure(style="collapsable_frame_label.TLabel")
+            self.check_button.configure(style="collapsable_frame_checkbutton.TCheckbutton")
+            self.toggle_button.configure(style="collapsable_frame_button.TButton")
+            self.title_frame.configure(style="collapsable_frame_row.TFrame")
 
 
     def add_content(self, note):

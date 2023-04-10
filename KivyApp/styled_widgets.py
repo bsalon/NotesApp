@@ -2,7 +2,7 @@ from kivy.core import window
 from kivy.lang import Builder
 from kivy.uix import boxlayout, button, label, switch, tabbedpanel
 
-from KivyApp.dialogs import advanced_filter_dialog, category_dialog, filter_dialog, note_dialog, tag_dialog
+from KivyApp.dialogs import advanced_filter_dialog, category_dialog, filter_dialog, note_dialog, settings_dialog, tag_dialog
 from KivyApp.widgets import custom_mddatatable, pagination_labels, searchbar_with_icon, time_label
 
 import pathlib
@@ -163,4 +163,9 @@ class TagDialog(tag_dialog.TagDialog):
 class FilterDialog(filter_dialog.FilterDialog):
     def __init__(self, *args, **kwargs):
         super(FilterDialog, self).__init__(*args, **kwargs)
+
+
+class SettingsDialog(settings_dialog.SettingsDialog):
+    def __init__(self, *args, **kwargs):
+        super(SettingsDialog, self).__init__(*args, **kwargs)
 

@@ -18,6 +18,8 @@ from KivyApp.widgets import loading_bar, notes_accordion, pagination_labels, sea
 class KivyApplicationLayout(boxlayout.BoxLayout):
     def __init__(self, use_cases, *args, **kwargs):
         super(KivyApplicationLayout, self).__init__(*args, **kwargs)
+        self.gui = 2
+
         self.padding = (2, 2)
 
         self.use_cases = use_cases
@@ -119,10 +121,25 @@ class KivyApplicationLayout(boxlayout.BoxLayout):
 
         # Settings icon button
         settings_icon_path = image_dir_path / "SettingsIcon.png"
-        self.settings_icon_button = styled_widgets.ToolbarButton(background_image = settings_icon_path.resolve().as_posix())
+        self.settings_icon_button = styled_widgets.ToolbarButton(background_image = settings_icon_path.resolve().as_posix(), on_release=self.change_library)
         settings_icon_box = styled_widgets.ToolbarButtonBox()
         settings_icon_box.add_widget(self.settings_icon_button)
         self.toolbar_layout.add_widget(settings_icon_box)
+
+
+
+    def change_library(self, button_instance):
+        dialog = styled_widgets.SettingsDialog()
+        dialog.bind(on_dismiss=self._settings_dialog_closed)
+        dialog.open()
+
+
+    def _settings_dialog_closed(self, dialog):
+        if dialog.accepted:
+            self.gui = dialog.data_dict["library"]
+            if self.gui == 2:
+                return
+        app.MDApp.get_running_app().stop()
 
 
 
@@ -940,15 +957,24 @@ class KivyApplicationLayout(boxlayout.BoxLayout):
 
 
 class KivyApplication(app.MDApp):
-    def build(self):
+    def __init__(self, *args, **kwargs):
+        super(KivyApplication, self).__init__(*args, **kwargs)
         window.Window.size = (1280, 640)
         window.Window.minimum_width, window.Window.minimum_height = window.Window.size
         use_cases = UseCases.UseCases()
-        return KivyApplicationLayout(use_cases, orientation="vertical")
+        self.kivy_app = KivyApplicationLayout(use_cases, orientation="vertical")
+
+
+    def build(self):
+        return self.kivy_app
 
 
 def run_application():
-    KivyApplication().run()
+    application = KivyApplication()
+    application.run()
+    gui = application.kivy_app.gui
+    window.Window.close()
+    return gui
 
 
 if __name__ == "__main__":

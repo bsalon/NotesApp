@@ -10,13 +10,16 @@ import textwrap
 from BusinessLogic import UseCases
 
 from TkinterApp import custom_ttk_style
-from TkinterApp.dialogs import advanced_filter_dialog, category_dialog, note_dialog, filter_dialog, tag_dialog
+from TkinterApp.dialogs import advanced_filter_dialog, category_dialog, note_dialog, filter_dialog, settings_dialog, tag_dialog
 from TkinterApp.widgets import common_tree_view, notes_accordion, pagination_labels, time_label, scrollable_frame, searchbar_with_icon
 
 
 class TkinterApplication(ttk.Frame):
     def __init__(self, master, use_cases, *args, **kwargs):
         super(TkinterApplication, self).__init__(master, *args, **kwargs)
+        self.master = master
+        self.gui = 1
+
         self["borderwidth"] = 2
         self.use_cases = use_cases
 
@@ -132,7 +135,7 @@ class TkinterApplication(ttk.Frame):
         settings_icon_path = image_dir_path / "SettingsIcon.png"
         settings_icon = tkinter.PhotoImage(file = settings_icon_path.resolve().as_posix())
         settings_icon = settings_icon.subsample(18, 18)
-        self.settings_icon_button = ttk.Button(self.toolbar_layout, image = settings_icon, style="toolbar_icon_button.TButton") # TODO click
+        self.settings_icon_button = ttk.Button(self.toolbar_layout, image = settings_icon, command=self.change_library, style="toolbar_icon_button.TButton")
         self.settings_icon_button.icon = settings_icon
         self.settings_icon_button.grid(row=0, column=col, rowspan=1, columnspan=2)
         col += 2
@@ -142,6 +145,16 @@ class TkinterApplication(ttk.Frame):
             self.toolbar_layout.columnconfigure(c, weight=1)
         for time_col in range(14, 19):
             self.toolbar_layout.columnconfigure(time_col, weight=2)
+
+
+
+    def change_library(self):
+        dialog = settings_dialog.SettingsDialog(self)
+        if dialog.accepted:
+            self.gui = dialog.data_dict["library"]
+            if self.gui == 1:
+                return
+            self.master.destroy()
 
 
 
@@ -182,7 +195,7 @@ class TkinterApplication(ttk.Frame):
 
 
     def _fill_todays_notes_list(self):
-        for note in self.today_notes:
+        for index, note in enumerate(self.today_notes):
             default_font = tkinter.font.nametofont("TkDefaultFont")
             time_label = tkinter.Label(self.todays_notes_list_frame.interior, text=note[0], bg="#f1f6be")
             time_label.configure(font=(default_font.cget("family"), default_font.cget("size"), "bold"))
@@ -194,6 +207,7 @@ class TkinterApplication(ttk.Frame):
             name_label.grid(pady=(0, 15))
 
             self.todays_notes_list.append((time_label, name_label))
+            self.today_notes[index] = (note[0], wrapped_name)
 
 
 
@@ -205,8 +219,7 @@ class TkinterApplication(ttk.Frame):
             name = name_label.cget("text")
             time = time_label.cget("text")
             if name in wrapped_notes:
-                notes_index = wrapped_notes.index(name)
-                i = self.today_notes.index((time, notes[notes_index]))
+                i = self.today_notes.index((time, name))
                 remove_indices.append(i)
 
         for i in reversed(sorted(remove_indices)):
@@ -220,7 +233,7 @@ class TkinterApplication(ttk.Frame):
 
     def add_note_to_todays_notes(self, note):
         if note.time.date() == datetime.today().date():
-            # Fixed width of 20 characters
+            # Fixed width of 12 characters
             wrapped_name = '\n'.join(textwrap.wrap(note.name, 12))
             
             note_tuple = (note.time.strftime("%H:%M"), wrapped_name)
@@ -308,7 +321,7 @@ class TkinterApplication(ttk.Frame):
         self.notes_tab_table.grid(row=1, column=0, columnspan=8, padx=(2, 2), pady=(2, 2), sticky="nsew")
 
         self.notes_tab.grid_rowconfigure(1, weight=1)
-        self.notes_tab.grid_columnconfigure(tuple(range(8)), weight=1, uniform="column") # TODO for all?
+        self.notes_tab.grid_columnconfigure(tuple(range(8)), weight=1, uniform="column")
 
 
     # Inspired by https://stackoverflow.com/questions/58559865/tkinter-checkbutton-different-image
@@ -914,7 +927,9 @@ def run_application():
     app = TkinterApplication(root, use_cases, style="window.TFrame")
     app.master.minsize(1280, 640)
     app.master.maxsize(1280, 640)
-    app.mainloop()    
+    app.mainloop()
+
+    return app.gui
 
 
 

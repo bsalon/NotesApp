@@ -7,7 +7,7 @@ from datetime import datetime
 
 from BusinessLogic import UseCases
 
-from PySideApp.dialogs import advanced_filter_dialog, category_dialog, filter_dialog, note_dialog, tag_dialog
+from PySideApp.dialogs import advanced_filter_dialog, category_dialog, filter_dialog, note_dialog, settings_dialog, tag_dialog
 
 from PySideApp.widgets import clickable_label, common_table_view, loading_bar, notes_accordion, pagination_labels, searchbar_with_icon, time_widget, todays_notes_row_widget, toggle_switch_button
 
@@ -18,6 +18,8 @@ from PySide6 import QtCore, QtWidgets, QtGui
 class MainWindow(QtWidgets.QWidget):
     def __init__(self, use_cases, *args, **kwargs):
         super(MainWindow, self).__init__(*args, **kwargs)
+        self.gui = 0
+
         self.use_cases = use_cases
         
         # get data from database for tables and accordion
@@ -148,15 +150,16 @@ class MainWindow(QtWidgets.QWidget):
         self.toolbar_layout.addWidget(self.loading_bar, 0, col, 0, 5)
         col += 5
 
-        # Settings icon button TODO
+        # Settings icon button
         settings_icon_path = image_dir_path / "SettingsIcon.png"
         self.settings_icon = QtGui.QIcon()
         self.settings_icon.addFile(settings_icon_path.resolve().as_posix())
-        self.settings_dropdown_button = QtWidgets.QToolButton()
-        self.settings_dropdown_button.setIcon(self.settings_icon)
-        self.settings_dropdown_button.setIconSize(QtCore.QSize(28, 28))
-        self.settings_dropdown_button.setObjectName("toolbar_icon_button")
-        self.toolbar_layout.addWidget(self.settings_dropdown_button, 0, col, 0, 2, alignment=QtGui.Qt.AlignRight)
+        self.settings_button = QtWidgets.QToolButton()
+        self.settings_button.setIcon(self.settings_icon)
+        self.settings_button.setIconSize(QtCore.QSize(28, 28))
+        self.settings_button.setObjectName("toolbar_icon_button")
+        self.settings_button.clicked.connect(self.change_library)
+        self.toolbar_layout.addWidget(self.settings_button, 0, col, 0, 2, alignment=QtGui.Qt.AlignRight)
         col += 2
 
         # Stretch time widget more than other widgets
@@ -164,6 +167,16 @@ class MainWindow(QtWidgets.QWidget):
             self.toolbar_layout.setColumnStretch(c, 1)
         for time_col in range(14, 19):
             self.toolbar_layout.setColumnStretch(time_col, 2)
+
+
+
+    def change_library(self):
+        dialog = settings_dialog.SettingsDialog(objectName="dialog")
+        if dialog.exec():
+            self.gui = dialog.data_dict["library"]
+            if self.gui == 0:
+                return
+            QtCore.QCoreApplication.quit()
 
 
 
@@ -918,8 +931,9 @@ def run_application():
     widget = MainWindow(use_cases)
     widget.resize(1280, 640)
     widget.show()
+    app.exec()
 
-    sys.exit(app.exec())
+    return widget.gui
     
 
 if __name__ == "__main__":

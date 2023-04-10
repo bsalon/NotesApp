@@ -45,6 +45,7 @@ class CommonTableView(QtWidgets.QTableView):
 
         for i in reversed(sorted(indices)):
             self.model.removeRows(i, 1)
+        self._resize_table()
 
 
     def delete_selection(self):
@@ -60,12 +61,14 @@ class CommonTableView(QtWidgets.QTableView):
         
         for i in reversed(sorted(selected_indices)):
             self.model.removeRows(i, 1)
+        self._resize_table()
 
 
     def replace_data(self, new_data):
         self.model.removeAllRows()
         for row in new_data:
             self.model.insertRows(row)
+        self._resize_table()
 
 
     def replace_row(self, old_row, new_row):
@@ -73,15 +76,16 @@ class CommonTableView(QtWidgets.QTableView):
         self.model.insertRows(new_row)
         order = self.horizontalHeader().sortIndicatorOrder()
         column = self.horizontalHeader().sortIndicatorSection()
-        self.sortByColumn(column, order) # TODO - doesnt work
+        self.sortByColumn(column, order) # doesnt work all the time?
+        self._resize_table()
 
 
     def add_row(self, new_row):
         self.model.insertRows(new_row)
         order = self.horizontalHeader().sortIndicatorOrder()
         column = self.horizontalHeader().sortIndicatorSection()
-        self.sortByColumn(column, order) # TODO - doesnt work
-        if len(self.data) == 1:
+        self.sortByColumn(column, order) # doesnt work all the time?
+        if len(self.data) >= 1:
             self._resize_table()
 
 

@@ -20,6 +20,34 @@ def create_app_parser():
     return parser
 
 
+def run_application(library):
+    if library == "PySide":
+        return PySideAppMain.run_application()
+    elif library == "Tkinter":
+        return TkinterAppMain.run_application()
+    elif library == "Kivy":
+        # This import style is needed, otherwise
+        # Kivy would create a new empty window
+        from KivyApp import main as KivyAppMain
+        return KivyAppMain.run_application()
+    else:
+        print(f"Invalid library {library}")
+    return -1
+
+
+def library_from_number(gui_number):
+    if gui_number == 0:
+        return "PySide"
+    elif gui_number == 1:
+        return "Tkinter"
+    elif gui_number == 2:
+        return "Kivy"
+    else:
+        print(f"Invalid library number {gui_number}")
+    return ""
+
+
+
 if __name__ == "__main__":
     parser = create_app_parser()
     
@@ -27,14 +55,12 @@ if __name__ == "__main__":
     if args.create_data:
         create_test_data.create_test_data()
 
-    if args.library == "PySide":
-        PySideAppMain.run_application()
-    elif args.library == "Tkinter":
-        TkinterAppMain.run_application()
-    elif args.library == "Kivy":
-        # This import style is needed, otherwise
-        # Kivy would create a new empty window
-        from KivyApp import main as KivyAppMain
-        KivyAppMain.run_application()
-    else:
-        print(f"Invalid library {args.library}")
+    library = args.library
+    while True:
+        gui_number = run_application(library)
+
+        new_library = library_from_number(gui_number)
+        if library == new_library:
+            break
+        library = new_library
+

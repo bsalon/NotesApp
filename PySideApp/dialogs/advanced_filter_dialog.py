@@ -33,20 +33,16 @@ class AdvancedFilterDialog(QtWidgets.QDialog):
         form_layout.addRow("Note text contains:", self.note_text_lineedit)
 
         # Note priority
-        priority_validator = QtGui.QIntValidator(0, 100)
-
         note_priority_layout = QtWidgets.QHBoxLayout()
         note_priority_layout.setContentsMargins(0, 0, 0, 0)
         note_priority_layout.setAlignment(QtCore.Qt.AlignTop)
         
-        self.note_min_priority_lineedit = QtWidgets.QLineEdit()
-        self.note_min_priority_lineedit.setValidator(priority_validator)
-        self.note_max_priority_lineedit = QtWidgets.QLineEdit()
-        self.note_max_priority_lineedit.setValidator(priority_validator)
+        self.note_min_priority_spinbox = QtWidgets.QSpinBox(minimum=0, maximum=100, value=0)
+        self.note_max_priority_spinbox = QtWidgets.QSpinBox(minimum=0, maximum=100, value=100)
         
-        note_priority_layout.addWidget(self.note_min_priority_lineedit)
-        note_priority_layout.addWidget(QtWidgets.QLabel(" - "))
-        note_priority_layout.addWidget(self.note_max_priority_lineedit)
+        note_priority_layout.addWidget(self.note_min_priority_spinbox)
+        note_priority_layout.addWidget(QtWidgets.QLabel(" - ", alignment=QtGui.Qt.AlignCenter))
+        note_priority_layout.addWidget(self.note_max_priority_spinbox)
         form_layout.addRow("Note priority range:", note_priority_layout)
 
         form_layout.addItem(QtWidgets.QSpacerItem(0, 20))
@@ -73,6 +69,7 @@ class AdvancedFilterDialog(QtWidgets.QDialog):
         dialog_layout.addLayout(form_layout)
         dialog_layout.addWidget(btnBox)
         self.setLayout(dialog_layout)
+        dialog_layout.setSizeConstraint(QtWidgets.QLayout.SetFixedSize)
 
 
     def ok_callback(self):
@@ -80,8 +77,8 @@ class AdvancedFilterDialog(QtWidgets.QDialog):
             "note_name" : self.note_name_lineedit.text(),
             "note_from_date" : self.note_from_datetime_edit.dateTime(),
             "note_to_date" : self.note_to_datetime_edit.dateTime(),
-            "note_min_priority" : self._get_min_priority(),
-            "note_max_priority" : self._get_max_priority(),
+            "note_min_priority" : self.note_min_priority_spinbox.value(),
+            "note_max_priority" : self.note_max_priority_spinbox.value(),
             "note_text" : self.note_text_lineedit.text(),
             "category_name" : self.category_name_lineedit.text(),
             "category_description" : self.category_description_lineedit.text(),
@@ -94,30 +91,6 @@ class AdvancedFilterDialog(QtWidgets.QDialog):
 
     def cancel_callback(self):
         self.close()
-
-
-    def _get_min_priority(self):
-        priority_text = self.note_min_priority_lineedit.text().replace(" ", "")
-        if priority_text == "":
-            return 0
-        num = int(priority_text)
-        if num > 100:
-            return 100
-        if num < 0:
-            return 0
-        return num
-
-
-    def _get_max_priority(self):
-        priority_text = self.note_max_priority_lineedit.text().replace(" ", "")
-        if priority_text == "":
-            return 100
-        num = int(priority_text)
-        if num > 100:
-            return 100
-        if num < 0:
-            return 0
-        return num
 
 
 if __name__ == "__main__":

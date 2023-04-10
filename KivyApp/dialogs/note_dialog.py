@@ -47,9 +47,9 @@ class NoteDialog(popup.Popup):
         # Priority
         priority_label = label.Label(text="Assign priority:", color="black", size_hint=(1/2, 1))
         priority_yes_label = label.Label(text="Yes", color="black", size_hint=(1/8, 1))
-        self.priority_yes_radiobutton = checkbox.CheckBox(group="priority", active=True, size_hint=(1/8, 1))
+        self.priority_yes_radiobutton = checkbox.CheckBox(group="priority", active=True, allow_no_selection=False, size_hint=(1/8, 1))
         priority_no_label = label.Label(text="No", color="black", size_hint=(1/8, 1))
-        self.priority_no_radiobutton = checkbox.CheckBox(group="priority", size_hint=(1/8, 1))
+        self.priority_no_radiobutton = checkbox.CheckBox(group="priority", allow_no_selection=False, size_hint=(1/8, 1))
         self.priority_no_radiobutton.bind(state=self._slider_enabling)
  
         priority_layout = boxlayout.BoxLayout(orientation="horizontal")

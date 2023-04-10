@@ -80,6 +80,7 @@ class NoteDialog(QtWidgets.QDialog):
         dialog_layout.addLayout(form_layout)
         dialog_layout.addWidget(btnBox)
         self.setLayout(dialog_layout)
+        dialog_layout.setSizeConstraint(QtWidgets.QLayout.SetFixedSize)
 
 
     def fill_categories_listwidget(self, categories):

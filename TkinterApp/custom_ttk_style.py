@@ -38,6 +38,13 @@ class CustomTtkStyle(ttk.Style):
             relief="groove",
             bordercolor="black",
         )
+        
+        self.configure("collapsable_frame_row_check.TFrame",
+            background="#d7eb5a",
+            borderwidth=1,
+            relief="groove",
+            bordercolor="black",
+        )
 
         self.configure("scrollable_interior.TFrame",
             background="#f1f6be",
@@ -146,6 +153,16 @@ class CustomTtkStyle(ttk.Style):
             relief=[('pressed', 'flat'),
                     ('!pressed', 'flat')]
         )
+        
+        self.configure("collapsable_frame_button_check.TButton",
+            background="#d7eb5a"
+        )
+        self.map("collapsable_frame_button_check.TButton",
+            background=[('!active', '#d7eb5a'),
+                        ('active', '#f1f6be')],
+            relief=[('pressed', 'flat'),
+                    ('!pressed', 'flat')]
+        )
 
 
         self.configure("text_link.TLabel",
@@ -184,28 +201,13 @@ class CustomTtkStyle(ttk.Style):
             background="#e9f29b"
         )
         
+        self.configure("collapsable_frame_label_check.TLabel",
+            background="#d7eb5a"
+        )
+        
         self.configure("collapsable_frame_content_label.TLabel",
             background="#f7fade",
         )
-
-        '''        
-        QWidget#search_container
-        {
-            border: 1px solid black;
-            border-radius: 12px;
-            background-color: white;
-        }
-
-        QWidget#collapsable_widget_checked {
-            border: 1px solid black;
-            background-color: #d7eb5a;
-        }
-
-        QWidget#info_alert_widget {
-            background-color: #ffc957;
-            border: 1px solid black;
-        }
-        '''
 
         # Inspired by https://stackoverflow.com/questions/58559865/tkinter-checkbutton-different-image
         self.configure("no_indicatoron.TCheckbutton",
@@ -230,6 +232,13 @@ class CustomTtkStyle(ttk.Style):
                         ('active', '#e9f29b')],
         )
 
+        self.configure("collapsable_frame_checkbutton_check.TCheckbutton",
+            background="#d7eb5a"
+        )
+        self.map("collapsable_frame_checkbutton_check.TCheckbutton",
+            background=[('!active', '#d7eb5a'),
+                        ('active', '#d7eb5a')],
+        )
 
         self.configure("Treeview",
             background="#e9f29b", 
