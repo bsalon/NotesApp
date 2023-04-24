@@ -930,6 +930,8 @@ def run_application():
     use_cases = UseCases.UseCases()
     widget = MainWindow(use_cases)
     widget.resize(1280, 640)
+    widget.setMinimumSize(1280, 640)
+    widget.setMaximumSize(1280, 640)
     widget.show()
     app.exec()
 

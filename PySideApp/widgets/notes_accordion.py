@@ -105,6 +105,7 @@ class CollapsableExpandWidget(QtWidgets.QWidget):
         super(CollapsableExpandWidget, self).__init__(*args, **kwargs) # text
 
         self.note_name_label = QtWidgets.QLabel(name, objectName="collapsable_note_name")
+        self.note_name_label.setWordWrap(True)
         note_date_label = QtWidgets.QLabel(date.strftime("%d/%m/%Y %H:%M"), objectName="collapsable_note_date")
         self.checkbox = QtWidgets.QCheckBox()
         self.checkbox.stateChanged.connect(self.toggle_check_state)
@@ -113,7 +114,10 @@ class CollapsableExpandWidget(QtWidgets.QWidget):
         layout.addWidget(self.note_name_label,  0, 0, alignment=QtCore.Qt.AlignLeft)
         layout.addWidget(note_date_label, 0, 1, alignment=QtCore.Qt.AlignCenter)
         layout.addWidget(self.checkbox, 0, 2, alignment=QtCore.Qt.AlignRight)
-        
+
+        for r in range(3):
+            layout.setColumnStretch(r, 1)
+
         self.section = section
 
     

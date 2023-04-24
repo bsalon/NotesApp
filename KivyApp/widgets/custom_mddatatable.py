@@ -55,5 +55,5 @@ class CustomMDDataTable(datatables.MDDataTable):
         for row in rows_to_delete:
             self.remove_row(row)
         
-        #self.table_data.select_all("normal")
+        self.table_data.select_all("normal")
         self.selected_rows = []

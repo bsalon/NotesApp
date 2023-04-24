@@ -32,10 +32,8 @@ class TodaysNotesRowWidget(QtWidgets.QWidget):
         adjusted_height = text_rect_size // size_hint.width()
 
         # size = text_W x text_H
-        # 
         #
         # hint_W / text_W = coefficient
-        #
         #
         # size / hint_W = new_hint_H 
 

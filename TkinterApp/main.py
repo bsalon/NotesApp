@@ -82,13 +82,13 @@ class TkinterApplication(ttk.Frame):
         col += 4
 
         # Use fast filter section
-        tkinter.Label(self.toolbar_layout, text="Use fast filters:", bg="#ffc957").grid(row=0, column=col, rowspan=1, columnspan=3)
+        tkinter.Label(self.toolbar_layout, text="Use fast filters:", bg="#ffc957", anchor="w").grid(row=0, column=col, rowspan=1, columnspan=3, sticky="we")
         col += 3
-        self.fast_filters_text_links = [ttk.Label(self.toolbar_layout, text="#1", style="text_link.TLabel"),
-                                        ttk.Label(self.toolbar_layout, text="#2", style="text_link.TLabel"),
-                                        ttk.Label(self.toolbar_layout, text="#3", style="text_link.TLabel")]
+        self.fast_filters_text_links = [ttk.Label(self.toolbar_layout, text="#1", anchor="w", style="text_link.TLabel"),
+                                        ttk.Label(self.toolbar_layout, text="#2", anchor="w", style="text_link.TLabel"),
+                                        ttk.Label(self.toolbar_layout, text="#3", anchor="w", style="text_link.TLabel")]
         for order, fast_filter_text_link in enumerate(self.fast_filters_text_links):
-            fast_filter_text_link.grid(row=0, column=col, rowspan=1, columnspan=2)
+            fast_filter_text_link.grid(row=0, column=col, rowspan=1, columnspan=2, sticky="we")
             fast_filter_text_link.bind("<Button-1>", lambda e, o=order: self.use_fast_filter(o+1))
             fast_filter_text_link.bind("<Enter>", lambda e, f=fast_filter_text_link: f.configure(style="hover_text_link.TLabel"))
             fast_filter_text_link.bind("<Leave>", lambda e, f=fast_filter_text_link: f.configure(style="text_link.TLabel"))

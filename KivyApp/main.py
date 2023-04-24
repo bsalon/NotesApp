@@ -1,3 +1,6 @@
+import os
+os.environ["KIVY_NO_CONSOLELOG"] = "1"
+
 from kivy import app, lang, metrics
 from kivy.core import window
 from kivy.uix import boxlayout, button, image, label, popup, tabbedpanel
@@ -179,9 +182,9 @@ class KivyApplicationLayout(boxlayout.BoxLayout):
     def remove_notes_from_todays_notes(self, notes):
         todays_notes = self.todays_notes_recycleview.data
         for note in notes:
-            index = next((i for i, v in enumerate(todays_notes) if v["name"] == note), None)
+            index = [i for i, v in enumerate(todays_notes) if v["name"] == note]
             if index:
-                del todays_notes[index]
+                del todays_notes[index[0]]
 
 
     def add_note_to_todays_notes(self, note):
@@ -740,11 +743,10 @@ class KivyApplicationLayout(boxlayout.BoxLayout):
                                row.order,
                                row.note_name,
                                row.category_name) for row in ordered_filters if row.name != new_filter.name]
-                self.filters_tab_table.delete_rows(table_rows)
 
                 for i, row in enumerate(table_rows):
-                    table_rows[i] = row[0], -1, row[2], row[3]
-                    self.filters_tab_table.add_row(table_rows[i])
+                    new_row = row[0], -1, row[2], row[3]
+                    self.filters_tab_table.update_row(row, new_row)
             else:
                 self.display_error_message_box(f"Fast filter with name={new_filter.name} already exists")
             self.update_notes_tab_accordion()
@@ -961,6 +963,7 @@ class KivyApplication(app.MDApp):
         super(KivyApplication, self).__init__(*args, **kwargs)
         window.Window.size = (1280, 640)
         window.Window.minimum_width, window.Window.minimum_height = window.Window.size
+        window.Window.maximum_width, window.Window.maximum_height = window.Window.size
         use_cases = UseCases.UseCases()
         self.kivy_app = KivyApplicationLayout(use_cases, orientation="vertical")
 

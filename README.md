@@ -32,7 +32,7 @@ $ pip3 install --requirement=requirements.txt
 
 ## Run
 
-You can run the application using the *main.py* file:
+You can run the application using the *main.py* file.
 ``` console
 $ python3.10 main.py -h
 usage: main.py [-h] [--create-data] [{PySide,Tkinter,Kivy}]
@@ -46,10 +46,24 @@ positional arguments:
 options:
   -h, --help            show this help message and exit
   --create-data         if there is no data, create test data for the application
+
+$ python3.10 main.py PySide
 ```
 
-You can also run the application using individual libraries running the *main.py* file of a specific subproject, i.e.:
+You can also run the application using individual libraries running a specific subproject's *main.py* file.
+This requires adding the project to your PYTHONPATH variable to make the imports work correctly:
 ``` console
+$ export PYTHONPATH="${PYTHONPATH}:/location/of/project"
 $ cd TkinterApp
 $ python3.10 main.py
 ```
+
+WINDOWS:
+``` console
+$ set PYTHONPATH=%PYTHONPATH%;C:\location\of\project\
+$ cd TkinterApp
+$ python3.10 main.py
+```
+
+Now, you can try the application.
+

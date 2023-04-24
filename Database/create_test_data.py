@@ -92,7 +92,7 @@ def _create_filters():
         for i in range(10):
             NoteFilterModel.create(
                 name = "Filter " + str(i),
-                note_name = "",
+                note_name = str(i) if i % 2 == 0 else "",
                 note_min_priority = 0 + i,
                 note_max_priority = 100 - i,
                 note_min_time = datetime.min,
@@ -100,7 +100,7 @@ def _create_filters():
                 note_text = "",
                 tag_name = "",
                 tag_description = "",
-                category_name = "",
+                category_name = str(i) if i % 3 == 0 else "",
                 category_description = "",
                 order = i
             )

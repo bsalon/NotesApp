@@ -25,6 +25,7 @@ Builder.load_string('''
 ''')
 
 
+# https://stackoverflow.com/questions/45830039/kivy-python-multiple-widgets-in-recycleview-row
 
 class TodaysNotesRow(RecycleDataViewBehavior, GridLayout):
     def __init__(self, *args, **kwargs):
