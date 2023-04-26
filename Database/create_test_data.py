@@ -56,7 +56,7 @@ def _create_notes(categories):
             NoteModel.create(
                 name = "Note " + str(i),
                 priority = i,
-                time = datetime.now() + timedelta(hours = i),
+                time = datetime.now() + timedelta(hours = i - 5),
                 text = "This is just some text for note " + str(i),
                 category = categories[(i // 5) // len(categories)]
             )

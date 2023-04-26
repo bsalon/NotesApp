@@ -10,7 +10,9 @@ class CommonTreeView(ttk.Treeview):
         for i, heading in enumerate(headings):
             #stretch_tkinter = tkinter.YES if i == stretch else tkinter.NO
             self.heading(heading, text=heading, command=lambda _head=heading: self._sort_column(_head, True))
-            self.column(heading) #, stretch=stretch_tkinter)
+            self.column(heading, anchor="n") #, stretch=stretch_tkinter)
+            
+
 
         self.fill_table(items)
 
