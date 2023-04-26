@@ -921,6 +921,7 @@ def run_application():
     use_cases = UseCases.UseCases()
 
     root = tkinter.Tk()
+    root.title("TkinterApplication")
     
     style = custom_ttk_style.CustomTtkStyle()
     
