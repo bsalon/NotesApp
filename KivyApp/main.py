@@ -429,7 +429,7 @@ class KivyApplicationLayout(boxlayout.BoxLayout):
                 ("Name", metrics.dp(60), lambda data: zip(*sorted(enumerate(data), key=lambda x:x[1][0]))),
                 ("Order", metrics.dp(25), lambda data: zip(*sorted(enumerate(data), key=lambda x:x[1][1]))),
                 ("Note name", metrics.dp(60), lambda data: zip(*sorted(enumerate(data), key=lambda x:x[1][2]))),
-                ("Description", metrics.dp(80), lambda data: zip(*sorted(enumerate(data), key=lambda x:x[1][3]))),
+                ("Category name", metrics.dp(80), lambda data: zip(*sorted(enumerate(data), key=lambda x:x[1][3]))),
             ],
             row_data=self.table_filters
         )

@@ -438,7 +438,7 @@ class TkinterApplication(ttk.Frame):
         
         self.filters_tab_table = common_tree_view.CommonTreeView(
             master=self.filters_tab,
-            headings=("Name", "Order", "Note name", "Description"),
+            headings=("Name", "Order", "Note name", "Category name"),
             items=self.table_filters,
             sort_col="Name",
             reverse=False,
