@@ -919,7 +919,10 @@ class MainWindow(QtWidgets.QWidget):
 
 
 def run_application():
-    app = QtWidgets.QApplication([])
+    if not QtWidgets.QApplication.instance():
+        app = QtWidgets.QApplication([])
+    else:
+        app = QtWidgets.QApplication.instance()
 
     stylesheet_path = pathlib.Path(__file__).parent / "style.qss"
 
