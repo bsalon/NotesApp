@@ -16,16 +16,19 @@ class FilterDialog(QtWidgets.QDialog):
         
         # Filter
         self.filter_name_lineedit = QtWidgets.QLineEdit()
-        form_layout.addRow("Filter name:", self.filter_name_lineedit)
+        filter_name_label = QtWidgets.QLabel("Filter name:", objectName="black_label")
+        form_layout.addRow(filter_name_label, self.filter_name_lineedit)
 
         self.filter_order_spinbox = QtWidgets.QSpinBox(minimum=-1, maximum=1000, value=-1)
-        form_layout.addRow("Filter order:", self.filter_order_spinbox)
+        filter_order_label = QtWidgets.QLabel("Filter order:", objectName="black_label")
+        form_layout.addRow(filter_order_label, self.filter_order_spinbox)
         
         form_layout.addItem(QtWidgets.QSpacerItem(0, 20))
         
         # Note name
         self.note_name_lineedit = QtWidgets.QLineEdit()
-        form_layout.addRow("Note name contains:", self.note_name_lineedit)
+        note_name_label = QtWidgets.QLabel("Note name contains:", objectName="black_label")
+        form_layout.addRow(note_name_label, self.note_name_lineedit)
         
         # Note time
         note_datetime_layout = QtWidgets.QHBoxLayout()
@@ -41,13 +44,15 @@ class FilterDialog(QtWidgets.QDialog):
         self.note_to_datetime_edit.setToolTip("Rewrite date and time or use ticks")
         
         note_datetime_layout.addWidget(self.note_from_datetime_edit, stretch=1)
-        note_datetime_layout.addWidget(QtWidgets.QLabel(" - "))
+        note_datetime_layout.addWidget(QtWidgets.QLabel(" - ", objectName="black_label"))
         note_datetime_layout.addWidget(self.note_to_datetime_edit, stretch=1)
-        form_layout.addRow("Note date and time range:", note_datetime_layout)
+        note_datetime_label = QtWidgets.QLabel("Note date and time range:", objectName="black_label")
+        form_layout.addRow(note_datetime_label, note_datetime_layout)
         
         # Note text
         self.note_text_lineedit = QtWidgets.QLineEdit()
-        form_layout.addRow("Note text contains:", self.note_text_lineedit)
+        note_text_label = QtWidgets.QLabel("Note text contains:", objectName="black_label")
+        form_layout.addRow(note_text_label, self.note_text_lineedit)
 
         # Note priority
         note_priority_layout = QtWidgets.QHBoxLayout()
@@ -58,27 +63,32 @@ class FilterDialog(QtWidgets.QDialog):
         self.note_max_priority_spinbox = QtWidgets.QSpinBox(minimum=0, maximum=100, value=100)
 
         note_priority_layout.addWidget(self.note_min_priority_spinbox)
-        note_priority_layout.addWidget(QtWidgets.QLabel(" - ", alignment=QtGui.Qt.AlignCenter))
+        note_priority_layout.addWidget(QtWidgets.QLabel(" - ", objectName="black_label", alignment=QtGui.Qt.AlignCenter))
         note_priority_layout.addWidget(self.note_max_priority_spinbox)
-        form_layout.addRow("Note priority range:", note_priority_layout)
+        note_priority_range_label = QtWidgets.QLabel("Note priority range:", objectName="black_label")
+        form_layout.addRow(note_priority_range_label, note_priority_layout)
 
         form_layout.addItem(QtWidgets.QSpacerItem(0, 20))
 
         # Category name
         self.category_name_lineedit = QtWidgets.QLineEdit()
-        form_layout.addRow("Category name contains:", self.category_name_lineedit)
+        category_name_label = QtWidgets.QLabel("Category name contains:", objectName="black_label")
+        form_layout.addRow(category_name_label, self.category_name_lineedit)
         
         # Category description
         self.category_description_lineedit = QtWidgets.QLineEdit()
-        form_layout.addRow("Category description contains:", self.category_description_lineedit)
+        category_description_label = QtWidgets.QLabel("Category description contains:", objectName="black_label")
+        form_layout.addRow(category_description_label, self.category_description_lineedit)
 
         # Tag name
         self.tag_name_lineedit = QtWidgets.QLineEdit()
-        form_layout.addRow("Tag name contains:", self.tag_name_lineedit)
+        tag_name_label = QtWidgets.QLabel("Tag name contains:", objectName="black_label")
+        form_layout.addRow(tag_name_label, self.tag_name_lineedit)
         
         # Tag description
         self.tag_description_lineedit = QtWidgets.QLineEdit()
-        form_layout.addRow("Tag description contains:", self.tag_description_lineedit)
+        tag_description_label = QtWidgets.QLabel("Tag description contains:", objectName="black_label")
+        form_layout.addRow(tag_description_label, self.tag_description_lineedit)
 
         # Buttons
         btnBox = QtWidgets.QDialogButtonBox()

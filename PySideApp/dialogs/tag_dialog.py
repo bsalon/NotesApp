@@ -12,10 +12,12 @@ class TagDialog(QtWidgets.QDialog):
         form_layout = QtWidgets.QFormLayout()
         
         self.name_lineedit = QtWidgets.QLineEdit()
-        form_layout.addRow("Name:", self.name_lineedit)
+        name_label = QtWidgets.QLabel("Name:", objectName="black_label")
+        form_layout.addRow(name_label, self.name_lineedit)
         
         self.description_lineedit = QtWidgets.QLineEdit()
-        form_layout.addRow("Description:", self.description_lineedit)
+        description_label = QtWidgets.QLabel("Description:", objectName="black_label")
+        form_layout.addRow(description_label, self.description_lineedit)
         
         btnBox = QtWidgets.QDialogButtonBox()
         btnBox.setStandardButtons(QtWidgets.QDialogButtonBox.Save | QtWidgets.QDialogButtonBox.Cancel)

@@ -20,7 +20,7 @@ class NoteDialog(tkinter.simpledialog.Dialog):
         frame.configure(bg="#d7eb5a")
 
         # Name
-        name_label = tkinter.Label(frame, text="Name:", bg="#d7eb5a")
+        name_label = tkinter.Label(frame, text="Name:", bg="#d7eb5a", fg="black")
         name_label.grid(row=0, column=0, sticky="news")
         self.name_entry = tkinter.Entry(frame, width=25)
         self.name_entry.grid(row=0, column=1, columnspan=2, pady=(5, 5))
@@ -28,12 +28,12 @@ class NoteDialog(tkinter.simpledialog.Dialog):
         # Date and time
         today = datetime.date.today()
 
-        date_label = tkinter.Label(frame, text="Date:", bg="#d7eb5a")
+        date_label = tkinter.Label(frame, text="Date:", bg="#d7eb5a", fg="black")
         date_label.grid(row=1, column=0, sticky="news")
         self.date_entry = tkcalendar.DateEntry(frame, selectmode="day", year=today.year, month=today.month, day=today.day)
         self.date_entry.grid(row=1, column=1, columnspan=2, pady=(5, 5), sticky="news")
 
-        time_label = tkinter.Label(frame, text="Time (hh:mm):", bg="#d7eb5a")
+        time_label = tkinter.Label(frame, text="Time (hh:mm):", bg="#d7eb5a", fg="black")
         time_label.grid(row=2, column=0, pady=(5, 5), sticky="news")
         self.time_hour_spinbox = ttk.Spinbox(frame, from_=0, to=23, wrap=True, width=5, state="readonly", justify=tkinter.CENTER)
         self.time_hour_spinbox.set(0)
@@ -44,26 +44,26 @@ class NoteDialog(tkinter.simpledialog.Dialog):
         self.time_minute_spinbox.grid(row=2, column=2, pady=(5, 5), sticky="news")
 
         # Text
-        text_label = tkinter.Label(frame, text="Text:", bg="#d7eb5a")
+        text_label = tkinter.Label(frame, text="Text:", bg="#d7eb5a", fg="black")
         text_label.grid(row=3, column=0, pady=(5, 20), sticky="news")
         self.text_entry = tkinter.Entry(frame, width=25)
         self.text_entry.grid(row=3, column=1, columnspan=2, pady=(5, 20))
 
         # Priority radio buttons
-        priority_label = tkinter.Label(frame, text="Assign priority:", bg="#d7eb5a")
+        priority_label = tkinter.Label(frame, text="Assign priority:", bg="#d7eb5a", fg="black")
         priority_label.grid(row=4, column=0, pady=(5, 5), sticky="news")
         self.assign_priority = tkinter.IntVar()
-        yes_radiobutton = tkinter.Radiobutton(frame, text="Yes", variable=self.assign_priority, value=1, command=self._slider_enabling, bg="#d7eb5a")
+        yes_radiobutton = tkinter.Radiobutton(frame, text="Yes", variable=self.assign_priority, value=1, command=self._slider_enabling, bg="#d7eb5a", fg="black")
         yes_radiobutton.grid(row=4, column=1, pady=(5, 5))
-        no_radiobutton = tkinter.Radiobutton(frame, text="No", variable=self.assign_priority, value=2, command=self._slider_enabling, bg="#d7eb5a")
+        no_radiobutton = tkinter.Radiobutton(frame, text="No", variable=self.assign_priority, value=2, command=self._slider_enabling, bg="#d7eb5a", fg="black")
         no_radiobutton.grid(row=4, column=2, pady=(5, 5))
 
         # Priority slider
-        self.priority_slider = tkinter.Scale(frame, from_=0, to=100, orient=tkinter.HORIZONTAL, bg="#d7eb5a")
+        self.priority_slider = tkinter.Scale(frame, from_=0, to=100, orient=tkinter.HORIZONTAL, bg="#d7eb5a", fg="black")
         self.priority_slider.grid(row=5, column=1, columnspan=2, pady=(5, 20), sticky="news")
 
         # Categories
-        self.categories_label = tkinter.Label(frame, text="Select category:", bg="#d7eb5a")
+        self.categories_label = tkinter.Label(frame, text="Select category:", bg="#d7eb5a", fg="black")
         self.categories_label.grid(row=6, column=0, pady=(5, 5), sticky="news")
         self.categories_combobox = ttk.Combobox(frame, width = 25)
         self.categories_combobox["values"] = self.categories_names
@@ -72,7 +72,7 @@ class NoteDialog(tkinter.simpledialog.Dialog):
             self.categories_combobox.current(0)
 
         # Tags
-        self.tags_label = tkinter.Label(frame, text="Select tags:", bg="#d7eb5a")
+        self.tags_label = tkinter.Label(frame, text="Select tags:", bg="#d7eb5a", fg="black")
         self.tags_label.grid(row=7, column=0, pady=(5, 5), sticky="news")
         self.tags = tkinter.Variable(value=self.tags_names)
         self.tags_listbox = tkinter.Listbox(frame, listvariable=self.tags, height = 3, selectmode="multiple")

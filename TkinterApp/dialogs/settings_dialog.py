@@ -23,13 +23,13 @@ class SettingsDialog(tkinter.simpledialog.Dialog):
         # Radio buttons
         self.gui_library = tkinter.IntVar()
 
-        qt_radiobutton = tkinter.Radiobutton(frame, text="PySide", variable=self.gui_library, value=0, bg="#d7eb5a")
+        qt_radiobutton = tkinter.Radiobutton(frame, text="PySide", variable=self.gui_library, value=0, bg="#d7eb5a", fg="black")
         qt_radiobutton.grid(row=1, column=0, pady=(5, 5))
         
-        tk_radiobutton = tkinter.Radiobutton(frame, text="Tkinter", variable=self.gui_library, value=1, bg="#d7eb5a")
+        tk_radiobutton = tkinter.Radiobutton(frame, text="Tkinter", variable=self.gui_library, value=1, bg="#d7eb5a", fg="black")
         tk_radiobutton.grid(row=2, column=0, pady=(5, 5))
         
-        kv_radiobutton = tkinter.Radiobutton(frame, text="Kivy", variable=self.gui_library, value=2, bg="#d7eb5a")
+        kv_radiobutton = tkinter.Radiobutton(frame, text="Kivy", variable=self.gui_library, value=2, bg="#d7eb5a", fg="black")
         kv_radiobutton.grid(row=3, column=0, pady=(5, 5))
 
         self.gui_library.set(1)

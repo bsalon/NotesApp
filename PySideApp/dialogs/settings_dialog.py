@@ -11,14 +11,14 @@ class SettingsDialog(QtWidgets.QDialog):
         dialog_layout = QtWidgets.QVBoxLayout()
 
         # Name
-        self.info_label = QtWidgets.QLabel("Saving with different than current library will restart the application")
+        self.info_label = QtWidgets.QLabel("Saving with different than current library will restart the application", objectName="red_label")
         dialog_layout.addWidget(self.info_label)
         
 
         # Radio buttons
-        self.radio_buttons = [QtWidgets.QRadioButton("PySide"),
-                              QtWidgets.QRadioButton("Tkinter"),
-                              QtWidgets.QRadioButton("Kivy")]
+        self.radio_buttons = [QtWidgets.QRadioButton("PySide", objectName="black_button"),
+                              QtWidgets.QRadioButton("Tkinter", objectName="black_button"),
+                              QtWidgets.QRadioButton("Kivy", objectName="black_button")]
 
         for rb in self.radio_buttons:
             dialog_layout.addWidget(rb)

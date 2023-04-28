@@ -1,6 +1,8 @@
 import os
 os.environ["KIVY_NO_CONSOLELOG"] = "1"
 
+import platform
+
 from kivy import app, lang, metrics
 from kivy.core import window
 from kivy.uix import boxlayout, button, image, label, popup, tabbedpanel
@@ -142,7 +144,7 @@ class KivyApplicationLayout(boxlayout.BoxLayout):
             self.gui = dialog.data_dict["library"]
             if self.gui == 2:
                 return
-        app.MDApp.get_running_app().stop()
+            app.MDApp.get_running_app().stop()
 
 
 
@@ -301,6 +303,7 @@ class KivyApplicationLayout(boxlayout.BoxLayout):
 
     
     def use_current_note_filter(self):
+        self.grid_page = self.notes_tab_accordion_pagination.current_page = 1
         filtered_notes = self.use_cases.get_filtered_notes(self.current_note_filter)
         self.table_notes = [(note.name, note.priority, note.time.strftime("%d/%m/%Y %H:%M"), note.text) for note in filtered_notes]
 
@@ -961,7 +964,12 @@ class KivyApplicationLayout(boxlayout.BoxLayout):
 class KivyApplication(app.MDApp):
     def __init__(self, *args, **kwargs):
         super(KivyApplication, self).__init__(*args, **kwargs)
-        window.Window.size = (1280, 640)
+        # MacOs doubles the size -- https://github.com/kivy/kivy/issues/8140
+        # One solution is to test system as metrics.dp didnt work in 8140
+        if platform.system() == "Darwin":
+            window.Window.size = (1280 // 2, 640 // 2)
+        else:
+            window.Window.siye = (1280, 640)
         window.Window.minimum_width, window.Window.minimum_height = window.Window.size
         window.Window.maximum_width, window.Window.maximum_height = window.Window.size
         use_cases = UseCases.UseCases()

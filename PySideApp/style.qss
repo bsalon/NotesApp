@@ -161,22 +161,38 @@ QLabel#text_link:hover {
 }
 
 QLabel#todays_notes_header {
+    color: black;
     background-color: #d7eb5a;
     font-weight: bold;
     border: 1px solid black;
 }
 
 QLabel#panel_time_header {
+    color: black;
     font-weight: bold;
 }
 
 QLabel#pagination {
+    color: black;
     border: 1px dotted black;
 }
 
 QLabel#pagination_current_page {
+    color: black;
     border: 1px dotted black;
     background-color: #ffc957;
+}
+
+QLabel#black_label {
+    color: black;
+}
+
+QLabel#red_label {
+    color: red;
+}
+
+QRadioButton#black_button {
+    color: black;
 }
 
 
@@ -198,6 +214,7 @@ QLineEdit#search_bar
 
 
 QTextEdit#panel_note_name {
+    color: black;
     border: none;
     background-color: #f1f6be;
 }

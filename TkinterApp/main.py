@@ -82,7 +82,7 @@ class TkinterApplication(ttk.Frame):
         col += 4
 
         # Use fast filter section
-        tkinter.Label(self.toolbar_layout, text="Use fast filters:", bg="#ffc957", anchor="w").grid(row=0, column=col, rowspan=1, columnspan=3, sticky="we")
+        tkinter.Label(self.toolbar_layout, text="Use fast filters:", fg="black", bg="#ffc957", anchor="w").grid(row=0, column=col, rowspan=1, columnspan=3, sticky="we")
         col += 3
         self.fast_filters_text_links = [ttk.Label(self.toolbar_layout, text="#1", anchor="w", style="text_link.TLabel"),
                                         ttk.Label(self.toolbar_layout, text="#2", anchor="w", style="text_link.TLabel"),
@@ -197,16 +197,16 @@ class TkinterApplication(ttk.Frame):
     def _fill_todays_notes_list(self):
         for index, note in enumerate(self.today_notes):
             default_font = tkinter.font.nametofont("TkDefaultFont")
-            time_label = tkinter.Label(self.todays_notes_list_frame.interior, text=note[0], bg="#f1f6be")
-            time_label.configure(font=(default_font.cget("family"), default_font.cget("size"), "bold"))
-            time_label.grid(pady=(5, 5))
+            time_lbl = tkinter.Label(self.todays_notes_list_frame.interior, text=note[0], fg="black", bg="#f1f6be")
+            time_lbl.configure(font=(default_font.cget("family"), default_font.cget("size"), "bold"))
+            time_lbl.grid(pady=(5, 5))
 
             # Fixed width of 12 characters
             wrapped_name = '\n'.join(textwrap.wrap(note[1], 12))
-            name_label = tkinter.Label(self.todays_notes_list_frame.interior, text=wrapped_name, bg="#f1f6be")
+            name_label = tkinter.Label(self.todays_notes_list_frame.interior, text=wrapped_name, fg="black", bg="#f1f6be")
             name_label.grid(pady=(0, 15))
 
-            self.todays_notes_list.append((time_label, name_label))
+            self.todays_notes_list.append((time_lbl, name_label))
             self.today_notes[index] = (note[0], wrapped_name)
 
 
@@ -215,17 +215,17 @@ class TkinterApplication(ttk.Frame):
         wrapped_notes = ['\n'.join(textwrap.wrap(note, 12)) for note in notes]
 
         remove_indices = []
-        for time_label, name_label in self.todays_notes_list:
+        for time_lbl, name_label in self.todays_notes_list:
             name = name_label.cget("text")
-            time = time_label.cget("text")
+            time = time_lbl.cget("text")
             if name in wrapped_notes:
                 i = self.today_notes.index((time, name))
                 remove_indices.append(i)
 
         for i in reversed(sorted(remove_indices)):
-            name_label, time_label = self.todays_notes_list[i]
+            name_label, time_lbl = self.todays_notes_list[i]
             name_label.destroy()
-            time_label.destroy()
+            time_lbl.destroy()
             self.today_notes.pop(i)
             self.todays_notes_list.pop(i)
 
@@ -242,16 +242,16 @@ class TkinterApplication(ttk.Frame):
             new_note_index = self.today_notes.index(note_tuple)
             
             font = tkinter.font.nametofont("TkDefaultFont")
-            time_label = tkinter.Label(self.todays_notes_list_frame.interior, text=note_tuple[0], bg="#f1f6be", font=f"{font.cget('family')} {font.cget('size')} bold")
-            name_label = tkinter.Label(self.todays_notes_list_frame.interior, text=note_tuple[1], bg="#f1f6be")
-            self.todays_notes_list.insert(new_note_index, (time_label, name_label))
+            time_lbl = tkinter.Label(self.todays_notes_list_frame.interior, text=note_tuple[0], bg="#f1f6be", font=f"{font.cget('family')} {font.cget('size')} bold", fg="black")
+            name_label = tkinter.Label(self.todays_notes_list_frame.interior, text=note_tuple[1], bg="#f1f6be", fg="black")
+            self.todays_notes_list.insert(new_note_index, (time_lbl, name_label))
 
             for widget in self.todays_notes_list_frame.interior.children.values():
                 widget.grid_forget()
             
             index = 0
-            for time_label, name_label in self.todays_notes_list:
-                time_label.grid(row=index, pady=(5, 5))
+            for time_lbl, name_label in self.todays_notes_list:
+                time_lbl.grid(row=index, pady=(5, 5))
                 index += 1
                 name_label.grid(row=index, pady=(0, 15))
                 index += 1
@@ -357,6 +357,7 @@ class TkinterApplication(ttk.Frame):
 
 
     def use_current_note_filter(self):
+        self.grid_page = self.notes_tab_accordion_pagination.current_page = 1
         filtered_notes = self.use_cases.get_filtered_notes(self.current_note_filter)
         self.table_notes = [(note.name, note.priority, note.time.strftime("%d/%m/%Y %H:%M"), note.text) for note in filtered_notes]
 

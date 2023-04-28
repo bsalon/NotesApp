@@ -1,3 +1,5 @@
+from kivy import metrics
+
 from kivy.uix import accordion, scrollview
 
 from kivy.uix.label import Label
@@ -69,7 +71,7 @@ Builder.load_string(
 class NotesAccordionBox(BoxLayout):
     def __init__(self, notes, row_selection_function, *args, **kwargs):
         super(NotesAccordionBox, self).__init__(*args, **kwargs)
-        self.notes_accordion = NotesAccordion(notes, row_selection_function, size_hint_y=None, height=600)
+        self.notes_accordion = NotesAccordion(notes, row_selection_function, size_hint_y=None, height=metrics.dp(600))
         
         scrollable_accordion = scrollview.ScrollView(size_hint=(1, 1))
         scrollable_accordion.add_widget(self.notes_accordion)

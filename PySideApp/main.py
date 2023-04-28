@@ -296,7 +296,7 @@ class MainWindow(QtWidgets.QWidget):
         self.notes_advanced_filter_button = QtWidgets.QPushButton("Advanced filter")
         self.notes_advanced_filter_button.clicked.connect(self.notes_advanced_filtering)
 
-        self.notes_toggle_switch_label = QtWidgets.QLabel("Table view")
+        self.notes_toggle_switch_label = QtWidgets.QLabel("Table view", objectName="black_label")
         self.notes_toggle_switch_button = toggle_switch_button.ToggleSwitchButton()
         self.notes_toggle_switch_button.clicked.connect(self.toggle_notes_view)
 
@@ -357,6 +357,7 @@ class MainWindow(QtWidgets.QWidget):
 
 
     def use_current_note_filter(self):
+        self.grid_page = self.notes_tab_accordion_pagination.current_page = 1
         filtered_notes = self.use_cases.get_filtered_notes(self.current_note_filter)
         self.table_notes = [(note.name, note.priority, note.time.strftime("%d/%m/%Y %H:%M"), note.text) for note in filtered_notes]
 

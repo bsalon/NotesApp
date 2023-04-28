@@ -13,17 +13,20 @@ class NoteDialog(QtWidgets.QDialog):
 
         # Name
         self.name_lineedit = QtWidgets.QLineEdit()
-        form_layout.addRow("Name:", self.name_lineedit)
+        name_label = QtWidgets.QLabel("Name:", objectName="black_label")
+        form_layout.addRow(name_label, self.name_lineedit)
         
         # Date and time
         self.datetime_lineedit = QtWidgets.QDateTimeEdit(QtCore.QDateTime.currentDateTime())
         self.datetime_lineedit.setDisplayFormat("dd:MM:yyyy hh:mm")
         self.datetime_lineedit.setToolTip("Rewrite date and time or use ticks")
-        form_layout.addRow("Date and time:", self.datetime_lineedit)
+        datetime_label = QtWidgets.QLabel("Date and time:", objectName="black_label")
+        form_layout.addRow(datetime_label, self.datetime_lineedit)
         
         # Text
         self.text_lineedit = QtWidgets.QLineEdit()
-        form_layout.addRow("Text:", self.text_lineedit)
+        text_label = QtWidgets.QLabel("Text:", objectName="black_label")
+        form_layout.addRow(text_label, self.text_lineedit)
         
         form_layout.addItem(QtWidgets.QSpacerItem(0, 20))
 
@@ -36,10 +39,11 @@ class NoteDialog(QtWidgets.QDialog):
         priority_layout.addWidget(self.yes_radiobutton)
         priority_layout.addWidget(self.no_radiobutton)
         priority_layout.addStretch()
-        form_layout.addRow("Assign priority:", priority_layout)
+        priority_label = QtWidgets.QLabel("Assign priority:", objectName="black_label")
+        form_layout.addRow(priority_label, priority_layout)
         
         # Priority value label and slider
-        self.priority_slider_label = QtWidgets.QLabel("0")
+        self.priority_slider_label = QtWidgets.QLabel("0", objectName="black_label")
         self.priority_slider_label.setAlignment(QtCore.Qt.AlignmentFlag.AlignHCenter | QtCore.Qt.AlignmentFlag.AlignCenter)
         self.priority_slider_label.setMinimumWidth(80)
         self.priority_slider = QtWidgets.QSlider(QtCore.Qt.Horizontal)
@@ -51,7 +55,8 @@ class NoteDialog(QtWidgets.QDialog):
         priority_slider_layout.setAlignment(QtCore.Qt.AlignTop)
         priority_slider_layout.addWidget(self.priority_slider)
         priority_slider_layout.addWidget(self.priority_slider_label)
-        form_layout.addRow("Priority value:", priority_slider_layout)
+        priority_value_label = QtWidgets.QLabel("Priority value:", objectName="black_label")
+        form_layout.addRow(priority_value_label, priority_slider_layout)
 
         form_layout.addItem(QtWidgets.QSpacerItem(0, 20))
 
@@ -60,14 +65,16 @@ class NoteDialog(QtWidgets.QDialog):
         self.categories_listwidget.setMaximumHeight(60)
         self.categories_listwidget.setToolTip("Select one category from the list")
         self.fill_categories_listwidget(categories) # from the constructor
-        form_layout.addRow("Category:", self.categories_listwidget)
+        category_label = QtWidgets.QLabel("Category:", objectName="black_label")
+        form_layout.addRow(category_label, self.categories_listwidget)
 
         # Tags
         self.tags_listwidget = QtWidgets.QListWidget()
         self.tags_listwidget.setMaximumHeight(60)
         self.tags_listwidget.setToolTip("Select zero or more tags from the list")
         self.fill_tags_listwidget(tags) # from the constructor
-        form_layout.addRow("Tags:", self.tags_listwidget)
+        tags_label = QtWidgets.QLabel("Tags:", objectName="black_label")
+        form_layout.addRow(tags_label, self.tags_listwidget)
 
         # Buttons
         btnBox = QtWidgets.QDialogButtonBox()

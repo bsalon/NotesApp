@@ -56,7 +56,7 @@
 <ToolbarButton>:
     border: (0, 0, 0, 0)
     size_hint: (None, None)
-    size: (28, 28)
+    size: (dp(28), dp(28))
     pos_hint: {"center_x": 0.5, "center_y": 0.5}
     background_color: (255/255, 201/255, 87/255, 255/255) if not self.disabled else (255/255, 201/255, 87/255, 60/255)
     background_down: ""
@@ -88,13 +88,13 @@
         color: 0, 0, 0, 1
         text: 'ON'
         bold: True
-        font_size: 13
+        font_size: dp(13)
         pos: self.parent.center_x - sp(70), self.parent.center_y - sp(50)
     Label:
         color: 0, 0, 0, 1
         text: 'OFF'
         bold: True
-        font_size: 13
+        font_size: dp(13)
         pos: self.parent.center_x - sp(30), self.parent.center_y - sp(50)
 
 
@@ -104,7 +104,7 @@
     size_hint: (2/32, 1)
 
 <ToolbarLayout>:
-    spacing: 10
+    spacing: dp(10)
     canvas.before:
         Color:
             rgba: (255/255, 201/255, 87/255, 255/255)
@@ -150,8 +150,8 @@
     orientation: "vertical"
 
 <TabToolbarLayout>:
-    padding: 5, 3
-    spacing: 5
+    padding: dp(5), dp(3)
+    spacing: dp(5)
     canvas.before:
         Color:
             rgba: (241/255, 246/255, 190/255, 255/255)
@@ -168,7 +168,7 @@
             rectangle: self.x, self.y, self.width, self.height
 
 <SearchbarWithIcon>:
-    padding: 5, 0
+    padding: dp(5), dp(0)
     size_hint: 4/8, 1
     canvas.before:
         Color:
@@ -209,7 +209,7 @@
 
 <NotesTabbedPanel>:
     do_default_tab: False
-    padding: (5, 5)
+    padding: (dp(5), dp(5))
     canvas.before:
         Color:
             rgba: 0, 0, 0, 1
@@ -223,7 +223,7 @@
     background_normal: ""
     background_down: ""
     color: (0, 0, 0, 1)
-    padding: (5, 5)
+    padding: (dp(5), dp(5))
     canvas:
         Color:
             rgba: 0, 0, 0, 1

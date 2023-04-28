@@ -125,6 +125,7 @@ class CustomTtkStyle(ttk.Style):
 
 
         self.configure("today_notes_icon_button.TButton",
+            foreground="black",
             background="#ffc957"
         )
         self.map("today_notes_icon_button.TButton",
@@ -175,37 +176,45 @@ class CustomTtkStyle(ttk.Style):
         )
 
         self.configure("toolbar_time.TLabel",
+            foreground="black",
             background="#ffc957"
         )
 
         self.configure("todays_notes_header.TLabel",
+            foreground="black",
             background="#d7eb5a"
         )
 
         self.configure("pagination.TLabel",
+            foreground="black",
             background="#f1f6be",
             borderwidth=2,
             relief="groove"
         )
         self.configure("pagination_current_page.TLabel",
+            foreground="black",
             background="#ffc957",
             borderwidth=2,
             relief="groove"
         )
 
         self.configure("filterbar_label.TLabel",
+            foreground="black",
             background="#f1f6be"
         )
 
         self.configure("collapsable_frame_label.TLabel",
+            foreground="black",
             background="#e9f29b"
         )
         
         self.configure("collapsable_frame_label_check.TLabel",
+            foreground="black",
             background="#d7eb5a"
         )
         
         self.configure("collapsable_frame_content_label.TLabel",
+            foreground="black",
             background="#f7fade",
         )
 

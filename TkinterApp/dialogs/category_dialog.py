@@ -18,13 +18,13 @@ class CategoryDialog(tkinter.simpledialog.Dialog):
         frame.configure(bg="#d7eb5a")
 
         # Name
-        name_label = tkinter.Label(frame, text="Name:", bg="#d7eb5a")
+        name_label = tkinter.Label(frame, text="Name:", bg="#d7eb5a", fg="black")
         name_label.grid(row=0, column=0, sticky="news")
         self.name_entry = tkinter.Entry(frame, width=25)
         self.name_entry.grid(row=0, column=1, columnspan=2, pady=(5, 5))
 
         # Description
-        description_label = tkinter.Label(frame, text="Description:", bg="#d7eb5a")
+        description_label = tkinter.Label(frame, text="Description:", bg="#d7eb5a", fg="black")
         description_label.grid(row=3, column=0, pady=(5, 20), sticky="news")
         self.description_entry = tkinter.Entry(frame, width=25)
         self.description_entry.grid(row=3, column=1, columnspan=2, pady=(5, 20))

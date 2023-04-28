@@ -47,12 +47,12 @@ class NotesAccordion(QtWidgets.QDialog):
         widget = QtWidgets.QFrame(self.tree, objectName="collapsable_widget_frame")
         layout = QtWidgets.QVBoxLayout(widget)
 
-        text_label = QtWidgets.QLabel(f"<b>Text:</b> {note.text}")
+        text_label = QtWidgets.QLabel(f"<b>Text:</b> {note.text}", objectName="black_label")
         text_label.setWordWrap(True)
-        priority_label = QtWidgets.QLabel(f"<b>Priority:</b> {note.priority}")
-        category_label = QtWidgets.QLabel(f"<b>Category:</b> {note.category.name}")
+        priority_label = QtWidgets.QLabel(f"<b>Priority:</b> {note.priority}", objectName="black_label")
+        category_label = QtWidgets.QLabel(f"<b>Category:</b> {note.category.name}", objectName="black_label")
         tags_string = " ".join(note.tags)
-        tags_label = QtWidgets.QLabel(f"<b>Tags:</b> {tags_string}")
+        tags_label = QtWidgets.QLabel(f"<b>Tags:</b> {tags_string}", objectName="black_label")
         tags_label.setWordWrap(True)
 
         layout.addWidget(text_label)
@@ -104,9 +104,9 @@ class CollapsableExpandWidget(QtWidgets.QWidget):
     def __init__(self, section, name, date, *args, **kwargs):
         super(CollapsableExpandWidget, self).__init__(*args, **kwargs) # text
 
-        self.note_name_label = QtWidgets.QLabel(name, objectName="collapsable_note_name")
+        self.note_name_label = QtWidgets.QLabel(name, objectName="black_label")
         self.note_name_label.setWordWrap(True)
-        note_date_label = QtWidgets.QLabel(date.strftime("%d/%m/%Y %H:%M"), objectName="collapsable_note_date")
+        note_date_label = QtWidgets.QLabel(date.strftime("%d/%m/%Y %H:%M"), objectName="black_label")
         self.checkbox = QtWidgets.QCheckBox()
         self.checkbox.stateChanged.connect(self.toggle_check_state)
 

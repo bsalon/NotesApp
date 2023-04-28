@@ -17,25 +17,25 @@ class AdvancedFilterDialog(tkinter.simpledialog.Dialog):
         frame.configure(bg="#d7eb5a")
 
         # Note name
-        note_name_label = tkinter.Label(frame, text="Note name contains:", bg="#d7eb5a")
+        note_name_label = tkinter.Label(frame, text="Note name contains:", bg="#d7eb5a", fg="black")
         note_name_label.grid(row=0, column=0, sticky="news")
         self.note_name_entry = tkinter.Entry(frame, width=25)
         self.note_name_entry.grid(row=0, column=1, columnspan=5, pady=(5, 5), sticky="news")
 
         # Note date
         today = datetime.date.today()
-        note_date_label = tkinter.Label(frame, text="Note date range:", bg="#d7eb5a")
+        note_date_label = tkinter.Label(frame, text="Note date range:", bg="#d7eb5a", fg="black")
         note_date_label.grid(row=1, column=0, sticky="news")
         self.note_from_date_entry = tkcalendar.DateEntry(frame, selectmode="day", year=today.year, month=today.month, day=today.day)
         self.note_from_date_entry.grid(row=1, column=1, columnspan=2, pady=(5, 5), sticky="news")
 
-        note_date_divider_label = tkinter.Label(frame, text="  -  ", bg="#d7eb5a")
+        note_date_divider_label = tkinter.Label(frame, text="  -  ", bg="#d7eb5a", fg="black")
         note_date_divider_label.grid(row=1, column=3, sticky="news")
         self.note_to_date_entry = tkcalendar.DateEntry(frame, selectmode="day", year=today.year, month=today.month, day=today.day)
         self.note_to_date_entry.grid(row=1, column=4, columnspan=2, pady=(5, 5), sticky="news")
 
         # Note time
-        note_time_label = tkinter.Label(frame, text="Note time (hh:mm) range:", bg="#d7eb5a")
+        note_time_label = tkinter.Label(frame, text="Note time (hh:mm) range:", bg="#d7eb5a", fg="black")
         note_time_label.grid(row=2, column=0, pady=(5, 5), sticky="news")
         
         self.note_from_time_hour_spinbox = ttk.Spinbox(frame, from_=0, to=23, width=5, state="readonly", justify=tkinter.CENTER)
@@ -46,7 +46,7 @@ class AdvancedFilterDialog(tkinter.simpledialog.Dialog):
         self.note_from_time_minute_spinbox.set(0)
         self.note_from_time_minute_spinbox.grid(row=2, column=2, pady=(5, 5), sticky="news")
         
-        note_time_divider_label = tkinter.Label(frame, text="  -  ", bg="#d7eb5a")
+        note_time_divider_label = tkinter.Label(frame, text="  -  ", bg="#d7eb5a", fg="black")
         note_time_divider_label.grid(row=2, column=3, sticky="news")
         
         self.note_to_time_hour_spinbox = ttk.Spinbox(frame, from_=0, to=23, width=5, state="readonly", justify=tkinter.CENTER)
@@ -58,20 +58,20 @@ class AdvancedFilterDialog(tkinter.simpledialog.Dialog):
         self.note_to_time_minute_spinbox.grid(row=2, column=5, pady=(5, 5), sticky="news")
 
         # Note text
-        note_text_label = tkinter.Label(frame, text="Note text contains:", bg="#d7eb5a")
+        note_text_label = tkinter.Label(frame, text="Note text contains:", bg="#d7eb5a", fg="black")
         note_text_label.grid(row=3, column=0, pady=(5, 20), sticky="news")
         self.note_text_entry = tkinter.Entry(frame, width=25)
         self.note_text_entry.grid(row=3, column=1, columnspan=5, pady=(5, 20), sticky="news")
 
         # Priority
-        note_priority_label = tkinter.Label(frame, text="Note priority range:", bg="#d7eb5a")
+        note_priority_label = tkinter.Label(frame, text="Note priority range:", bg="#d7eb5a", fg="black")
         note_priority_label.grid(row=4, column=0, pady=(5, 20), sticky="news")
 
         self.note_min_priority_spinbox = ttk.Spinbox(frame, from_=0, to=100, state="readonly")
         self.note_min_priority_spinbox.set(0)
         self.note_min_priority_spinbox.grid(row=4, column=1, columnspan=2, pady=(5, 20), sticky="news")
 
-        note_priority_divider_label = tkinter.Label(frame, text="  -  ", bg="#d7eb5a")
+        note_priority_divider_label = tkinter.Label(frame, text="  -  ", bg="#d7eb5a", fg="black")
         note_priority_divider_label.grid(row=4, column=3, pady=(5, 20), sticky="news")
 
         self.note_max_priority_spinbox = ttk.Spinbox(frame, from_=0, to=100, state="readonly")
@@ -79,23 +79,23 @@ class AdvancedFilterDialog(tkinter.simpledialog.Dialog):
         self.note_max_priority_spinbox.grid(row=4, column=4, columnspan=2, pady=(5, 20), sticky="news")
 
         # Category
-        category_name_label = tkinter.Label(frame, text="Category name contains:", bg="#d7eb5a")
+        category_name_label = tkinter.Label(frame, text="Category name contains:", bg="#d7eb5a", fg="black")
         category_name_label.grid(row=5, column=0, sticky="news")
         self.category_name_entry = tkinter.Entry(frame, width=25)
         self.category_name_entry.grid(row=5, column=1, columnspan=5, pady=(5, 5), sticky="news")
         
-        category_description_label = tkinter.Label(frame, text="Category description contains:", bg="#d7eb5a")
+        category_description_label = tkinter.Label(frame, text="Category description contains:", bg="#d7eb5a", fg="black")
         category_description_label.grid(row=6, column=0, sticky="news")
         self.category_description_entry = tkinter.Entry(frame, width=25)
         self.category_description_entry.grid(row=6, column=1, columnspan=5, pady=(5, 5), sticky="news")
 
         # Tag
-        tag_name_label = tkinter.Label(frame, text="Tag name contains:", bg="#d7eb5a")
+        tag_name_label = tkinter.Label(frame, text="Tag name contains:", bg="#d7eb5a", fg="black")
         tag_name_label.grid(row=7, column=0, sticky="news")
         self.tag_name_entry = tkinter.Entry(frame, width=25)
         self.tag_name_entry.grid(row=7, column=1, columnspan=5, pady=(5, 5), sticky="news")
         
-        tag_description_label = tkinter.Label(frame, text="Tag description contains:", bg="#d7eb5a")
+        tag_description_label = tkinter.Label(frame, text="Tag description contains:", bg="#d7eb5a", fg="black")
         tag_description_label.grid(row=8, column=0, sticky="news")
         self.tag_description_entry = tkinter.Entry(frame, width=25)
         self.tag_description_entry.grid(row=8, column=1, columnspan=5, pady=(5, 5), sticky="news")
