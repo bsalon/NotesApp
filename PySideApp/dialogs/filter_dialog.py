@@ -93,6 +93,8 @@ class FilterDialog(QtWidgets.QDialog):
         # Buttons
         btnBox = QtWidgets.QDialogButtonBox()
         btnBox.setStandardButtons(QtWidgets.QDialogButtonBox.Save | QtWidgets.QDialogButtonBox.Cancel)
+        btnBox.button(QtWidgets.QDialogButtonBox.Save).setObjectName("black_pbutton")
+        btnBox.button(QtWidgets.QDialogButtonBox.Cancel).setObjectName("black_pbutton")
         btnBox.accepted.connect(self.ok_callback)
         btnBox.rejected.connect(self.cancel_callback)
         

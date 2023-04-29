@@ -32,9 +32,9 @@ class NoteDialog(QtWidgets.QDialog):
 
         # Priority radio buttons
         priority_layout = QtWidgets.QHBoxLayout()
-        self.yes_radiobutton = QtWidgets.QRadioButton("Yes")
+        self.yes_radiobutton = QtWidgets.QRadioButton("Yes", objectName="black_button")
         self.yes_radiobutton.setChecked(True)
-        self.no_radiobutton = QtWidgets.QRadioButton("No")
+        self.no_radiobutton = QtWidgets.QRadioButton("No", objectName="black_button")
         self.no_radiobutton.toggled.connect(self.slider_enabling)
         priority_layout.addWidget(self.yes_radiobutton)
         priority_layout.addWidget(self.no_radiobutton)
@@ -79,6 +79,8 @@ class NoteDialog(QtWidgets.QDialog):
         # Buttons
         btnBox = QtWidgets.QDialogButtonBox()
         btnBox.setStandardButtons(QtWidgets.QDialogButtonBox.Save | QtWidgets.QDialogButtonBox.Cancel)
+        btnBox.button(QtWidgets.QDialogButtonBox.Save).setObjectName("black_pbutton")
+        btnBox.button(QtWidgets.QDialogButtonBox.Cancel).setObjectName("black_pbutton")
         btnBox.accepted.connect(self.ok_callback)
         btnBox.rejected.connect(self.cancel_callback)
         
@@ -94,7 +96,7 @@ class NoteDialog(QtWidgets.QDialog):
         for category in categories:
             category_item = QtWidgets.QListWidgetItem(self.categories_listwidget)
             self.categories_listwidget.addItem(category_item)
-            self.categories_listwidget.setItemWidget(category_item, QtWidgets.QRadioButton(category))
+            self.categories_listwidget.setItemWidget(category_item, QtWidgets.QRadioButton(category, objectName="black_button"))
         
         # Selecting the first available cateogry
         if len(categories) > 0:

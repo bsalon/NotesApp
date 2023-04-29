@@ -964,14 +964,12 @@ class KivyApplicationLayout(boxlayout.BoxLayout):
 class KivyApplication(app.MDApp):
     def __init__(self, *args, **kwargs):
         super(KivyApplication, self).__init__(*args, **kwargs)
-        # MacOs doubles the size -- https://github.com/kivy/kivy/issues/8140
-        # One solution is to test system as metrics.dp didnt work in 8140
-        if platform.system() == "Darwin":
-            window.Window.size = (1280 // 2, 640 // 2)
-        else:
+        # MacOS doubles the size -- https://github.com/kivy/kivy/issues/8140
+        # This sizing doesnt work on my MacOS system
+        if platform.system() != "Darwin":
             window.Window.size = (1280, 640)
-        window.Window.minimum_width, window.Window.minimum_height = window.Window.size
-        window.Window.maximum_width, window.Window.maximum_height = window.Window.size
+            window.Window.minimum_width, window.Window.minimum_height = window.Window.size
+            window.Window.maximum_width, window.Window.maximum_height = window.Window.size
         use_cases = UseCases.UseCases()
         self.kivy_app = KivyApplicationLayout(use_cases, orientation="vertical")
 
