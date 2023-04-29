@@ -969,7 +969,7 @@ class KivyApplication(app.MDApp):
         if platform.system() == "Darwin":
             window.Window.size = (1280 // 2, 640 // 2)
         else:
-            window.Window.siye = (1280, 640)
+            window.Window.size = (1280, 640)
         window.Window.minimum_width, window.Window.minimum_height = window.Window.size
         window.Window.maximum_width, window.Window.maximum_height = window.Window.size
         use_cases = UseCases.UseCases()
