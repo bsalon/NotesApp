@@ -93,7 +93,7 @@ class MainWindow(QtWidgets.QWidget):
         col += 4
 
         # Use fast filter section
-        self.toolbar_layout.addWidget(QtWidgets.QLabel("Use fast filters:"), 0, col, 0, 3, alignment=QtGui.Qt.AlignCenter)
+        self.toolbar_layout.addWidget(QtWidgets.QLabel("Use fast filters:", objectName="black_label"), 0, col, 0, 3, alignment=QtGui.Qt.AlignCenter)
         col += 3
         self.fast_filters_text_links = [clickable_label.ClickableQLabel("#1"), clickable_label.ClickableQLabel("#2"), clickable_label.ClickableQLabel("#3")]
         for order, fast_filters_text_link in enumerate(self.fast_filters_text_links):
@@ -286,14 +286,14 @@ class MainWindow(QtWidgets.QWidget):
 
         self.notes_tab_searchbar = searchbar_with_icon.SearchBarWithIcon(objectName="search_container")
         
-        self.notes_filter_button = QtWidgets.QPushButton("Filter")
+        self.notes_filter_button = QtWidgets.QPushButton("Filter", objectName="black_pbutton")
         self.notes_filter_button.setToolTip("Resets fast or advanced filter")
         self.notes_filter_button.clicked.connect(lambda: self._set_basic_text_filtering(
             self.notes_tab_table.filter_proxy_model,
             self.notes_tab_searchbar.searchbar)
         )
 
-        self.notes_advanced_filter_button = QtWidgets.QPushButton("Advanced filter")
+        self.notes_advanced_filter_button = QtWidgets.QPushButton("Advanced filter", objectName="black_pbutton")
         self.notes_advanced_filter_button.clicked.connect(self.notes_advanced_filtering)
 
         self.notes_toggle_switch_label = QtWidgets.QLabel("Table view", objectName="black_label")
@@ -387,7 +387,7 @@ class MainWindow(QtWidgets.QWidget):
     def _init_categories_tab(self):
         self.categories_tab_layout = QtWidgets.QGridLayout(self.categories_tab_widget)
         self.categories_tab_searchbar = searchbar_with_icon.SearchBarWithIcon(objectName="search_container")
-        self.categories_filter_button = QtWidgets.QPushButton("Filter")
+        self.categories_filter_button = QtWidgets.QPushButton("Filter", objectName="black_pbutton")
         self.categories_filter_button.clicked.connect(lambda: self._set_basic_text_filtering(
             self.categories_tab_table.filter_proxy_model,
             self.categories_tab_searchbar.searchbar)
@@ -411,7 +411,7 @@ class MainWindow(QtWidgets.QWidget):
     def _init_tags_tab(self):
         self.tags_tab_layout = QtWidgets.QGridLayout(self.tags_tab_widget)
         self.tags_tab_searchbar = searchbar_with_icon.SearchBarWithIcon(objectName="search_container")
-        self.tags_filter_button = QtWidgets.QPushButton("Filter")
+        self.tags_filter_button = QtWidgets.QPushButton("Filter", objectName="black_pbutton")
         self.tags_filter_button.clicked.connect(lambda: self._set_basic_text_filtering(
             self.tags_tab_table.filter_proxy_model,
             self.tags_tab_searchbar.searchbar)
@@ -435,7 +435,7 @@ class MainWindow(QtWidgets.QWidget):
     def _init_filters_tab(self):
         self.filters_tab_layout = QtWidgets.QGridLayout(self.filters_tab_widget)
         self.filters_tab_searchbar = searchbar_with_icon.SearchBarWithIcon(objectName="search_container")
-        self.filters_filter_button = QtWidgets.QPushButton("Filter")
+        self.filters_filter_button = QtWidgets.QPushButton("Filter", objectName="black_pbutton")
         self.filters_filter_button.clicked.connect(lambda: self._set_basic_text_filtering(
             self.filters_tab_table.filter_proxy_model,
             self.filters_tab_searchbar.searchbar)

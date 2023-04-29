@@ -11,7 +11,7 @@ class TimeWidget(QtWidgets.QWidget):
 
         layout = QtWidgets.QVBoxLayout()
         
-        self.label = QtWidgets.QLabel()
+        self.label = QtWidgets.QLabel(objectName="black_label")
         self.label.setAlignment(QtCore.Qt.AlignCenter)
         
         layout.addWidget(self.label)
