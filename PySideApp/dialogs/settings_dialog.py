@@ -5,12 +5,16 @@ from PySide6 import QtWidgets, QtCore, QtGui
 
 class SettingsDialog(QtWidgets.QDialog):
     def __init__(self, *args, **kwargs):
+        """
+        Initializes settings dialog with all its widget
+        """
+
         super(SettingsDialog, self).__init__(*args, **kwargs)
         self.setWindowTitle("Select GUI library")
 
         dialog_layout = QtWidgets.QVBoxLayout()
 
-        # Name
+        # Settings info
         self.info_label = QtWidgets.QLabel("Saving with different than current library will restart the application", objectName="red_label")
         dialog_layout.addWidget(self.info_label)
         
@@ -39,6 +43,10 @@ class SettingsDialog(QtWidgets.QDialog):
 
 
     def ok_callback(self):
+        """
+        Fills data_dict property with new gui value
+        """
+
         index = 0
         for i, rb in enumerate(self.radio_buttons):
             if rb.isChecked():
@@ -53,6 +61,10 @@ class SettingsDialog(QtWidgets.QDialog):
 
 
     def cancel_callback(self):
+        """
+        Closes the dialog
+        """
+
         self.close()
 
 

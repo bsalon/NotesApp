@@ -4,6 +4,10 @@ from PySide6 import QtCore, QtWidgets, QtGui
 
 
 class TodaysNotesRowWidget(QtWidgets.QWidget):
+    """
+    Note name and note time for todays notes pane
+    """
+
     def __init__(self, note_time, note_name, parent=None):
         super(TodaysNotesRowWidget, self).__init__(parent, objectName="panel_row")
 

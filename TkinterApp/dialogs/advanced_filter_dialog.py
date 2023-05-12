@@ -9,11 +9,21 @@ import datetime
 
 class AdvancedFilterDialog(tkinter.simpledialog.Dialog):
     def __init__(self, master, *args, **kwargs):
+        """
+        Initializes advanced filter dialog
+        """
+
         self.accepted = False
         super(AdvancedFilterDialog, self).__init__(master, title="Advanced filter dialog", *args, **kwargs)
 
 
     def body(self, frame):
+        """
+        Puts all dialog widgets into the dialog frame
+
+        :param frame: Dialog frame
+        """
+
         frame.configure(bg="#d7eb5a")
 
         # Note name
@@ -22,7 +32,7 @@ class AdvancedFilterDialog(tkinter.simpledialog.Dialog):
         self.note_name_entry = tkinter.Entry(frame, width=25)
         self.note_name_entry.grid(row=0, column=1, columnspan=5, pady=(5, 5), sticky="news")
 
-        # Note date
+        # Note date range
         today = datetime.date.today()
         note_date_label = tkinter.Label(frame, text="Note date range:", bg="#d7eb5a", fg="black")
         note_date_label.grid(row=1, column=0, sticky="news")
@@ -34,7 +44,7 @@ class AdvancedFilterDialog(tkinter.simpledialog.Dialog):
         self.note_to_date_entry = tkcalendar.DateEntry(frame, selectmode="day", year=today.year, month=today.month, day=today.day)
         self.note_to_date_entry.grid(row=1, column=4, columnspan=2, pady=(5, 5), sticky="news")
 
-        # Note time
+        # Note time range
         note_time_label = tkinter.Label(frame, text="Note time (hh:mm) range:", bg="#d7eb5a", fg="black")
         note_time_label.grid(row=2, column=0, pady=(5, 5), sticky="news")
         
@@ -63,7 +73,7 @@ class AdvancedFilterDialog(tkinter.simpledialog.Dialog):
         self.note_text_entry = tkinter.Entry(frame, width=25)
         self.note_text_entry.grid(row=3, column=1, columnspan=5, pady=(5, 20), sticky="news")
 
-        # Priority
+        # Note priority range
         note_priority_label = tkinter.Label(frame, text="Note priority range:", bg="#d7eb5a", fg="black")
         note_priority_label.grid(row=4, column=0, pady=(5, 20), sticky="news")
 
@@ -78,23 +88,25 @@ class AdvancedFilterDialog(tkinter.simpledialog.Dialog):
         self.note_max_priority_spinbox.set(100)
         self.note_max_priority_spinbox.grid(row=4, column=4, columnspan=2, pady=(5, 20), sticky="news")
 
-        # Category
+        # Category name
         category_name_label = tkinter.Label(frame, text="Category name contains:", bg="#d7eb5a", fg="black")
         category_name_label.grid(row=5, column=0, sticky="news")
         self.category_name_entry = tkinter.Entry(frame, width=25)
         self.category_name_entry.grid(row=5, column=1, columnspan=5, pady=(5, 5), sticky="news")
         
+        # Category description
         category_description_label = tkinter.Label(frame, text="Category description contains:", bg="#d7eb5a", fg="black")
         category_description_label.grid(row=6, column=0, sticky="news")
         self.category_description_entry = tkinter.Entry(frame, width=25)
         self.category_description_entry.grid(row=6, column=1, columnspan=5, pady=(5, 5), sticky="news")
 
-        # Tag
+        # Tag name
         tag_name_label = tkinter.Label(frame, text="Tag name contains:", bg="#d7eb5a", fg="black")
         tag_name_label.grid(row=7, column=0, sticky="news")
         self.tag_name_entry = tkinter.Entry(frame, width=25)
         self.tag_name_entry.grid(row=7, column=1, columnspan=5, pady=(5, 5), sticky="news")
         
+        # Tag description
         tag_description_label = tkinter.Label(frame, text="Tag description contains:", bg="#d7eb5a", fg="black")
         tag_description_label.grid(row=8, column=0, sticky="news")
         self.tag_description_entry = tkinter.Entry(frame, width=25)
@@ -109,6 +121,10 @@ class AdvancedFilterDialog(tkinter.simpledialog.Dialog):
 
 
     def save_pressed(self):
+        """
+        Fills data_dict property with field values and closes the dialog
+        """
+
         self.accepted = True
         self.data_dict = {
             "note_name" : self.note_name_entry.get(),
@@ -126,6 +142,12 @@ class AdvancedFilterDialog(tkinter.simpledialog.Dialog):
 
 
     def _get_selected_from_datetime(self):
+        """
+        Gets from datetime in datetime range
+
+        :return: From datetime in datetime range
+        """
+
         date = self.note_from_date_entry.get_date()
         note_date = datetime.datetime.combine(date, datetime.datetime.min.time())
         note_datetime = note_date + datetime.timedelta(hours=int(self.note_from_time_hour_spinbox.get()),
@@ -134,6 +156,12 @@ class AdvancedFilterDialog(tkinter.simpledialog.Dialog):
 
 
     def _get_selected_to_datetime(self):
+        """
+        Gets to datetime in datetime range
+
+        :return: To datetime in datetime range
+        """
+
         date = self.note_to_date_entry.get_date()
         note_date = datetime.datetime.combine(date, datetime.datetime.min.time())
         note_datetime = note_date + datetime.timedelta(hours=int(self.note_to_time_hour_spinbox.get()),
@@ -142,11 +170,19 @@ class AdvancedFilterDialog(tkinter.simpledialog.Dialog):
 
 
     def cancel_pressed(self):
+        """
+        Closes the dialog
+        """
+
         self.accepted = False
         self.destroy()
 
 
     def buttonbox(self):
+        """
+        Creates buttons for dialog
+        """
+
         self.configure(bg="#d7eb5a")
         self.ok_button = tkinter.Button(self, text='Save', width=5, command=self.save_pressed)
         self.ok_button.pack(side="top")

@@ -6,6 +6,10 @@ from PySide6 import QtWidgets, QtCore, QtGui
 
 
 class SearchBarWithIcon(QtWidgets.QWidget):
+    """
+    Search field with magnify icon to filter items by name
+    """
+
     def __init__(self, *args, **kwargs):
         super(SearchBarWithIcon, self).__init__(*args, **kwargs)
         image_path = pathlib.Path(__file__).parent.parent.parent / "Images" / "SearchIcon.png"

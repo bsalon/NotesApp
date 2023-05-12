@@ -5,32 +5,36 @@ from PySide6 import QtWidgets, QtCore, QtGui
 
 class NoteDialog(QtWidgets.QDialog):
     def __init__(self, categories, tags, *args, **kwargs):
+        """
+        Initializes note dialog with all its widgets
+        """
+
         super(NoteDialog, self).__init__(*args, **kwargs)
         self.setWindowTitle("Note dialog")
 
         dialog_layout = QtWidgets.QVBoxLayout()
         form_layout = QtWidgets.QFormLayout()
 
-        # Name
+        # Note name
         self.name_lineedit = QtWidgets.QLineEdit()
         name_label = QtWidgets.QLabel("Name:", objectName="black_label")
         form_layout.addRow(name_label, self.name_lineedit)
         
-        # Date and time
+        # Note date and time
         self.datetime_lineedit = QtWidgets.QDateTimeEdit(QtCore.QDateTime.currentDateTime())
         self.datetime_lineedit.setDisplayFormat("dd:MM:yyyy hh:mm")
         self.datetime_lineedit.setToolTip("Rewrite date and time or use ticks")
         datetime_label = QtWidgets.QLabel("Date and time:", objectName="black_label")
         form_layout.addRow(datetime_label, self.datetime_lineedit)
         
-        # Text
+        # Note text
         self.text_lineedit = QtWidgets.QLineEdit()
         text_label = QtWidgets.QLabel("Text:", objectName="black_label")
         form_layout.addRow(text_label, self.text_lineedit)
         
         form_layout.addItem(QtWidgets.QSpacerItem(0, 20))
 
-        # Priority radio buttons
+        # Note priority radio buttons
         priority_layout = QtWidgets.QHBoxLayout()
         self.yes_radiobutton = QtWidgets.QRadioButton("Yes", objectName="black_button")
         self.yes_radiobutton.setChecked(True)
@@ -42,7 +46,7 @@ class NoteDialog(QtWidgets.QDialog):
         priority_label = QtWidgets.QLabel("Assign priority:", objectName="black_label")
         form_layout.addRow(priority_label, priority_layout)
         
-        # Priority value label and slider
+        # Note priority value label and slider
         self.priority_slider_label = QtWidgets.QLabel("0", objectName="black_label")
         self.priority_slider_label.setAlignment(QtCore.Qt.AlignmentFlag.AlignHCenter | QtCore.Qt.AlignmentFlag.AlignCenter)
         self.priority_slider_label.setMinimumWidth(80)
@@ -60,7 +64,7 @@ class NoteDialog(QtWidgets.QDialog):
 
         form_layout.addItem(QtWidgets.QSpacerItem(0, 20))
 
-        # Categories
+        # Note categories
         self.categories_listwidget = QtWidgets.QListWidget()
         self.categories_listwidget.setMaximumHeight(60)
         self.categories_listwidget.setToolTip("Select one category from the list")
@@ -68,7 +72,7 @@ class NoteDialog(QtWidgets.QDialog):
         category_label = QtWidgets.QLabel("Category:", objectName="black_label")
         form_layout.addRow(category_label, self.categories_listwidget)
 
-        # Tags
+        # Note tags
         self.tags_listwidget = QtWidgets.QListWidget()
         self.tags_listwidget.setMaximumHeight(60)
         self.tags_listwidget.setToolTip("Select zero or more tags from the list")
@@ -93,11 +97,17 @@ class NoteDialog(QtWidgets.QDialog):
 
 
     def fill_categories_listwidget(self, categories):
+        """
+        Fills categories listwidget with all available categories
+
+        :param categories: Available categories
+        """
+
         for category in categories:
             category_item = QtWidgets.QListWidgetItem(self.categories_listwidget)
             self.categories_listwidget.addItem(category_item)
             self.categories_listwidget.setItemWidget(category_item, QtWidgets.QRadioButton(category, objectName="black_button"))
-        
+
         # Selecting the first available cateogry
         if len(categories) > 0:
             category_item = self.categories_listwidget.item(0)
@@ -106,6 +116,12 @@ class NoteDialog(QtWidgets.QDialog):
 
 
     def fill_tags_listwidget(self, tags):
+        """
+        Fills tags listwidget with all available tags
+
+        :param tags: Available tags
+        """
+
         for tag in tags:
             tag_item = QtWidgets.QListWidgetItem(tag)
             tag_item.setCheckState(QtCore.Qt.Unchecked)
@@ -113,6 +129,12 @@ class NoteDialog(QtWidgets.QDialog):
 
 
     def slider_enabling(self, event):
+        """
+        Toggle slide visibility
+
+        :param event: Event causing this method
+        """
+
         if event:
             self.priority_slider_label.setText("0")
             self.priority_slider.setValue(0)
@@ -122,6 +144,12 @@ class NoteDialog(QtWidgets.QDialog):
 
 
     def fill_dialog(self, note):
+        """
+        Fills dialog widgets with note values
+
+        :param note: Note object
+        """
+
         self.name_lineedit.setText(note.name)
         self.datetime_lineedit.setDateTime(note.time)
         self.text_lineedit.setText(note.text)
@@ -132,6 +160,12 @@ class NoteDialog(QtWidgets.QDialog):
 
 
     def select_category(self, category):
+        """
+        Select category in the widget
+
+        :param category: Category to be selected
+        """
+
         for i in range(self.categories_listwidget.count()):
             category_item = self.categories_listwidget.item(i)
             category_item_widget = self.categories_listwidget.itemWidget(category_item)
@@ -140,6 +174,12 @@ class NoteDialog(QtWidgets.QDialog):
 
 
     def select_tags(self, tags):
+        """
+        Select tags in the widget
+
+        :param tags: Tags to be selected
+        """
+
         for i in range(self.tags_listwidget.count()):
             tag_item = self.tags_listwidget.item(i)
             if tag_item.text() in tags:
@@ -147,6 +187,12 @@ class NoteDialog(QtWidgets.QDialog):
 
 
     def get_selected_category_name(self):
+        """
+        Gets selected category name
+
+        :return: Selected category name
+        """
+
         for i in range(self.categories_listwidget.count()):
             category_item = self.categories_listwidget.item(i)
             category_item_widget = self.categories_listwidget.itemWidget(category_item)
@@ -155,15 +201,31 @@ class NoteDialog(QtWidgets.QDialog):
 
 
     def get_selected_tags_names(self):
+        """
+        Gets selected tags names
+
+        :return: Selected tags names
+        """
+
         return [self.tags_listwidget.item(index).text() for index in range(self.tags_listwidget.count()) if self.tags_listwidget.item(index).checkState() == QtCore.Qt.Checked]
 
 
     @QtCore.Slot()
     def update_slider_label(self, value):
+        """
+        Updates slider label
+
+        :param value: New value of the label
+        """
+
         self.priority_slider_label.setText(str(value))
 
 
     def ok_callback(self):
+        """
+        Fills data_dict property with field values and closes the dialog
+        """
+
         if not self._validate():
             return
         self.data_dict = {
@@ -179,10 +241,22 @@ class NoteDialog(QtWidgets.QDialog):
 
 
     def _validate(self):
+        """
+        Validates name field
+        """
+
         return self._validate_field(self.name_lineedit)
 
 
     def _validate_field(self, field):
+        """
+        Validates field value by testing if its empty
+
+        :param field: Field to be validated
+
+        :return: True if field value is not empty False otherwise
+        """
+
         if field.text() == "" or field.text().isspace():
             field.setStyleSheet("background: #ff7f7f")
             return False
@@ -191,6 +265,10 @@ class NoteDialog(QtWidgets.QDialog):
 
 
     def cancel_callback(self):
+        """
+        Closes the dialog
+        """
+
         self.close()
 
 

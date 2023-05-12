@@ -10,18 +10,22 @@ from KivyApp.widgets import multi_select_spinner
 
 class NoteDialog(popup.Popup):
     def __init__(self, categories_names, tags_names, **kwargs):
+        """
+        Initializes note dialog with all its widgets
+        """
+
         super(NoteDialog, self).__init__(**kwargs)
         self.title = "Note dialog"
         layout = boxlayout.BoxLayout(orientation="vertical")
 
-        # Name
+        # Note name
         name_label = label.Label(text="Name:", color="black", size_hint=(1/2, 1))
         self.name_input = textinput.TextInput(size_hint=(1/2, 1), multiline=False)
         name_layout = boxlayout.BoxLayout(orientation="horizontal")
         name_layout.add_widget(name_label)
         name_layout.add_widget(self.name_input)
 
-        # Date
+        # Note date
         today = datetime.date.today()
 
         date_label = label.Label(text="Date:", color="black", size_hint=(1/2, 1))
@@ -30,21 +34,21 @@ class NoteDialog(popup.Popup):
         date_layout.add_widget(date_label)
         date_layout.add_widget(self.date_button)
 
-        # Time
+        # Note time
         time_label = label.Label(text="Time:", color="black", size_hint=(1/2, 1))
         self.time_button = button.Button(text="00:00", size_hint=(1/2, 1), on_release=self._show_time_picker)
         time_layout = boxlayout.BoxLayout(orientation="horizontal")
         time_layout.add_widget(time_label)
         time_layout.add_widget(self.time_button)
 
-        # Text
+        # Note text
         text_label = label.Label(text="Text:", color="black", size_hint=(1/2, 1))
         self.text_input = textinput.TextInput(size_hint=(1/2, 1), multiline=False)
         text_layout = boxlayout.BoxLayout(orientation="horizontal")
         text_layout.add_widget(text_label)
         text_layout.add_widget(self.text_input)
 
-        # Priority
+        # Note priority
         priority_label = label.Label(text="Assign priority:", color="black", size_hint=(1/2, 1))
         priority_yes_label = label.Label(text="Yes", color="black", size_hint=(1/8, 1))
         self.priority_yes_radiobutton = checkbox.CheckBox(group="priority", active=True, allow_no_selection=False, size_hint=(1/8, 1))
@@ -59,7 +63,7 @@ class NoteDialog(popup.Popup):
         priority_layout.add_widget(priority_no_label)
         priority_layout.add_widget(self.priority_no_radiobutton)
 
-        # Priority slider
+        # Note priority slider
         priority_value = label.Label(text="0", color="black", size_hint=(1/2, 1))
         priority_slider_value = properties.NumericProperty(0)
         self.priority_slider = slider.Slider(min=0, max=100, value_track=True, size_hint=(1/2, 1))
@@ -113,6 +117,12 @@ class NoteDialog(popup.Popup):
 
 
     def fill_dialog(self, note):
+        """
+        Fills dialog widgets with note values
+
+        :param note: Note object
+        """
+
         self.name_input.text = note.name
         self.date_button.text = note.time.date().strftime("%d-%m-%Y")
         self.time_button.text = note.time.time().strftime("%H:%M")
@@ -123,6 +133,12 @@ class NoteDialog(popup.Popup):
 
 
     def _show_date_picker(self, instance):
+        """
+        Shows datepicker with set date
+
+        :param instance: Instance causing this method
+        """
+
         previous_date = datetime.datetime.strptime(self.date_button.text, "%d-%m-%Y").date()
         date_picker = pickers.MDDatePicker(
             year=previous_date.year,
@@ -134,10 +150,24 @@ class NoteDialog(popup.Popup):
 
 
     def _set_date_button(self, instance, time, date_range):
+        """
+        Sets date to a date button text
+
+        :param instance: Instance causing this method
+        :param time: DatePicker time
+        :param date_range: DatePicker date_range
+        """
+
         self.date_button.text = time.strftime("%d-%m-%Y")
 
 
     def _show_time_picker(self, instance):
+        """
+        Shows TimePicker from time dialog
+
+        :param instance: Instance causing this method
+        """
+
         previous_time = datetime.datetime.strptime(self.time_button.text, "%H:%M").time()
         time_picker = pickers.MDTimePicker()
         time_picker.set_time(previous_time)
@@ -146,10 +176,24 @@ class NoteDialog(popup.Popup):
 
 
     def _set_time_button(self, instance, time):
+        """
+        Sets time to a time button text
+
+        :param instance: Instance causing this method
+        :param time: DatePicker time
+        """
+
         self.time_button.text = time.strftime("%H:%M")
 
 
     def _slider_enabling(self, instance, state):
+        """
+        Toggles priority slider visibility
+
+        :param instance: Instance causing this method
+        :param state: State of the no radiobutton
+        """
+
         w = self.priority_slider_layout
         if state == "down":
             w.saved_attrs = w.width, w.size_hint_x, w.size_hint_y, w.opacity, w.disabled
@@ -160,6 +204,12 @@ class NoteDialog(popup.Popup):
 
 
     def _save(self, instance):
+        """
+        Saves dialog date into data_dict and closes the dialog
+
+        :param instance: Instance causing this method
+        """
+
         if not self._validate():
             return
         self.accepted = True
@@ -175,20 +225,35 @@ class NoteDialog(popup.Popup):
 
 
     def _close(self, instance):
+        """
+        Closes ths dialog
+
+        :param instance: Instance causing this method
+        """
+
         self.accepted = False
         self.dismiss()
 
 
     def _validate(self):
+        """
+        Validates name field
+        """
+
         return self._validate_field(self.name_input)
 
 
     def _validate_field(self, field):
+        """
+        Validates field value by testing if its empty
+
+        :param field: Field to be validated
+        """
+
         if field.text == "" or field.text.isspace():
             field.background_color = (1, 0.5, 0.5, 1)
             return False
         field.background_color = (1, 1, 1, 1)
         return True
-
 
 

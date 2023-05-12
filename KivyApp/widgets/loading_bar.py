@@ -4,6 +4,10 @@ from kivy import clock
 
 
 class LoadingBar(progressbar.ProgressBar):
+    """
+    Infinite loading bar
+    """
+
     def __init__(self, *args, **kwargs):
         super(LoadingBar, self).__init__(*args, **kwargs)
         self.load_level = 0

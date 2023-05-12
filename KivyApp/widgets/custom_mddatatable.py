@@ -2,6 +2,12 @@ from kivymd.uix import datatables
 
 
 class CustomMDDataTable(datatables.MDDataTable):
+    """
+    Table used in the tabs to display records
+
+    Methods are used for CRUD operations
+    """
+
     def __init__(self, *args, **kwargs):
         super(CustomMDDataTable, self).__init__(*args, **kwargs)
         self.selected_rows = []

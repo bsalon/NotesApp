@@ -9,6 +9,10 @@ import datetime
 
 class NoteDialog(tkinter.simpledialog.Dialog):
     def __init__(self, master, categories_names, tags_names, note=None, *args, **kwargs):
+        """
+        Initializes note dialog
+        """
+
         self.accepted = False
         self.categories_names = categories_names
         self.tags_names = tags_names
@@ -17,15 +21,21 @@ class NoteDialog(tkinter.simpledialog.Dialog):
 
 
     def body(self, frame):
+        """
+        Puts all dialog widgets into the dialog frame
+
+        :param frame: Dialog frame
+        """
+
         frame.configure(bg="#d7eb5a")
 
-        # Name
+        # Note name
         name_label = tkinter.Label(frame, text="Name:", bg="#d7eb5a", fg="black")
         name_label.grid(row=0, column=0, sticky="news")
         self.name_entry = tkinter.Entry(frame, width=25)
         self.name_entry.grid(row=0, column=1, columnspan=2, pady=(5, 5))
 
-        # Date and time
+        # Note date range
         today = datetime.date.today()
 
         date_label = tkinter.Label(frame, text="Date:", bg="#d7eb5a", fg="black")
@@ -33,6 +43,7 @@ class NoteDialog(tkinter.simpledialog.Dialog):
         self.date_entry = tkcalendar.DateEntry(frame, selectmode="day", year=today.year, month=today.month, day=today.day)
         self.date_entry.grid(row=1, column=1, columnspan=2, pady=(5, 5), sticky="news")
 
+        # Note time range
         time_label = tkinter.Label(frame, text="Time (hh:mm):", bg="#d7eb5a", fg="black")
         time_label.grid(row=2, column=0, pady=(5, 5), sticky="news")
         self.time_hour_spinbox = ttk.Spinbox(frame, from_=0, to=23, wrap=True, width=5, state="readonly", justify=tkinter.CENTER)
@@ -43,13 +54,13 @@ class NoteDialog(tkinter.simpledialog.Dialog):
         self.time_minute_spinbox.set(0)
         self.time_minute_spinbox.grid(row=2, column=2, pady=(5, 5), sticky="news")
 
-        # Text
+        # Note text
         text_label = tkinter.Label(frame, text="Text:", bg="#d7eb5a", fg="black")
         text_label.grid(row=3, column=0, pady=(5, 20), sticky="news")
         self.text_entry = tkinter.Entry(frame, width=25)
         self.text_entry.grid(row=3, column=1, columnspan=2, pady=(5, 20))
 
-        # Priority radio buttons
+        # Note priority
         priority_label = tkinter.Label(frame, text="Assign priority:", bg="#d7eb5a", fg="black")
         priority_label.grid(row=4, column=0, pady=(5, 5), sticky="news")
         self.assign_priority = tkinter.IntVar()
@@ -58,7 +69,6 @@ class NoteDialog(tkinter.simpledialog.Dialog):
         no_radiobutton = tkinter.Radiobutton(frame, text="No", variable=self.assign_priority, value=2, command=self._slider_enabling, bg="#d7eb5a", fg="black")
         no_radiobutton.grid(row=4, column=2, pady=(5, 5))
 
-        # Priority slider
         self.priority_slider = tkinter.Scale(frame, from_=0, to=100, orient=tkinter.HORIZONTAL, bg="#d7eb5a", fg="black")
         self.priority_slider.grid(row=5, column=1, columnspan=2, pady=(5, 20), sticky="news")
 
@@ -90,6 +100,10 @@ class NoteDialog(tkinter.simpledialog.Dialog):
 
 
     def save_pressed(self):
+        """
+        Fills date_dict property with field values and closes the dialog
+        """
+
         if not self._validate():
             return
         self.accepted = True
@@ -105,10 +119,22 @@ class NoteDialog(tkinter.simpledialog.Dialog):
 
 
     def _validate(self):
+        """
+        Validates name field
+        """
+
         return self._validate_field(self.name_entry)
 
 
     def _validate_field(self, field):
+        """
+        Validates field value by testing if its empty
+
+        :param field: Field to be validated
+
+        :return: True if field value is not empty False otherwise
+        """
+
         if field.get() == "" or field.get().isspace():
             field.config({"background": "#ff7f7f"})
             return False
@@ -117,6 +143,12 @@ class NoteDialog(tkinter.simpledialog.Dialog):
 
 
     def _get_selected_datetime(self):
+        """
+        Gets note datetime
+
+        :return: Note datetime
+        """
+
         date = self.date_entry.get_date()
         note_date = datetime.datetime.combine(date, datetime.datetime.min.time())
         note_datetime = note_date + datetime.timedelta(hours=int(self.time_hour_spinbox.get()),
@@ -125,14 +157,28 @@ class NoteDialog(tkinter.simpledialog.Dialog):
 
 
     def _get_selected_tags(self):
+        """
+        Gets selected tags
+
+        :return: Selected tags
+        """
+
         return [self.tags_listbox.get(i) for i in self.tags_listbox.curselection()]
 
 
     def cancel_pressed(self):
+        """
+        Closes the dialog
+        """
+
         self.destroy()
 
 
     def buttonbox(self):
+        """
+        Creates buttons for dialog
+        """
+
         self.configure(bg="#d7eb5a")
         self.ok_button = tkinter.Button(self, text='Save', width=5, command=self.save_pressed)
         self.ok_button.pack(side="top")
@@ -143,6 +189,10 @@ class NoteDialog(tkinter.simpledialog.Dialog):
 
 
     def fill_dialog(self):
+        """
+        Fills dialog fields with note values
+        """
+
         note = self.note
         self.name_entry.insert(0, note.name)
         self.date_entry.set_date(note.time)
@@ -156,16 +206,32 @@ class NoteDialog(tkinter.simpledialog.Dialog):
 
 
     def select_category(self, category):
+        """
+        Selects category in combobox
+
+        :param category: Category to be selected
+        """
+
         self.categories_combobox.set(category)
 
 
     def select_tags(self, tags):
+        """
+        Selects tags in listbox
+
+        :param tags: Tags to be selected
+        """
+
         for index, tag in enumerate(self.tags_names):
             if tag in tags:
                 self.tags_listbox.select_set(index)
 
 
     def _slider_enabling(self):
+        """
+        Toggle priority slider visibility
+        """
+
         if self.assign_priority.get() == 1:
             self.priority_slider.grid()
         else:

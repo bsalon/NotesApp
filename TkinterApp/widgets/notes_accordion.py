@@ -5,6 +5,12 @@ from TkinterApp.widgets import scrollable_frame
 
 
 class NotesAccordion(scrollable_frame.ScrollableFrame):
+    """
+    Accordion widget displaying notes
+
+    Methods are used for CRUD operations
+    """
+
     def __init__(self, master, notes, *args, **kwargs):
         super(NotesAccordion, self).__init__(master, *args, **kwargs)
         self.notes = notes

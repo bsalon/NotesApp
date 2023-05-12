@@ -69,6 +69,12 @@ Builder.load_string(
 
 
 class NotesAccordionBox(BoxLayout):
+    """
+    Accordion box layout with accordion widget
+
+    Methods are used for Read operations
+    """
+
     def __init__(self, notes, row_selection_function, *args, **kwargs):
         super(NotesAccordionBox, self).__init__(*args, **kwargs)
         self.notes_accordion = NotesAccordion(notes, row_selection_function, size_hint_y=None, height=metrics.dp(600))
@@ -89,6 +95,12 @@ class NotesAccordionBox(BoxLayout):
 
 
 class NotesAccordion(accordion.Accordion):
+    """
+    Accordion widget displaying notes
+
+    Methods are used for CRUD operations
+    """
+
     def __init__(self, notes, row_selection_function, *args, **kwargs):
         super(NotesAccordion, self).__init__(orientation="vertical", *args, **kwargs)
         self.create_items(notes)

@@ -17,12 +17,20 @@ from PySide6 import QtCore, QtWidgets, QtGui
 
 class MainWindow(QtWidgets.QWidget):
     def __init__(self, use_cases, *args, **kwargs):
+        """
+        Initializes the main window widget with all its contents
+
+        :param use_cases: Class contaning methods that retrieve data for the application
+        """
+
         super(MainWindow, self).__init__(*args, **kwargs)
+
+        # Constant representing which gui is used 0 == PySide
         self.gui = 0
 
         self.use_cases = use_cases
         
-        # get data from database for tables and accordion
+        # Get data from database for tables and accordion
         self.current_note_filter = self.create_default_filter()
         self.grid_page = 1
         self.grid_notes = [note for note in self.use_cases.get_filtered_notes_paged(self.current_note_filter, page=self.grid_page, size=10)]
@@ -46,25 +54,25 @@ class MainWindow(QtWidgets.QWidget):
         self.layout.setContentsMargins(0, 0, 0, 0)
         self.layout.setSpacing(0)
 
-        # toolbar layout on top
+        # Toolbar layout on top
         self.toolbar_container_widget = QtWidgets.QWidget(objectName="toolbar_container")
         self.toolbar_layout = QtWidgets.QGridLayout(self.toolbar_container_widget)
         self._init_toolbar_layout()
         self.layout.addWidget(self.toolbar_container_widget, 0, 0, 1, 8)
         
-        # todays notes layout
+        # Todays notes layout
         self.todays_notes_container_widget = QtWidgets.QWidget(objectName="todays_notes_container")
         self.todays_notes_layout = QtWidgets.QGridLayout(self.todays_notes_container_widget)
         self._init_todays_notes_layout()
         self.layout.addWidget(self.todays_notes_container_widget, 1, 0, 14, 1)
         
-        # content layout
+        # Content layout
         self.tabs_content_container_widget = QtWidgets.QWidget(objectName="tabs_content_container")
         self.tabs_content_layout = QtWidgets.QGridLayout(self.tabs_content_container_widget)
         self._init_tabs_content_layout()
         self.layout.addWidget(self.tabs_content_container_widget, 1, 1, 14, 7)
 
-        # stretch rows and columns
+        # Stretch rows and columns
         for r in range(15):
             self.layout.setRowStretch(r, 1)
         for c in range(8):
@@ -74,6 +82,10 @@ class MainWindow(QtWidgets.QWidget):
 
 
     def _init_toolbar_layout(self):
+        """
+        Initializes widgets in the toolbar
+        """
+
         col = 0
         image_dir_path = pathlib.Path(__file__).parent.parent / "Images"
 
@@ -171,6 +183,10 @@ class MainWindow(QtWidgets.QWidget):
 
 
     def change_library(self):
+        """
+        Changes the used gui library of the application
+        """
+
         dialog = settings_dialog.SettingsDialog(objectName="dialog")
         if dialog.exec():
             self.gui = dialog.data_dict["library"]
@@ -182,9 +198,15 @@ class MainWindow(QtWidgets.QWidget):
 
     @QtCore.Slot()
     def toggle_todays_notes_pane(self):
+        """
+        Toggles the visibility of todays notes pane
+        """
+
+        # Hide todays notes pane
         if self.todays_notes_pane_visible:
             self.todays_notes_container_widget.hide()
             self.layout.addWidget(self.tabs_content_container_widget, 1, 0, 14, 8)
+        # Show todays notes pane
         else:
             self.layout.addWidget(self.tabs_content_container_widget, 1, 1, 14, 7)
             self.todays_notes_container_widget.show()
@@ -194,6 +216,12 @@ class MainWindow(QtWidgets.QWidget):
 
     @QtCore.Slot()
     def use_fast_filter(self, order):
+        """
+        Uses fast filter from the toolbar layout
+
+        :param order: Order value of the Filter object
+        """
+
         self.current_note_filter = self.use_cases.find_filter_by_order(order)
         if self.current_note_filter == None:
             self.current_note_filter = self.create_default_filter()
@@ -203,14 +231,20 @@ class MainWindow(QtWidgets.QWidget):
 
 
     def _init_todays_notes_layout(self):
+        """
+        Initializes widgets in todays notes pane
+        """
+
         self.todays_notes_layout.setContentsMargins(0, 0, 0, 0)
         self.todays_notes_layout.setSpacing(0)
         
+        # Todays notes header label
         self.todays_notes_header = QtWidgets.QLabel("Today's notes", objectName="todays_notes_header")
         self.todays_notes_header.setAlignment(QtCore.Qt.AlignHCenter)
         self.todays_notes_header.setMargin(12)
         self.todays_notes_layout.addWidget(self.todays_notes_header)
 
+        # List of todays notes
         self.todays_notes_list = QtWidgets.QListWidget(objectName="todays_notes_list")
         for note in self.today_notes:
             item = QtWidgets.QListWidgetItem(self.todays_notes_list)
@@ -227,6 +261,12 @@ class MainWindow(QtWidgets.QWidget):
 
     # Maybe faster algorithm here could help
     def remove_notes_from_todays_notes(self, notes):
+        """
+        Removes notes from todays notes pane
+
+        :param notes: Notes to remove from todays notes pane
+        """
+
         remove_indices = []
         for i in range(self.todays_notes_list.count()):
             item = self.todays_notes_list.item(i)
@@ -241,6 +281,13 @@ class MainWindow(QtWidgets.QWidget):
 
 
     def add_note_to_todays_notes(self, note):
+        """
+        Adds note to todays notes pane
+
+        :param note: Note to add to todays notes pane
+        """
+
+        # Add only if date of note is today
         if note.time.date() == datetime.today().date():
             note_tuple = (note.time.strftime("%H:%M"), note.name)
             bisect.insort_left(self.today_notes, note_tuple)
@@ -256,8 +303,13 @@ class MainWindow(QtWidgets.QWidget):
 
     
     def _init_tabs_content_layout(self):
+        """
+        Initializes tabs widget
+        """
+
         self.tabs = QtWidgets.QTabWidget(objectName="tabs")
 
+        # Specific tabs
         self.notes_tab_widget = QtWidgets.QWidget(objectName="notes_tab")
         self._init_notes_tab()
         self.categories_tab_widget = QtWidgets.QWidget(objectName="categories_tab")
@@ -267,6 +319,7 @@ class MainWindow(QtWidgets.QWidget):
         self.filters_tab_widget = QtWidgets.QWidget(objectName="filters_tab")
         self._init_filters_tab()
 
+        # Adding initialized tabs
         self.tabs.addTab(self.notes_tab_widget, "Notes")
         self.tabs.addTab(self.categories_tab_widget, "Categories")
         self.tabs.addTab(self.tags_tab_widget, "Tags")
@@ -278,6 +331,10 @@ class MainWindow(QtWidgets.QWidget):
 
 
     def _init_notes_tab(self):
+        """
+        Initializes widgets in the notes tab
+        """
+
         self.notes_tab_layout = QtWidgets.QGridLayout(self.notes_tab_widget)
 
         self.notes_tab_filtering_container_widget = QtWidgets.QWidget(objectName="filtering_container")
@@ -318,7 +375,7 @@ class MainWindow(QtWidgets.QWidget):
         )
         self.notes_tab_table.selectionModel().selectionChanged.connect(self.table_update_buttons_enabling)
 
-        # accordion
+        # Accordion with pagination
         self.notes_tab_accordion = notes_accordion.NotesAccordion(self.grid_notes)
         self.notes_tab_accordion.selection_changed.connect(self.notes_accordion_buttons_enabling)
         self.notes_tab_accordion.hide()
@@ -337,6 +394,10 @@ class MainWindow(QtWidgets.QWidget):
 
     @QtCore.Slot()
     def notes_advanced_filtering(self):
+        """
+        Opens advanced filter dialog and filters notes based on its values
+        """
+
         dialog = advanced_filter_dialog.AdvancedFilterDialog(objectName="dialog")
         if dialog.exec():
             filters = lambda: None
@@ -357,6 +418,10 @@ class MainWindow(QtWidgets.QWidget):
 
 
     def use_current_note_filter(self):
+        """
+        Filters notes based on the currently saved filter
+        """
+
         self.grid_page = self.notes_tab_accordion_pagination.current_page = 1
         filtered_notes = self.use_cases.get_filtered_notes(self.current_note_filter)
         self.table_notes = [(note.name, note.priority, note.time.strftime("%d/%m/%Y %H:%M"), note.text) for note in filtered_notes]
@@ -368,23 +433,35 @@ class MainWindow(QtWidgets.QWidget):
 
     @QtCore.Slot()
     def toggle_notes_view(self, table_view):
+        """
+        Toggles visibility of table and accordion based on the toggle state
+        """
+
         self.is_table_view = table_view
+
+        # Hide accordion and show table
         if table_view:
             self.notes_tab_accordion.hide()
             self.notes_tab_accordion_pagination.hide()
             selected_rows_count = self.count_selected_rows(self.notes_tab_table)
             self.notes_tab_table.show()
+        # Hide table and show accordion
         else:
             self.notes_tab_table.hide()
             selected_rows_count = self.count_selected_notes()
             self.notes_tab_accordion.show()
             self.notes_tab_accordion_pagination.show()
+
         self.edit_icon_button.setEnabled(selected_rows_count == 1)
         self.delete_icon_button.setEnabled(selected_rows_count >= 1)
 
 
 
     def _init_categories_tab(self):
+        """
+        Initializes widgets in the categories tab
+        """
+
         self.categories_tab_layout = QtWidgets.QGridLayout(self.categories_tab_widget)
         self.categories_tab_searchbar = searchbar_with_icon.SearchBarWithIcon(objectName="search_container")
         self.categories_filter_button = QtWidgets.QPushButton("Filter", objectName="black_pbutton")
@@ -409,6 +486,10 @@ class MainWindow(QtWidgets.QWidget):
 
 
     def _init_tags_tab(self):
+        """
+        Initializes widgets in the tags tab
+        """
+
         self.tags_tab_layout = QtWidgets.QGridLayout(self.tags_tab_widget)
         self.tags_tab_searchbar = searchbar_with_icon.SearchBarWithIcon(objectName="search_container")
         self.tags_filter_button = QtWidgets.QPushButton("Filter", objectName="black_pbutton")
@@ -433,6 +514,10 @@ class MainWindow(QtWidgets.QWidget):
 
 
     def _init_filters_tab(self):
+        """
+        Initializes widgets in the filters tab
+        """
+
         self.filters_tab_layout = QtWidgets.QGridLayout(self.filters_tab_widget)
         self.filters_tab_searchbar = searchbar_with_icon.SearchBarWithIcon(objectName="search_container")
         self.filters_filter_button = QtWidgets.QPushButton("Filter", objectName="black_pbutton")
@@ -459,6 +544,12 @@ class MainWindow(QtWidgets.QWidget):
 
     @QtCore.Slot()
     def tab_update_buttons_enabling(self, index):
+        """
+        Updates buttons state based on the count of currently selected rows
+
+        :param index: Index of the tab
+        """
+
         if index == 0: # Notes tab
             if self.is_table_view:
                 selected_rows_count = self.count_selected_rows(self.notes_tab_table)
@@ -479,17 +570,35 @@ class MainWindow(QtWidgets.QWidget):
 
 
     def count_selected_rows(self, table):
+        """
+        Counts number of selected rows in the table
+
+        :param table: Table with selectable rows
+
+        :return: Number of selected rows in the table
+        """
+
         return len(table.selectionModel().selectedRows())
 
 
 
     def count_selected_notes(self):
+        """
+        Counts number of selected rows in the accordion
+
+        :return: Number of selected rows in the accordion
+        """
+
         return len(self.notes_tab_accordion.get_selected_notes())
 
 
 
     @QtCore.Slot()
     def table_update_buttons_enabling(self):
+        """
+        Updates buttons state based on the count of currently selected rows in current tabs table
+        """
+
         current_tab_name = self.tabs.currentWidget().objectName()
         if current_tab_name == "notes_tab":
             selected_rows_count = self.count_selected_rows(self.notes_tab_table)
@@ -509,6 +618,10 @@ class MainWindow(QtWidgets.QWidget):
 
     @QtCore.Slot()
     def notes_accordion_buttons_enabling(self):
+        """
+        Updates buttons state based on the count of currently selected rows in accordion
+        """
+
         if self.tabs.currentWidget().objectName() == "notes_tab" and not self.is_table_view:
             selected_notes_count = self.count_selected_notes()
             self.edit_icon_button.setEnabled(selected_notes_count == 1)
@@ -520,6 +633,10 @@ class MainWindow(QtWidgets.QWidget):
 
     @QtCore.Slot()
     def add_item(self):
+        """
+        Adds item
+        """
+
         self.loading_bar.loading_bar.setRange(0, 0)
         self.item_action("ADD")
         self.loading_bar.loading_bar.setRange(0, 1)
@@ -528,6 +645,10 @@ class MainWindow(QtWidgets.QWidget):
     
     @QtCore.Slot()
     def edit_item(self):
+        """
+        Edits item
+        """
+
         self.loading_bar.loading_bar.setRange(0, 0)
         self.item_action("EDIT")
         self.loading_bar.loading_bar.setRange(0, 1)
@@ -535,6 +656,12 @@ class MainWindow(QtWidgets.QWidget):
 
     
     def item_action(self, action_name):
+        """
+        Takes action on item
+
+        :param action_name: EDIT or ADD action to be taken on item
+        """
+
         current_tab_name = self.tabs.currentWidget().objectName()
         if current_tab_name == "notes_tab":
             if action_name == "EDIT":
@@ -569,6 +696,12 @@ class MainWindow(QtWidgets.QWidget):
 
 
     def display_error_message_box(self, text):
+        """
+        Displays error message box
+
+        :param text: Message of error message box
+        """
+
         message_box = QtWidgets.QMessageBox(self)
         message_box.setWindowTitle("Error")
         message_box.setText(text)
@@ -579,6 +712,10 @@ class MainWindow(QtWidgets.QWidget):
     # CRUD operations for all items
 
     def _add_note(self):
+        """
+        Opens new note dialog
+        """
+
         categories_names = [category.name for category in self.use_cases.get_categories()]
         tags_names = [tag.name for tag in self.use_cases.get_tags()]
         
@@ -602,6 +739,10 @@ class MainWindow(QtWidgets.QWidget):
 
 
     def _edit_note(self):
+        """
+        Opens edit dialog for selected note
+        """
+
         categories_names = [category.name for category in self.use_cases.get_categories()]
         tags_names = [tag.name for tag in self.use_cases.get_tags()]
         selected_note = self._get_selected_note()
@@ -617,8 +758,8 @@ class MainWindow(QtWidgets.QWidget):
             updated_note.category_name = dialog.data_dict["category"]
             updated_note.tags_names = dialog.data_dict["tags"]
             if self.use_cases.update_note(selected_note.id, updated_note):
-                self.add_note_to_todays_notes(updated_note)
                 self.remove_notes_from_todays_notes([selected_note.name])
+                self.add_note_to_todays_notes(updated_note)
                 if self._is_note_filter_accepted(updated_note):
                     old_note_row = (selected_note.name, selected_note.priority, selected_note.time.strftime("%d/%m/%Y %H:%M"), selected_note.text)
                     new_note_row = (updated_note.name, updated_note.priority, updated_note.time.strftime("%d/%m/%Y %H:%M"), updated_note.text)
@@ -629,6 +770,14 @@ class MainWindow(QtWidgets.QWidget):
 
 
     def _is_note_filter_accepted(self, note):
+        """
+        Determines whether current filter accepts the note
+
+        :param note: Note tested against the filter
+
+        :return: True if filter accepts the note False otherwise
+        """
+
         if self.current_note_filter == None:
             return True
         return self.current_note_filter.note_name in note.name and \
@@ -644,6 +793,10 @@ class MainWindow(QtWidgets.QWidget):
 
 
     def _add_category(self):
+        """
+        Opens new category dialog
+        """
+
         dialog = category_dialog.CategoryDialog(objectName="dialog")
         if dialog.exec():
             new_category = lambda: None
@@ -658,6 +811,10 @@ class MainWindow(QtWidgets.QWidget):
 
 
     def _edit_category(self):
+        """
+        Opens edit dialog for selected category
+        """
+
         selected_category = self._get_selected_category()
         if selected_category.name == "Default":
             return
@@ -677,6 +834,10 @@ class MainWindow(QtWidgets.QWidget):
 
 
     def _add_tag(self):
+        """
+        Opens new tag dialog
+        """
+
         dialog = tag_dialog.TagDialog(objectName="dialog")
         if dialog.exec():
             new_tag = lambda: None
@@ -690,6 +851,10 @@ class MainWindow(QtWidgets.QWidget):
 
 
     def _edit_tag(self):
+        """
+        Opens edit dialog for selected tag
+        """
+
         selected_tag = self._get_selected_tag()
         
         dialog = tag_dialog.TagDialog(objectName="dialog")
@@ -707,6 +872,10 @@ class MainWindow(QtWidgets.QWidget):
 
 
     def _add_filter(self):
+        """
+        Opens new filter dialog
+        """
+
         dialog = filter_dialog.FilterDialog(objectName="dialog")
         if dialog.exec():
             new_filter = lambda: None
@@ -746,6 +915,10 @@ class MainWindow(QtWidgets.QWidget):
 
 
     def _edit_filter(self):
+        """
+        Opens edit dialog for selected filter
+        """
+
         selected_filter = self._get_selected_filter()
         
         dialog = filter_dialog.FilterDialog(objectName="dialog")
@@ -791,6 +964,10 @@ class MainWindow(QtWidgets.QWidget):
 
     @QtCore.Slot()
     def delete_items(self):
+        """
+        Deletes currently selected items
+        """
+
         current_tab_name = self.tabs.currentWidget().objectName()
         if current_tab_name == "notes_tab":
             if self.is_table_view:
@@ -838,6 +1015,10 @@ class MainWindow(QtWidgets.QWidget):
 
 
     def _get_selected_note(self):
+        """
+        Gets all information about the currently selected note
+        """
+
         if self.is_table_view:
             selected_notes = self.notes_tab_table.get_selected_rows()
             if len(selected_notes) != 1:
@@ -852,6 +1033,10 @@ class MainWindow(QtWidgets.QWidget):
 
 
     def _get_selected_category(self):
+        """
+        Gets all information about the currently selected category
+        """
+
         selected_categories = self.categories_tab_table.get_selected_rows()
         if len(selected_categories) != 1:
             return None
@@ -860,6 +1045,10 @@ class MainWindow(QtWidgets.QWidget):
 
 
     def _get_selected_tag(self):
+        """
+        Gets all information about the currently selected tag
+        """
+
         selected_tags = self.tags_tab_table.get_selected_rows()
         if len(selected_tags) != 1:
             return None
@@ -868,6 +1057,10 @@ class MainWindow(QtWidgets.QWidget):
 
 
     def _get_selected_filter(self):
+        """
+        Gets all information about the currently selected filter
+        """
+
         selected_filters = self.filters_tab_table.get_selected_rows()
         if len(selected_filters) != 1:
             return None
@@ -877,6 +1070,10 @@ class MainWindow(QtWidgets.QWidget):
 
     @QtCore.Slot()
     def change_notes_tab_accordion_page(self):
+        """
+        Changes the page of the accordion widget
+        """
+
         self.grid_page = self.notes_tab_accordion_pagination.current_page
         self.update_notes_tab_accordion()
         selected_rows_count = self.count_selected_notes()
@@ -885,6 +1082,10 @@ class MainWindow(QtWidgets.QWidget):
 
 
     def update_notes_tab_accordion(self):
+        """
+        Updates the displayed notes in the accordion widget
+        """
+
         self.grid_notes = [note for note in self.use_cases.get_filtered_notes_paged(self.current_note_filter, page=self.grid_page, size=10)]
         self.notes_tab_accordion.replace_sections(self.grid_notes)
 
@@ -895,6 +1096,13 @@ class MainWindow(QtWidgets.QWidget):
 
     @QtCore.Slot()
     def _set_basic_text_filtering(self, model, searchbar):
+        """
+        Filters table items by their name
+
+        :param model: Model on which will the filter be used
+        :param searchbar: Searchbar widget with filter text
+        """
+
         if self.tabs.currentWidget().objectName() == "notes_tab":
             self.current_note_filter = self.create_default_filter()
             self.current_note_filter.note_name = searchbar.text()
@@ -904,6 +1112,12 @@ class MainWindow(QtWidgets.QWidget):
 
 
     def create_default_filter(self):
+        """
+        Creates object with default filter values
+
+        :return: Object with default filter values
+        """
+
         filters = lambda: None
         filters.note_name = ""
         filters.note_min_priority = 0
@@ -920,6 +1134,13 @@ class MainWindow(QtWidgets.QWidget):
 
 
 def run_application():
+    """
+    Runs the application with the PySide gui
+
+    :return: Gui number of the next library
+    """
+
+    # Application is created the first time
     if not QtWidgets.QApplication.instance():
         app = QtWidgets.QApplication([])
     else:
@@ -927,10 +1148,12 @@ def run_application():
 
     stylesheet_path = pathlib.Path(__file__).parent / "style.qss"
 
+    # Connect the stylesheet to the application
     stylesheet = stylesheet_path.resolve().as_posix()
     with open(stylesheet, "r") as f:
         app.setStyleSheet(f.read())
 
+    # Create and customize the main widget
     use_cases = UseCases.UseCases()
     widget = MainWindow(use_cases)
     widget.setWindowTitle("PySideApplication")
@@ -945,3 +1168,4 @@ def run_application():
 
 if __name__ == "__main__":
     run_application()
+

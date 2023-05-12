@@ -11,6 +11,10 @@ from Models.NoteFilter import NoteFilterModel
 
 
 def create_test_data():
+    """
+    Creates test date for the application
+    """
+
     db = SqliteDatabase(os.path.abspath(os.path.dirname(__file__)) + "/notes_database.db")
     db.connect()
     db.create_tables([NoteModel, NoteTagModel, TagModel, CategoryModel, NoteFilterModel])
@@ -29,8 +33,11 @@ def create_test_data():
     db.close()
 
 
-
 def _create_categories():
+    """
+    Creates test categories for the application
+    """
+
     categories = [category for category in CategoryModel.select()]
 
     if len([category.name for category in categories if category.name == "Default"]) == 0:
@@ -49,6 +56,12 @@ def _create_categories():
 
 
 def _create_notes(categories):
+    """
+    Creates test notes for the application
+
+    :param categories: Categories of the created notes
+    """
+
     notes = [note for note in NoteModel.select()]
     if len(notes) < 1:
         print("Creating test data [notes]")
@@ -63,6 +76,10 @@ def _create_notes(categories):
 
 
 def _create_tags():
+    """
+    Creates test tags for the application
+    """
+
     tags = [tag for tag in TagModel.select()]
     if len(tags) < 1:
         print("Creating test data [tags]")
@@ -74,6 +91,13 @@ def _create_tags():
 
 
 def _create_notes_tags(notes, tags):
+    """
+    Connects notes with tags using NoteTagModel
+
+    :param notes: Notes to be connected with tags
+    :param tags: Tags to be connected with notes
+    """
+
     notes_tags = [note_tag for note_tag in NoteTagModel.select()]
     if len(notes_tags) < 1:
         print("Creating test data [notes_tags]")
@@ -86,6 +110,10 @@ def _create_notes_tags(notes, tags):
 
 
 def _create_filters():
+    """
+    Creates test filters for the aplication
+    """
+
     filters = [note_filter for note_filter in NoteFilterModel.select()]
     if len(filters) < 1:
         print("Creating test data [fast filters]")

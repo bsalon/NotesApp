@@ -9,20 +9,31 @@ import datetime
 
 class FilterDialog(tkinter.simpledialog.Dialog):
     def __init__(self, master, fast_filter=None, *args, **kwargs):
+        """
+        Initializes filter dialog
+        """
+
         self.accepted = False
         self.fast_filter = fast_filter
         super(FilterDialog, self).__init__(master, title="Fast filter dialog", *args, **kwargs)
 
 
     def body(self, frame):
+        """
+        Puts all dialog widgets into the dialog frame
+
+        :param frame: Dialog frame
+        """
+
         frame.configure(bg="#d7eb5a")
 
-        # Filter
+        # Filter name
         filter_name_label = tkinter.Label(frame, text="Filter name:", bg="#d7eb5a", fg="black")
         filter_name_label.grid(row=0, column=0, sticky="news")
         self.filter_name_entry = tkinter.Entry(frame, width=25)
         self.filter_name_entry.grid(row=0, column=1, columnspan=5, pady=(5, 5), sticky="news")
 
+        # Filter order
         filter_order_label = tkinter.Label(frame, text="Filter order:", bg="#d7eb5a", fg="black")
         filter_order_label.grid(row=1, column=0, sticky="news")
         self.filter_order_spinbox = ttk.Spinbox(frame, from_=-1, to=1000, width=25)
@@ -35,7 +46,7 @@ class FilterDialog(tkinter.simpledialog.Dialog):
         self.note_name_entry = tkinter.Entry(frame, width=25)
         self.note_name_entry.grid(row=2, column=1, columnspan=5, pady=(5, 5), sticky="news")
 
-        # Note date
+        # Note date range
         today = datetime.date.today()
         note_date_label = tkinter.Label(frame, text="Note date range:", bg="#d7eb5a", fg="black")
         note_date_label.grid(row=3, column=0, sticky="news")
@@ -47,7 +58,7 @@ class FilterDialog(tkinter.simpledialog.Dialog):
         self.note_to_date_entry = tkcalendar.DateEntry(frame, selectmode="day", year=today.year, month=today.month, day=today.day)
         self.note_to_date_entry.grid(row=3, column=4, columnspan=2, pady=(5, 5), sticky="news")
 
-        # Note time
+        # Note time range
         note_time_label = tkinter.Label(frame, text="Note time (hh:mm) range:", bg="#d7eb5a", fg="black")
         note_time_label.grid(row=4, column=0, pady=(5, 5), sticky="news")
         self.note_from_time_hour_spinbox = ttk.Spinbox(frame, from_=0, to=23, width=5, state="readonly", justify=tkinter.CENTER)
@@ -72,7 +83,7 @@ class FilterDialog(tkinter.simpledialog.Dialog):
         self.note_text_entry = tkinter.Entry(frame, width=25)
         self.note_text_entry.grid(row=5, column=1, columnspan=5, pady=(5, 20), sticky="news")
 
-        # Note priority
+        # Note priority range
         note_priority_label = tkinter.Label(frame, text="Note priority range:", bg="#d7eb5a", fg="black")
         note_priority_label.grid(row=6, column=0, pady=(5, 20), sticky="news")
 
@@ -88,23 +99,25 @@ class FilterDialog(tkinter.simpledialog.Dialog):
         self.note_max_priority_spinbox.set(100)
         self.note_max_priority_spinbox.grid(row=6, column=4, columnspan=2, pady=(5, 20), sticky="news")
 
-        # Category
+        # Category name
         category_name_label = tkinter.Label(frame, text="Category name contains:", bg="#d7eb5a", fg="black")
         category_name_label.grid(row=7, column=0, sticky="news")
         self.category_name_entry = tkinter.Entry(frame, width=25)
         self.category_name_entry.grid(row=7, column=1, columnspan=5, pady=(5, 5), sticky="news")
         
+        # Category description
         category_description_label = tkinter.Label(frame, text="Category description contains:", bg="#d7eb5a", fg="black")
         category_description_label.grid(row=8, column=0, sticky="news")
         self.category_description_entry = tkinter.Entry(frame, width=25)
         self.category_description_entry.grid(row=8, column=1, columnspan=5, pady=(5, 5), sticky="news")
 
-        # Tag
+        # Tag name
         tag_name_label = tkinter.Label(frame, text="Tag name contains:", bg="#d7eb5a", fg="black")
         tag_name_label.grid(row=9, column=0, sticky="news")
         self.tag_name_entry = tkinter.Entry(frame, width=25)
         self.tag_name_entry.grid(row=9, column=1, columnspan=5, pady=(5, 5), sticky="news")
         
+        # Tag description
         tag_description_label = tkinter.Label(frame, text="Tag description contains:", bg="#d7eb5a", fg="black")
         tag_description_label.grid(row=10, column=0, sticky="news")
         self.tag_description_entry = tkinter.Entry(frame, width=25)
@@ -122,6 +135,10 @@ class FilterDialog(tkinter.simpledialog.Dialog):
 
 
     def fill_dialog(self):
+        """
+        Fills dialog fields with filter values
+        """
+
         fast_filter = self.fast_filter
         self.filter_name_entry.insert(0, fast_filter.name)
         self.filter_order_spinbox.set(fast_filter.order)
@@ -142,6 +159,10 @@ class FilterDialog(tkinter.simpledialog.Dialog):
 
 
     def save_pressed(self):
+        """
+        Fills data_dict property with field values and closes the dialog
+        """
+
         if not self._validate():
             return
         self.accepted = True
@@ -163,10 +184,22 @@ class FilterDialog(tkinter.simpledialog.Dialog):
 
 
     def _validate(self):
+        """
+        Validates name field
+        """
+
         return self._validate_field(self.filter_name_entry)
 
 
     def _validate_field(self, field):
+        """
+        Validates field value by testing if its empty
+
+        :param field: Field to be validated
+
+        :return: True if field value is not empty False otherwise
+        """
+
         if field.get() == "" or field.get().isspace():
             field.config({"background": "#ff7f7f"})
             return False
@@ -175,6 +208,12 @@ class FilterDialog(tkinter.simpledialog.Dialog):
 
 
     def _get_selected_from_datetime(self):
+        """
+        Gets from datetime in datetime range
+
+        :return: From datetime in datetime range
+        """
+
         date = self.note_from_date_entry.get_date()
         note_date = datetime.datetime.combine(date, datetime.datetime.min.time())
         note_datetime = note_date + datetime.timedelta(hours=int(self.note_from_time_hour_spinbox.get()),
@@ -183,6 +222,12 @@ class FilterDialog(tkinter.simpledialog.Dialog):
 
 
     def _get_selected_to_datetime(self):
+        """
+        Gets to datetime in datetime range
+
+        :return: To datetime in datetime range
+        """
+
         date = self.note_to_date_entry.get_date()
         note_date = datetime.datetime.combine(date, datetime.datetime.min.time())
         note_datetime = note_date + datetime.timedelta(hours=int(self.note_to_time_hour_spinbox.get()),
@@ -191,11 +236,19 @@ class FilterDialog(tkinter.simpledialog.Dialog):
 
 
     def cancel_pressed(self):
+        """
+        Closes the dialog
+        """
+
         self.accepted = False
         self.destroy()
 
 
     def buttonbox(self):
+        """
+        Creates buttons for dialog
+        """
+
         self.configure(bg="#d7eb5a")
         self.ok_button = tkinter.Button(self, text='Save', width=5, command=self.save_pressed)
         self.ok_button.pack(side="top")

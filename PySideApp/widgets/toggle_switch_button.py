@@ -5,6 +5,10 @@ from PySide6 import QtCore, QtGui, QtWidgets
 
 # Taken from: https://stackoverflow.com/questions/56806987/switch-button-in-pyqt
 class ToggleSwitchButton(QtWidgets.QPushButton):
+    """
+    Toggle switch button for changing the table and accordion view
+    """
+
     def __init__(self, *args, **kwargs):
         super(ToggleSwitchButton, self).__init__(*args, **kwargs)
         self.setCheckable(True)

@@ -5,6 +5,10 @@ from PySide6 import QtWidgets, QtCore, QtGui
 
 class AdvancedFilterDialog(QtWidgets.QDialog):
     def __init__(self, *args, **kwargs):
+        """
+        Initializes advanced filter dialog with all its widgets
+        """
+
         super(AdvancedFilterDialog, self).__init__(*args, **kwargs)
         self.setWindowTitle("Advanced filter dialog")
         self.setAttribute(QtCore.Qt.WA_DeleteOnClose)
@@ -12,10 +16,12 @@ class AdvancedFilterDialog(QtWidgets.QDialog):
         dialog_layout = QtWidgets.QVBoxLayout()
         form_layout = QtWidgets.QFormLayout()
         
+        # Note name
         self.note_name_lineedit = QtWidgets.QLineEdit()
         note_name_label = QtWidgets.QLabel("Note name contains:", objectName="black_label")
         form_layout.addRow(note_name_label, self.note_name_lineedit)
         
+        # Note datetime range
         note_datetime_layout = QtWidgets.QHBoxLayout()
         note_datetime_layout.setContentsMargins(0, 0, 0, 0)
         note_datetime_layout.setAlignment(QtCore.Qt.AlignTop)
@@ -31,11 +37,12 @@ class AdvancedFilterDialog(QtWidgets.QDialog):
         datetime_range_label = QtWidgets.QLabel("Note date and time range:", objectName="black_label")
         form_layout.addRow(datetime_range_label, note_datetime_layout)
         
+        # Note text
         self.note_text_lineedit = QtWidgets.QLineEdit()
         note_text_label = QtWidgets.QLabel("Note text contains:", objectName="black_label")
         form_layout.addRow(note_text_label, self.note_text_lineedit)
 
-        # Note priority
+        # Note priority range
         note_priority_layout = QtWidgets.QHBoxLayout()
         note_priority_layout.setContentsMargins(0, 0, 0, 0)
         note_priority_layout.setAlignment(QtCore.Qt.AlignTop)
@@ -51,22 +58,27 @@ class AdvancedFilterDialog(QtWidgets.QDialog):
 
         form_layout.addItem(QtWidgets.QSpacerItem(0, 20))
 
+        # Category name
         self.category_name_lineedit = QtWidgets.QLineEdit()
         category_name_label = QtWidgets.QLabel("Category name contains:", objectName="black_label")
         form_layout.addRow(category_name_label, self.category_name_lineedit)
         
+        # Category description
         self.category_description_lineedit = QtWidgets.QLineEdit()
         category_description_label = QtWidgets.QLabel("Category description contains:", objectName="black_label")
         form_layout.addRow(category_description_label, self.category_description_lineedit)
 
+        # Tag name
         self.tag_name_lineedit = QtWidgets.QLineEdit()
         tag_name_label = QtWidgets.QLabel("Tag name contains:", objectName="black_label")
         form_layout.addRow(tag_name_label, self.tag_name_lineedit)
         
+        # Tag description
         self.tag_description_lineedit = QtWidgets.QLineEdit()
         tag_description_label = QtWidgets.QLabel("Tag description contains:", objectName="black_label")
         form_layout.addRow(tag_description_label, self.tag_description_lineedit)
 
+        # Buttons
         btnBox = QtWidgets.QDialogButtonBox()
         btnBox.setStandardButtons(QtWidgets.QDialogButtonBox.Ok | QtWidgets.QDialogButtonBox.Cancel)
         btnBox.button(QtWidgets.QDialogButtonBox.Ok).setObjectName("black_pbutton")
@@ -83,6 +95,10 @@ class AdvancedFilterDialog(QtWidgets.QDialog):
 
 
     def ok_callback(self):
+        """
+        Fills data_dict property with field values and closes the dialog
+        """
+
         self.data_dict = {
             "note_name" : self.note_name_lineedit.text(),
             "note_from_date" : self.note_from_datetime_edit.dateTime(),
@@ -100,6 +116,10 @@ class AdvancedFilterDialog(QtWidgets.QDialog):
 
 
     def cancel_callback(self):
+        """
+        Closes the dialog
+        """
+
         self.close()
 
 

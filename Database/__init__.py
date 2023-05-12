@@ -10,6 +10,7 @@ from Models.Category import CategoryModel
 from Models.NoteFilter import NoteFilterModel
 
 
+# Ensures that the database is created
 db = SqliteDatabase(os.path.abspath(os.path.dirname(__file__)) + "/notes_database.db")
 db.connect()
 db.create_tables([NoteModel, NoteTagModel, TagModel, CategoryModel, NoteFilterModel])

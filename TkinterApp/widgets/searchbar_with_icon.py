@@ -5,6 +5,10 @@ import pathlib
 
 
 class SearchBarWithIcon(ttk.Frame):
+    """
+    Search field with magnify icon to filter items by name
+    """
+
     def __init__(self, master, *args, **kwargs):
         super(SearchBarWithIcon, self).__init__(master, *args, **kwargs)
         image_path = pathlib.Path(__file__).parent.parent.parent / "Images" / "SearchIcon.png"

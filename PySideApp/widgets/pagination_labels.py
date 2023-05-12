@@ -7,6 +7,12 @@ from PySide6 import QtCore, QtWidgets, QtGui
 
 
 class PaginationLabels(QtWidgets.QWidget):
+    """
+    Pagination for the accordion
+
+    Methods are used to change the current page
+    """
+
     page_changed = QtCore.Signal()
 
     def __init__(self, page_size, items_count, *args, **kwargs):

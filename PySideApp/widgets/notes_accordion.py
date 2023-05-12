@@ -5,6 +5,12 @@ from PySide6 import QtWidgets, QtGui, QtCore
 
 # https://stackoverflow.com/questions/32476006/how-to-make-an-expandable-collapsable-section-widget-in-qt
 class NotesAccordion(QtWidgets.QDialog):
+    """
+    Accordion widget displaying notes
+
+    Methods are used for CRUD operations
+    """
+
     selection_changed = QtCore.Signal()
     
     def __init__(self, notes, *args, **kwargs):

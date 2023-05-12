@@ -22,13 +22,22 @@ from KivyApp.widgets import loading_bar, notes_accordion, pagination_labels, sea
 
 class KivyApplicationLayout(boxlayout.BoxLayout):
     def __init__(self, use_cases, *args, **kwargs):
+        """
+        Initializes the main window layout with all its contents
+
+        :param use_cases: Class containing methods that retrieve data for the application
+        """
+
         super(KivyApplicationLayout, self).__init__(*args, **kwargs)
+
+        # Constant representing which gui is used 2 == Kivy
         self.gui = 2
 
         self.padding = (2, 2)
 
         self.use_cases = use_cases
 
+        # Get data from database for tables and accordion
         self.current_note_filter = self.create_default_filter()
         self.grid_page = 1
         self.grid_notes = [note for note in self.use_cases.get_filtered_notes_paged(self.current_note_filter, page=self.grid_page, size=10)]
@@ -47,19 +56,19 @@ class KivyApplicationLayout(boxlayout.BoxLayout):
                                note_filter.note_name,
                                note_filter.category_name) for note_filter in self.use_cases.get_filters()]
 
-        # toolbar layout on top
+        # Toolbar layout on top
         self.toolbar_layout = styled_widgets.ToolbarLayout()
         self._init_toolbar_layout()
 
-        # todays notes layout
+        # Todays notes layout
         self.todays_notes_layout = styled_widgets.TodaysNotesLayout()
         self._init_todays_notes_layout()
 
-        # content layout
+        # Content layout
         self.tabs_content_layout = styled_widgets.TabsContentLayout()
         self._init_tabs_content_layout()
 
-        # todays notes and content below toolbar
+        # Todays notes and content below toolbar
         todays_notes_and_content_layout = boxlayout.BoxLayout(orientation="horizontal", size_hint=(1, 14/15))
         todays_notes_and_content_layout.add_widget(self.todays_notes_layout)
         todays_notes_and_content_layout.add_widget(self.tabs_content_layout)
@@ -71,6 +80,10 @@ class KivyApplicationLayout(boxlayout.BoxLayout):
 
 
     def _init_toolbar_layout(self):
+        """
+        Initializes widgets in the toolbar
+        """
+
         image_dir_path = pathlib.Path(__file__).parent.parent / "Images"
 
         # Today's notes icon button
@@ -134,12 +147,24 @@ class KivyApplicationLayout(boxlayout.BoxLayout):
 
 
     def change_library(self, button_instance):
+        """
+        Changes the used gui library of the application
+
+        :param button_instance: Button causing this method
+        """
+
         dialog = styled_widgets.SettingsDialog()
         dialog.bind(on_dismiss=self._settings_dialog_closed)
         dialog.open()
 
 
     def _settings_dialog_closed(self, dialog):
+        """
+        Handles closed settings dialog by changing the gui library
+
+        :param dialog: Closed dialog
+        """
+
         if dialog.accepted:
             self.gui = dialog.data_dict["library"]
             if self.gui == 2:
@@ -149,22 +174,35 @@ class KivyApplicationLayout(boxlayout.BoxLayout):
 
 
     def toggle_todays_notes_pane(self, button_instance):
+        """
+        Toggles the visibility of todays notes pane
+
+        :param button_instance: Button causing this method
+        """
+
         w = self.todays_notes_layout
+
+        # Hide todays notes pane
         if self.todays_notes_pane_visible:
             w.saved_attrs = w.height, w.width, w.size_hint_x, w.size_hint_y, w.opacity, w.disabled
             w.height, w.width, w.size_hint_x, w.size_hint_y, w.opacity, w.disabled = 0, 0, None, None, 0, True
             self.tabs_content_layout.size_hint = 1, 1
-            
+        # Show todays notes pane
         else:
             w.height, w.width, w.size_hint_x, w.size_hint_y, w.opacity, w.disabled = w.saved_attrs
             del w.saved_attrs
             self.tabs_content_layout.size_hint = 7/8, 1
-
         self.todays_notes_pane_visible = not self.todays_notes_pane_visible
 
 
 
     def use_fast_filter(self, order):
+        """
+        Uses fast filter from the toolbar layout
+
+        :param order: Order value of the Filter object
+        """
+
         self.current_note_filter = self.use_cases.find_filter_by_order(order)
         if self.current_note_filter == None:
             self.current_note_filter = self.create_default_filter()
@@ -174,14 +212,26 @@ class KivyApplicationLayout(boxlayout.BoxLayout):
     
 
     def _init_todays_notes_layout(self):
+        """
+        Initializes widgets in todays notes pane
+        """
+
+        # Todays notes header label
         self.todays_notes_header = styled_widgets.TodaysNotesLabel()
         self.todays_notes_layout.add_widget(self.todays_notes_header)
 
+        # List of todays notes
         self.todays_notes_recycleview = todays_notes_recycleview.TodaysNotesRecycleview(self.today_notes)
         self.todays_notes_layout.add_widget(self.todays_notes_recycleview)
 
 
     def remove_notes_from_todays_notes(self, notes):
+        """
+        Removes notes from todays notes pane
+
+        :param notes: Notes to remove from todays notes pane
+        """
+
         todays_notes = self.todays_notes_recycleview.data
         for note in notes:
             index = [i for i, v in enumerate(todays_notes) if v["name"] == note]
@@ -190,6 +240,12 @@ class KivyApplicationLayout(boxlayout.BoxLayout):
 
 
     def add_note_to_todays_notes(self, note):
+        """
+        Adds note to todays notes pane
+
+        :param note: Note to add to todays notes pane
+        """
+
         note_dict = {"time": note.time.strftime("%H:%M"), "name": note.name}
         for i, val in enumerate(self.todays_notes_recycleview.data):
             if val["time"] > note_dict["time"]:
@@ -200,9 +256,14 @@ class KivyApplicationLayout(boxlayout.BoxLayout):
 
 
     def _init_tabs_content_layout(self):
+        """
+        Initializes tabs widget
+        """
+
         self.tabs = styled_widgets.NotesTabbedPanel()
         self.tabs._tab_layout.padding = "2dp", "2dp", "2dp", "-2dp"
 
+        # Specific tabs
         self.notes_tab = styled_widgets.NotesTabbedPanelItem(text="Notes")
         self._init_notes_tab()
         self.categories_tab = styled_widgets.NotesTabbedPanelItem(text="Categories")
@@ -212,6 +273,7 @@ class KivyApplicationLayout(boxlayout.BoxLayout):
         self.filters_tab = styled_widgets.NotesTabbedPanelItem(text="Fast filters")
         self._init_filters_tab()
 
+        # Adding initialized tabs
         self.tabs.add_widget(self.notes_tab)
         self.tabs.add_widget(self.categories_tab)
         self.tabs.add_widget(self.tags_tab)
@@ -223,6 +285,10 @@ class KivyApplicationLayout(boxlayout.BoxLayout):
 
 
     def _init_notes_tab(self):
+        """
+        Initializes widgets in the notes tab
+        """
+
         self.notes_tab_searchbar = styled_widgets.SearchBarWithIcon()
         self.notes_filter_button = button.Button(text="Filter", size_hint=(1/8, 1), on_release=self._filter_items_by_name)
         self.notes_advanced_filter_button = button.Button(text="Advanced filter", size_hint=(1/8, 1), on_release=self.notes_advanced_filtering)
@@ -254,12 +320,12 @@ class KivyApplicationLayout(boxlayout.BoxLayout):
         )
         self.notes_tab_table.bind(on_row_press=self.table_update_buttons_enabling)
 
+        # Accordion with pagination
         self.notes_tab_accordion = notes_accordion.NotesAccordionBox(
             self.grid_notes,
             self.notes_accordion_buttons_enabling,
             size_hint=(1, 32/36)
         )
-
         self.notes_tab_accordion_pagination = styled_widgets.PaginationLabels(10, len(self.notes_tab_table.row_data))
         self.notes_tab_accordion_pagination.bind(on_page_changed=self.change_notes_tab_accordion_page)
 
@@ -276,6 +342,12 @@ class KivyApplicationLayout(boxlayout.BoxLayout):
 
 
     def notes_advanced_filtering(self, button_instance):
+        """
+        Opens advanced filter dialog
+
+        :param button_instance: Button causing this method
+        """
+
         self.loading_bar.start()
         dialog = styled_widgets.AdvancedFilterDialog()
         dialog.bind(on_dismiss=self._notes_advanced_filtering_dialog_closed)
@@ -283,6 +355,12 @@ class KivyApplicationLayout(boxlayout.BoxLayout):
 
 
     def _notes_advanced_filtering_dialog_closed(self, dialog):
+        """
+        Filters notes based on dialog values
+
+        :param dialog: Dialog from which are the values taken
+        """
+
         if dialog.accepted:
             filters = lambda: None
             filters.note_name = dialog.data_dict["note_name"]
@@ -303,6 +381,10 @@ class KivyApplicationLayout(boxlayout.BoxLayout):
 
     
     def use_current_note_filter(self):
+        """
+        Filters notes based on the currently saved filter
+        """
+
         self.grid_page = self.notes_tab_accordion_pagination.current_page = 1
         filtered_notes = self.use_cases.get_filtered_notes(self.current_note_filter)
         self.table_notes = [(note.name, note.priority, note.time.strftime("%d/%m/%Y %H:%M"), note.text) for note in filtered_notes]
@@ -312,6 +394,10 @@ class KivyApplicationLayout(boxlayout.BoxLayout):
 
 
     def _save_accordion_attrs(self):
+        """
+        Saves accordion attributes to make visibility toggling possible
+        """
+
         acc = self.notes_tab_accordion
         acc.saved_attrs = acc.height, acc.width, acc.size_hint_x, acc.size_hint_y, acc.opacity, acc.disabled
         acc.height, acc.width, acc.size_hint_x, acc.size_hint_y, acc.opacity, acc.disabled = 0, 0, None, None, 0, True
@@ -323,10 +409,18 @@ class KivyApplicationLayout(boxlayout.BoxLayout):
 
 
     def toggle_notes_view(self, switch, value):
+        """
+        Toggles visibitlity of table and accordion based on the toggle state
+
+        :param switch: Toggle button causing this method
+        :param value: State value of toggle button
+        """
+
         acc = self.notes_tab_accordion
         pag = self.notes_tab_accordion_pagination
         tab = self.notes_tab_table
 
+        # Hide accordion and show table
         if self.is_table_view:
             tab.saved_attrs = tab.height, tab.width, tab.size_hint_x, tab.size_hint_y, tab.opacity, tab.disabled
             tab.height, tab.width, tab.size_hint_x, tab.size_hint_y, tab.opacity, tab.disabled = 0, 0, None, None, 0, True
@@ -336,6 +430,7 @@ class KivyApplicationLayout(boxlayout.BoxLayout):
             pag.height, pag.width, pag.size_hint_x, pag.size_hint_y, pag.opacity, pag.disabled = pag.saved_attrs
             del pag.saved_attrs
             selected_rows_count = self.count_selected_notes()
+        # Hide table and show accordion
         else:
             acc.saved_attrs = acc.height, acc.width, acc.size_hint_x, acc.size_hint_y, acc.opacity, acc.disabled
             acc.height, acc.width, acc.size_hint_x, acc.size_hint_y, acc.opacity, acc.disabled = 0, 0, None, None, 0, True
@@ -355,6 +450,10 @@ class KivyApplicationLayout(boxlayout.BoxLayout):
 
 
     def _init_categories_tab(self):
+        """
+        Initializes widgets in the categories tab
+        """
+
         self.categories_tab_searchbar = searchbar_with_icon.SearchBarWithIcon(size_hint=(4/8, 1))
         self.categories_filter_button = button.Button(text="Filter", size_hint=(1/8, 1),  on_release=self._filter_items_by_name)
 
@@ -385,6 +484,10 @@ class KivyApplicationLayout(boxlayout.BoxLayout):
 
 
     def _init_tags_tab(self):
+        """
+        Initializes widgets in the tags tab
+        """
+
         self.tags_tab_searchbar = searchbar_with_icon.SearchBarWithIcon(size_hint=(4/8, 1))
         self.tags_filter_button = button.Button(text="Filter", size_hint=(1/8, 1), on_release=self._filter_items_by_name)
 
@@ -415,6 +518,10 @@ class KivyApplicationLayout(boxlayout.BoxLayout):
 
 
     def _init_filters_tab(self):
+        """
+        Initializes widgets in the filters tab
+        """
+
         self.filters_tab_searchbar = searchbar_with_icon.SearchBarWithIcon(size_hint=(4/8, 1))
         self.filters_filter_button = button.Button(text="Filter", size_hint=(1/8, 1), on_release=self._filter_items_by_name)
 
@@ -447,6 +554,13 @@ class KivyApplicationLayout(boxlayout.BoxLayout):
 
 
     def tab_update_buttons_enabling(self, instance, value):
+        """
+        Updates buttons state based on the count of currently selected rows
+
+        :param instance: Widget instance causing this method
+        :param value: State value of the widget instance
+        """
+
         current_tab_name = self.tabs.current_tab.text
         if current_tab_name == "Notes":
             if self.is_table_view:
@@ -467,10 +581,23 @@ class KivyApplicationLayout(boxlayout.BoxLayout):
 
 
     def count_selected_notes(self):
+        """
+        Counts number of selected rows in the accordion
+
+        :return: Number of selected rows in the accordion
+        """
+
         return len(self.notes_tab_accordion.get_selected_notes())
 
 
     def table_update_buttons_enabling(self, table_instance, row_instance):
+        """
+        Updates buttons state based on the count of currently selected rows in current tabs table
+
+        :table_instance: Current tabs table
+        :row_instance: Clicked row
+        """
+
         selected_rows_count = len(table_instance.selected_rows)
         self.edit_icon_button.disabled = selected_rows_count != 1
         self.delete_icon_button.disabled = selected_rows_count < 1
@@ -478,6 +605,10 @@ class KivyApplicationLayout(boxlayout.BoxLayout):
 
 
     def notes_accordion_buttons_enabling(self):
+        """
+        Updates buttons state based on the count of currently selected rows in accordion
+        """
+
         if self.tabs.current_tab.text == "Notes" and not self.is_table_view:
             selected_notes_count = self.count_selected_notes()
             self.edit_icon_button.disabled = selected_notes_count != 1
@@ -487,16 +618,28 @@ class KivyApplicationLayout(boxlayout.BoxLayout):
     # Operations on items
 
     def add_item(self, instance):
+        """
+        Adds item
+        """
         self.loading_bar.start()
         self.item_action("ADD")
 
 
     def edit_item(self, instance):
+        """
+        Edits item
+        """
         self.loading_bar.start()
         self.item_action("EDIT")
 
 
     def item_action(self, action_name):
+        """
+        Takes action on item
+
+        :param action_name: EDIT or ADD action to be taken on item
+        """
+
         current_tab_name = self.tabs.current_tab.text
         if current_tab_name == "Notes":
             if action_name == "EDIT":
@@ -528,6 +671,12 @@ class KivyApplicationLayout(boxlayout.BoxLayout):
 
 
     def display_error_message_box(self, text):
+        """
+        Displays error message box
+
+        :param text: Message of error message box
+        """
+
         message_box = popup.Popup(
             title=text,
             content=button.Button(text="Close", size_hint=(1/2, 1/2)),
@@ -541,6 +690,10 @@ class KivyApplicationLayout(boxlayout.BoxLayout):
     # CRUD operations for all items
 
     def _add_note(self):
+        """
+        Opens new note dialog
+        """
+
         categories_names = [category.name for category in self.use_cases.get_categories()]
         tags_names = [tag.name for tag in self.use_cases.get_tags()]
 
@@ -550,6 +703,12 @@ class KivyApplicationLayout(boxlayout.BoxLayout):
 
 
     def _add_note_dialog_closed(self, dialog):
+        """
+        Creates note based on the dialog values
+
+        :param dialog: Dialog from which are the values taken
+        """
+
         if dialog.accepted:
             new_note = lambda: None
             new_note.name = dialog.data_dict["name"]
@@ -570,6 +729,10 @@ class KivyApplicationLayout(boxlayout.BoxLayout):
 
     
     def _edit_note(self):
+        """
+        Opens edit dialog for selected note
+        """
+
         categories_names = [category.name for category in self.use_cases.get_categories()]
         tags_names = [tag.name for tag in self.use_cases.get_tags()]
         selected_note = self._get_selected_note()
@@ -581,6 +744,12 @@ class KivyApplicationLayout(boxlayout.BoxLayout):
 
 
     def _edit_note_dialog_closed(self, dialog):
+        """
+        Edits note based on the dialog values
+
+        :param dialog: Dialog from which are the values taken
+        """
+
         selected_note = self._get_selected_note()
         if dialog.accepted:
             updated_note = lambda: None
@@ -605,6 +774,14 @@ class KivyApplicationLayout(boxlayout.BoxLayout):
 
 
     def _is_note_filter_accepted(self, note):
+        """
+        Determines whether current filter accepts the note
+
+        :param note: Note tested against the filter
+
+        :return: True if filter accepts the note False otherwise
+        """
+
         if self.current_note_filter == None:
             return True
         return self.current_note_filter.note_name in note.name and \
@@ -619,12 +796,22 @@ class KivyApplicationLayout(boxlayout.BoxLayout):
 
 
     def _add_category(self):
+        """
+        Opens new category dialog
+        """
+
         dialog = styled_widgets.CategoryDialog()
         dialog.bind(on_dismiss=self._add_category_dialog_closed)
         dialog.open()
 
 
     def _add_category_dialog_closed(self, dialog):
+        """
+        Creates category based on the dialog values
+
+        :param dialog: Dialog from which are the values taken
+        """
+        
         if dialog.accepted:
             new_category = lambda: None
             new_category.name = dialog.data_dict["name"]
@@ -639,6 +826,10 @@ class KivyApplicationLayout(boxlayout.BoxLayout):
 
 
     def _edit_category(self):
+        """
+        Opens edit dialog for selected category
+        """
+
         selected_category = self._get_selected_category()
         if selected_category.name == "Default":
             return
@@ -650,6 +841,12 @@ class KivyApplicationLayout(boxlayout.BoxLayout):
 
 
     def _edit_category_dialog_closed(self, dialog):
+        """
+        Edits category based on the dialog values
+
+        :param dialog: Dialog from which are the values taken
+        """
+        
         selected_category = self._get_selected_category()
         if dialog.accepted:
             updated_category = lambda: None
@@ -667,12 +864,22 @@ class KivyApplicationLayout(boxlayout.BoxLayout):
 
 
     def _add_tag(self):
+        """
+        Opens new tag dialog
+        """
+
         dialog = styled_widgets.TagDialog()
         dialog.bind(on_dismiss=self._add_tag_dialog_closed)
         dialog.open()
 
 
     def _add_tag_dialog_closed(self, dialog):
+        """
+        Creates tag based on the dialog values
+
+        :param dialog: Dialog from which are the values taken
+        """
+
         if dialog.accepted:
             new_tag = lambda: None
             new_tag.name = dialog.data_dict["name"]
@@ -687,6 +894,10 @@ class KivyApplicationLayout(boxlayout.BoxLayout):
 
 
     def _edit_tag(self):
+        """
+        Opens edit dialog for selected tag
+        """
+
         selected_tag = self._get_selected_tag()
         
         dialog = styled_widgets.TagDialog()
@@ -696,6 +907,12 @@ class KivyApplicationLayout(boxlayout.BoxLayout):
 
 
     def _edit_tag_dialog_closed(self, dialog):
+        """
+        Edits tag based on the dialog values
+
+        :param dialog: Dialog from which are the values taken
+        """
+        
         selected_tag = self._get_selected_tag()
         if dialog.accepted:
             updated_tag = lambda: None
@@ -712,12 +929,22 @@ class KivyApplicationLayout(boxlayout.BoxLayout):
 
 
     def _add_filter(self):
+        """
+        Opens new filter dialog
+        """
+
         dialog = styled_widgets.FilterDialog()
         dialog.bind(on_dismiss=self._add_filter_dialog_closed)
         dialog.open()
 
 
     def _add_filter_dialog_closed(self, dialog):
+        """
+        Creates filter based on the dialog values
+
+        :param dialog: Dialog from which are the values taken
+        """
+        
         if dialog.accepted:
             new_filter = lambda: None
             new_filter.name = dialog.data_dict["name"]
@@ -758,6 +985,10 @@ class KivyApplicationLayout(boxlayout.BoxLayout):
 
 
     def _edit_filter(self):
+        """
+        Opens edit dialog for selected filter
+        """
+
         selected_filter = self._get_selected_filter()
 
         dialog = styled_widgets.FilterDialog()
@@ -767,6 +998,12 @@ class KivyApplicationLayout(boxlayout.BoxLayout):
 
 
     def _edit_filter_dialog_closed(self, dialog):
+        """
+        Edits filter based on the dialog values
+
+        :param dialog: Dialog from which are the values taken
+        """
+        
         selected_filter = self._get_selected_filter()
 
         if dialog.accepted:
@@ -814,6 +1051,10 @@ class KivyApplicationLayout(boxlayout.BoxLayout):
 
 
     def delete_items(self, button_instance):
+        """
+        Deletes currently selected items
+        """
+
         current_tab_name = self.tabs.current_tab.text
         if current_tab_name == "Notes":
             if self.is_table_view:
@@ -862,6 +1103,10 @@ class KivyApplicationLayout(boxlayout.BoxLayout):
 
 
     def _get_selected_note(self):
+        """
+        Gets all information about the currently selected note
+        """
+
         if self.is_table_view:
             selected_notes = self.notes_tab_table.selected_rows
             if len(selected_notes) != 1:
@@ -876,6 +1121,10 @@ class KivyApplicationLayout(boxlayout.BoxLayout):
 
 
     def _get_selected_category(self):
+        """
+        Gets all information about the currently selected category
+        """
+
         selected_categories = self.categories_tab_table.selected_rows
         if len(selected_categories) != 1:
             return None
@@ -884,6 +1133,10 @@ class KivyApplicationLayout(boxlayout.BoxLayout):
 
 
     def _get_selected_tag(self):
+        """
+        Gets all information about the currently selected tag
+        """
+
         selected_tags = self.tags_tab_table.selected_rows
         if len(selected_tags) != 1:
             return None
@@ -892,6 +1145,10 @@ class KivyApplicationLayout(boxlayout.BoxLayout):
 
 
     def _get_selected_filter(self):
+        """
+        Gets all information about the currently selected filter
+        """
+
         selected_filters = self.filters_tab_table.selected_rows
         if len(selected_filters) != 1:
             return None
@@ -899,11 +1156,19 @@ class KivyApplicationLayout(boxlayout.BoxLayout):
 
 
     def change_notes_tab_accordion_page(self, label_instance):
+        """
+        Changes the page of the accordion widget
+        """
+
         self.grid_page = self.notes_tab_accordion_pagination.current_page
         self.update_notes_tab_accordion()
 
 
     def update_notes_tab_accordion(self):
+        """
+        Updates the displayed notes in the accordion widget
+        """
+
         self.grid_notes = [note for note in self.use_cases.get_filtered_notes_paged(self.current_note_filter, page=self.grid_page, size=10)]
         self.notes_tab_accordion.replace_rows(self.grid_notes)
         self.edit_icon_button.disabled = True
@@ -914,6 +1179,12 @@ class KivyApplicationLayout(boxlayout.BoxLayout):
 
 
     def _filter_items_by_name(self, button_instance):
+        """
+        Filters table items by their name
+
+        :param button_instance: Button causing this method
+        """
+
         current_tab_name = self.tabs.current_tab.text
         if current_tab_name == "Notes":
             self.current_note_filter = self.create_default_filter()
@@ -946,6 +1217,12 @@ class KivyApplicationLayout(boxlayout.BoxLayout):
 
 
     def create_default_filter(self):
+        """
+        Creates object with default filter values
+
+        :return: Object with default filter values
+        """
+
         filters = lambda: None
         filters.note_name = ""
         filters.note_min_priority = 0
@@ -963,9 +1240,13 @@ class KivyApplicationLayout(boxlayout.BoxLayout):
 
 class KivyApplication(app.MDApp):
     def __init__(self, *args, **kwargs):
+        """
+        Initializes application widget and its properties
+        """
+
         super(KivyApplication, self).__init__(*args, **kwargs)
         # MacOS doubles the size -- https://github.com/kivy/kivy/issues/8140
-        # This sizing doesnt work on my MacOS system
+        # This sizing doesnt work on the tested MacOS system
         window.Window.size = (1280, 640)
         if platform.system() != "Darwin":
             window.Window.minimum_width, window.Window.minimum_height = window.Window.size
@@ -979,6 +1260,13 @@ class KivyApplication(app.MDApp):
 
 
 def run_application():
+    """
+    Runs the application with the Kivy gui
+
+    :return: Gui number of the next library
+    """
+
+    # Create and run the application
     application = KivyApplication()
     application.run()
     gui = application.kivy_app.gui

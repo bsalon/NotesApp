@@ -5,6 +5,10 @@ from datetime import datetime
 
 
 class TimeLabel(label.Label):
+    """
+    Current time with second precision
+    """
+
     def __init__(self, *args, **kwargs):
         super(TimeLabel, self).__init__(*args, **kwargs)
         self.tick(1.0)

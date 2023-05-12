@@ -9,12 +9,20 @@ import datetime
 
 class TagDialog(tkinter.simpledialog.Dialog):
     def __init__(self, master, tag=None, *args, **kwargs):
+        """
+        Initializes tag dialog
+        """
+
         self.accepted = False
         self.tag = tag
         super(TagDialog, self).__init__(master, title="Tag dialog", *args, **kwargs)
 
 
     def body(self, frame):
+        """
+        Puts all dialog widgets into the dialog frame
+        """
+
         frame.configure(bg="#d7eb5a")
         
         # Name
@@ -38,6 +46,10 @@ class TagDialog(tkinter.simpledialog.Dialog):
 
 
     def save_pressed(self):
+        """
+        Fills data_dict property with field values and closes the dialog
+        """
+
         if not self._validate():
             return
         self.accepted = True
@@ -49,10 +61,22 @@ class TagDialog(tkinter.simpledialog.Dialog):
 
 
     def _validate(self):
+        """
+        Validates name field
+        """
+
         return self._validate_field(self.name_entry)
 
 
     def _validate_field(self, field):
+        """
+        Validates field value by testing if its empty
+
+        :param field: Field to be validated
+
+        :return: True if field value is not empty False otherwise
+        """
+
         if field.get() == "" or field.get().isspace():
             field.config({"background": "#ff7f7f"})
             return False
@@ -61,11 +85,19 @@ class TagDialog(tkinter.simpledialog.Dialog):
 
 
     def cancel_pressed(self):
+        """
+        Closes the dialog
+        """
+
         self.accepted = False
         self.destroy()
 
 
     def buttonbox(self):
+        """
+        Creates buttons for dialog
+        """
+
         self.configure(bg="#d7eb5a")
         self.ok_button = tkinter.Button(self, text='Save', width=5, command=self.save_pressed)
         self.ok_button.pack(side="top")
@@ -76,6 +108,10 @@ class TagDialog(tkinter.simpledialog.Dialog):
 
 
     def fill_dialog(self):
+        """
+        Fills dialog fields with tag values
+        """
+
         tag = self.tag
         self.name_entry.insert(0, tag.name)
         self.description_entry.insert(0, tag.description)

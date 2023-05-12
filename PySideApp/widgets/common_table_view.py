@@ -4,6 +4,12 @@ from PySide6 import QtWidgets, QtCore, QtGui
 
 
 class CommonTableView(QtWidgets.QTableView):
+    """
+    Table used in the tabs to display records
+
+    Methods are used for CRUD operations
+    """
+
     def __init__(self, header, data, stretch_column, sort_column=0, order=QtCore.Qt.AscendingOrder, *args, **kwargs):
         super(CommonTableView, self).__init__(*args, **kwargs)
         self.header = header

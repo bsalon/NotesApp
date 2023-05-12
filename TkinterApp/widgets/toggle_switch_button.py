@@ -4,6 +4,11 @@ from tkinter import *
 # Inspired by https://stackoverflow.com/questions/65480255/is-it-posible-to-create-toggle-switch-button-in-tkinter
 
 class ToggleSwitchButton(Canvas):
+    """
+    Toggle switch button example which could not be used in the 
+    application because the Canvas widget didnt behave the expected way
+    """
+
     def __init__(self, master, command=None, on_bg="green", off_bg="red", *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.configure(width=100, height=50, borderwidth=0, highlightthickness=0)

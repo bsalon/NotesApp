@@ -3,6 +3,12 @@ from tkinter import ttk
 
 
 class CommonTreeView(ttk.Treeview):
+    """
+    Table used in the tabs to display records
+
+    Methods are used for CRUD operations
+    """
+
     def __init__(self, master, headings, items, sort_col, reverse, int_cols = [], *args, **kwargs):
         super(CommonTreeView, self).__init__(master, column=headings, *args, **kwargs)
         self["show"] = "headings"

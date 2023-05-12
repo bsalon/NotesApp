@@ -6,6 +6,10 @@ from datetime import datetime
 
 # Inspired by https://www.geeksforgeeks.org/python-create-a-digital-clock-using-tkinter/
 class TimeLabel(ttk.Label):
+    """
+    Current time with seconds precision
+    """
+
     def __init__(self, master, *args, **kwargs):
         super(TimeLabel, self).__init__(master, *args, **kwargs)
         self.configure(justify="center")

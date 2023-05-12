@@ -16,13 +16,23 @@ from TkinterApp.widgets import common_tree_view, notes_accordion, pagination_lab
 
 class TkinterApplication(ttk.Frame):
     def __init__(self, master, use_cases, *args, **kwargs):
+        """
+        Initializes the main window frame with all its contents
+
+        :param master: Parent of the main window frame
+        :param use_cases: Class containing methods that retrieve data for the application
+        """
+
         super(TkinterApplication, self).__init__(master, *args, **kwargs)
         self.master = master
+
+        # Constant representing which gui is used 1 == Tkinter
         self.gui = 1
 
         self["borderwidth"] = 2
         self.use_cases = use_cases
 
+        # Get data from database for tables and accordion
         self.current_note_filter = self.create_default_filter()
         self.grid_page = 1
         self.grid_notes = [note for note in self.use_cases.get_filtered_notes_paged(self.current_note_filter, page=self.grid_page, size=10)]
@@ -44,22 +54,22 @@ class TkinterApplication(ttk.Frame):
         # 15 rows : 8 columns
         self.pack(padx=0, pady=0, fill="both", expand=True)
 
-        # toolbar layout on top
+        # Toolbar layout on top
         self.toolbar_layout = ttk.Frame(self, style="toolbar_container.TFrame")
         self._init_toolbar_layout()
         self.toolbar_layout.grid(row=0, column=0, rowspan=1, columnspan=8, sticky="news")
 
-        # todays notes layout
+        # Todays notes layout
         self.todays_notes_layout = ttk.Frame(self, style="todays_notes_container.TFrame")
         self._init_todays_notes_layout()
         self.todays_notes_layout.grid(row=1, column=0, rowspan=14, columnspan=1, sticky="news")
 
-        # content layout
+        # Content layout
         self.tabs_content_layout = ttk.Frame(self, style="tabs_content_container.TFrame")
         self._init_tabs_content_layout()
         self.tabs_content_layout.grid(row=1, column=1, rowspan=14, columnspan=7, sticky="news")
 
-        # stretch rows and columns
+        # Stretch rows and columns
         for r in range(1, 15):
             self.rowconfigure(r, weight=1)
         for c in range(8):
@@ -68,6 +78,10 @@ class TkinterApplication(ttk.Frame):
 
 
     def _init_toolbar_layout(self):
+        """
+        Initializes widgets in the toolbar
+        """
+
         col = 0
         image_dir_path = pathlib.Path(__file__).parent.parent / "Images"
 
@@ -149,6 +163,10 @@ class TkinterApplication(ttk.Frame):
 
 
     def change_library(self):
+        """
+        Changes the used gui library of the application
+        """
+
         dialog = settings_dialog.SettingsDialog(self)
         if dialog.accepted:
             self.gui = dialog.data_dict["library"]
@@ -159,9 +177,15 @@ class TkinterApplication(ttk.Frame):
 
 
     def toggle_todays_notes_pane(self):
+        """
+        Toggles the visibility of todays notes pane
+        """
+
+        # Hide todays notes pane
         if self.todays_notes_pane_visible:
             self.todays_notes_layout.grid_forget()
             self.tabs_content_layout.grid(row=1, column=0, rowspan=14, columnspan=8, sticky="news")
+        # Show todays notes pane
         else:
             self.tabs_content_layout.grid(row=1, column=1, rowspan=14, columnspan=7, sticky="news")
             self.todays_notes_layout.grid(row=1, column=0, rowspan=14, columnspan=1, sticky="news")
@@ -170,6 +194,12 @@ class TkinterApplication(ttk.Frame):
 
 
     def use_fast_filter(self, order):
+        """
+        Uses fast filter from the toolbar layout
+
+        :param order: Order value of the Filter object
+        """
+
         self.current_note_filter = self.use_cases.find_filter_by_order(order)
         if self.current_note_filter == None:
             self.current_note_filter = self.create_default_filter()
@@ -179,9 +209,15 @@ class TkinterApplication(ttk.Frame):
 
 
     def _init_todays_notes_layout(self):
+        """
+        Initializes widgets in todays notes pane
+        """
+
+        # Todays notes header label
         self.todays_notes_header = ttk.Label(self.todays_notes_layout, text="Today's notes", style="todays_notes_header.TLabel")
         self.todays_notes_header.grid(row=0, column=0, padx=(12, 12), pady=(12, 12))
 
+        # List of todays notes
         self.todays_notes_list_frame = scrollable_frame.ScrollableFrame(self.todays_notes_layout)
         self.todays_notes_list_frame.grid(row=1, column=0, sticky="news")
         self.todays_notes_list_frame.interior.columnconfigure(0, weight=1)
@@ -195,6 +231,10 @@ class TkinterApplication(ttk.Frame):
 
 
     def _fill_todays_notes_list(self):
+        """
+        Fills todays notes pane with the list of todays notes
+        """
+
         for index, note in enumerate(self.today_notes):
             default_font = tkinter.font.nametofont("TkDefaultFont")
             time_lbl = tkinter.Label(self.todays_notes_list_frame.interior, text=note[0], fg="black", bg="#f1f6be")
@@ -212,6 +252,12 @@ class TkinterApplication(ttk.Frame):
 
 
     def remove_notes_from_todays_notes(self, notes):
+        """
+        Removes notes from todays notes pane
+
+        :param notes: Notes to remove from todays notes pane
+        """
+
         wrapped_notes = ['\n'.join(textwrap.wrap(note, 12)) for note in notes]
 
         remove_indices = []
@@ -232,6 +278,13 @@ class TkinterApplication(ttk.Frame):
 
 
     def add_note_to_todays_notes(self, note):
+        """
+        Adds notes to todays notes pane
+
+        :param note: Note to add to todays notes pane
+        """
+
+        # Add only if date of note is today
         if note.time.date() == datetime.today().date():
             # Fixed width of 12 characters
             wrapped_name = '\n'.join(textwrap.wrap(note.name, 12))
@@ -259,8 +312,13 @@ class TkinterApplication(ttk.Frame):
 
 
     def _init_tabs_content_layout(self):
+        """
+        Initializes tab widget
+        """
+
         self.tabs = ttk.Notebook(self.tabs_content_layout, style="tab.TNotebook")
         
+        # Specific tabs
         self.notes_tab = ttk.Frame(self.tabs, style="tabs_content_container.TFrame")
         self._init_notes_tab()
         self.categories_tab = ttk.Frame(self.tabs, style="tabs_content_container.TFrame")
@@ -270,6 +328,7 @@ class TkinterApplication(ttk.Frame):
         self.filters_tab = ttk.Frame(self.tabs, style="tabs_content_container.TFrame")
         self._init_filters_tab()
 
+        # Adding initialized tabs
         self.tabs.add(self.notes_tab, text="Notes", sticky="news")
         self.tabs.add(self.categories_tab, text="Categories", sticky="news")
         self.tabs.add(self.tags_tab, text="Tags", sticky="news")
@@ -281,6 +340,10 @@ class TkinterApplication(ttk.Frame):
 
 
     def _init_notes_tab(self):
+        """
+        Initializes widgets in the notes tab
+        """
+
         self.notes_tab_searchbar = searchbar_with_icon.SearchBarWithIcon(self.notes_tab, style="search_container.TFrame")
         self.notes_filter_button = tkinter.Button(self.notes_tab, text="Filter", command=self._filter_items_by_name)
         self.notes_advanced_filter_button = tkinter.Button(self.notes_tab, text="Advanced filter", command=self.notes_advanced_filtering)
@@ -306,6 +369,8 @@ class TkinterApplication(ttk.Frame):
             int_cols=["Priority"]
         )
         self.notes_tab_table.bind("<<TreeviewSelect>>", self.table_update_buttons_enabling)
+
+        # Accordion with pagination
         self.notes_tab_accordion = notes_accordion.NotesAccordion(self.notes_tab, self.grid_notes)
         self.notes_tab_accordion.bind("<<RowCheck>>", self.notes_accordion_buttons_enabling)
         self.notes_tab_accordion_pagination = pagination_labels.PaginationLabels(self.notes_tab, 10, len(self.table_notes))
@@ -326,6 +391,10 @@ class TkinterApplication(ttk.Frame):
 
     # Inspired by https://stackoverflow.com/questions/58559865/tkinter-checkbutton-different-image
     def prepare_toggle_checkbutton(self):
+        """
+        Paints toggle images and creates toogle variable
+        """
+
         self.notes_toggle_switch_button_var = tkinter.StringVar()
         self.notes_toggle_switch_button_var.set("ON")
         
@@ -336,7 +405,11 @@ class TkinterApplication(ttk.Frame):
         self.toggle_off_image.put(("#ff8a84",), to=(24, 0, 47, 23))
 
 
-    def notes_advanced_filtering(self): 
+    def notes_advanced_filtering(self):
+        """
+        Opens advanded filter dialog and filters notes based on its values
+        """
+
         dialog = advanced_filter_dialog.AdvancedFilterDialog(self)
         if dialog.accepted:
             filters = lambda: None
@@ -357,6 +430,10 @@ class TkinterApplication(ttk.Frame):
 
 
     def use_current_note_filter(self):
+        """
+        Filters notes based on the currently saved filter
+        """
+
         self.grid_page = self.notes_tab_accordion_pagination.current_page = 1
         filtered_notes = self.use_cases.get_filtered_notes(self.current_note_filter)
         self.table_notes = [(note.name, note.priority, note.time.strftime("%d/%m/%Y %H:%M"), note.text) for note in filtered_notes]
@@ -367,14 +444,21 @@ class TkinterApplication(ttk.Frame):
 
 
     def toggle_notes_view(self):
+        """
+        Toggles visibility of table and accordion based on the toggle state
+        """
+
         self.notes_toggle_switch_button['image'] = self.toggle_on_image if self.notes_toggle_switch_button.instate(['!disabled', 'selected']) else self.toggle_off_image
         
         self.is_table_view = not self.is_table_view
+
+        # Hide accordion and show table
         if self.is_table_view:
             self.notes_tab_accordion.grid_forget()
             self.notes_tab_accordion_pagination.grid_forget()
             self.notes_tab_table.grid(row=1, column=0, columnspan=8, sticky="nsew", padx=(2, 2), pady=(2, 2))
             selected_rows_count = len(self.notes_tab_table.selection())
+        # Hide table and show accordion
         else:
             self.notes_tab_table.grid_forget()
             self.notes_tab_accordion.grid(row=1, column=0, columnspan=8, sticky="nsew", padx=(2, 2), pady=(2, 2))
@@ -386,6 +470,10 @@ class TkinterApplication(ttk.Frame):
 
 
     def _init_categories_tab(self):
+        """
+        Initializes widgets in the categories tab
+        """
+
         self.categories_tab_searchbar = searchbar_with_icon.SearchBarWithIcon(self.categories_tab, style="search_container.TFrame")
         self.categories_filter_button = tkinter.Button(self.categories_tab, text="Filter", command=self._filter_items_by_name)
         
@@ -410,6 +498,10 @@ class TkinterApplication(ttk.Frame):
 
 
     def _init_tags_tab(self):
+        """
+        Initializes widgets in the tags tab
+        """
+
         self.tags_tab_searchbar = searchbar_with_icon.SearchBarWithIcon(self.tags_tab, style="search_container.TFrame")
         self.tags_filter_button = tkinter.Button(self.tags_tab, text = "Filter", command=self._filter_items_by_name)
         
@@ -434,6 +526,10 @@ class TkinterApplication(ttk.Frame):
 
 
     def _init_filters_tab(self):
+        """
+        Initializes widgets in he filters tab
+        """
+
         self.filters_tab_searchbar = searchbar_with_icon.SearchBarWithIcon(self.filters_tab, style="search_container.TFrame")
         self.filters_filter_button = tkinter.Button(self.filters_tab, text = "Filter", command=self._filter_items_by_name)
         
@@ -459,6 +555,12 @@ class TkinterApplication(ttk.Frame):
 
 
     def tab_update_buttons_enabling(self, event):
+        """
+        Updates buttons state based on the count of currently selected rows
+
+        :param event: Event causing this method
+        """
+
         current_tab_name = self.tabs.tab(self.tabs.select(), "text")
         if current_tab_name == "Notes":
             if self.is_table_view:
@@ -480,11 +582,23 @@ class TkinterApplication(ttk.Frame):
 
 
     def count_selected_notes(self):
+        """
+        Counts number of selected rows in the accordion
+
+        :return: Number of selected rows in the accordion
+        """
+
         return len(self.notes_tab_accordion.get_selected_notes())
 
 
 
     def table_update_buttons_enabling(self, event):
+        """
+        Updates buttons state based on the count of currently selected rows in current tabs table
+
+        :param event: Event causing this method
+        """
+
         current_tab_name = self.tabs.tab(self.tabs.select(), "text")
         if current_tab_name == "Notes":
             selected_rows_count = len(self.notes_tab_table.selection())
@@ -503,6 +617,12 @@ class TkinterApplication(ttk.Frame):
 
 
     def notes_accordion_buttons_enabling(self, event):
+        """
+        Updates buttons state based on the count of currently selected rows in accordion
+
+        :param event: Event causing this method
+        """
+
         if self.tabs.tab(self.tabs.select(), "text") == "Notes" and not self.is_table_view:
             selected_notes_count = self.count_selected_notes()
             self.edit_icon_button["state"] = "enable" if selected_notes_count == 1 else "disabled"
@@ -513,18 +633,32 @@ class TkinterApplication(ttk.Frame):
     # Operations on items
     
     def add_item(self):
+        """
+        Adds item
+        """
+
         self.loading_bar.start(8)
         self.item_action("ADD")
         self.loading_bar.stop()
 
 
     def edit_item(self):
+        """
+        Edits item
+        """
+
         self.loading_bar.start(8)
         self.item_action("EDIT")
         self.loading_bar.stop()
 
 
     def item_action(self, action_name):
+        """
+        Takes action on item
+
+        :param action_name: EDIT or ADD action to be taken on item
+        """
+
         current_tab_name = self.tabs.tab(self.tabs.select(), "text")
         if current_tab_name == "Notes":
             if action_name == "EDIT":
@@ -559,6 +693,12 @@ class TkinterApplication(ttk.Frame):
 
 
     def display_error_message_box(self, text):
+        """
+        Displays error message box
+
+        :param text: Message or error message box
+        """
+
         tkinter.messagebox.showerror("Error", text)
 
 
@@ -566,6 +706,10 @@ class TkinterApplication(ttk.Frame):
     # CRUD operations for all items
 
     def _add_note(self):
+        """
+        Opens new note dialog
+        """
+
         categories_names = [category.name for category in self.use_cases.get_categories()]
         tags_names = [tag.name for tag in self.use_cases.get_tags()]
 
@@ -589,6 +733,10 @@ class TkinterApplication(ttk.Frame):
 
 
     def _edit_note(self):
+        """
+        Opens edit dialog for selected note
+        """
+
         categories_names = [category.name for category in self.use_cases.get_categories()]
         tags_names = [tag.name for tag in self.use_cases.get_tags()]
         selected_note = self._get_selected_note()
@@ -615,6 +763,14 @@ class TkinterApplication(ttk.Frame):
 
 
     def _is_note_filter_accepted(self, note):
+        """
+        Determines whether current filter accepts the note
+
+        :param notne: Note tested against the filter
+
+        :return: True if filter accepts the note False otherwise
+        """
+
         if self.current_note_filter == None:
             return True
         return self.current_note_filter.note_name in note.name and \
@@ -630,6 +786,10 @@ class TkinterApplication(ttk.Frame):
 
 
     def _add_category(self):
+        """
+        Opens new category dialog
+        """
+
         dialog = category_dialog.CategoryDialog(self)
         if dialog.accepted:
             new_category = lambda: None
@@ -644,6 +804,10 @@ class TkinterApplication(ttk.Frame):
 
 
     def _edit_category(self):
+        """
+        Opens edit dialog for selected category
+        """
+
         selected_category = self._get_selected_category()
         if selected_category.name == "Default":
             return
@@ -662,6 +826,10 @@ class TkinterApplication(ttk.Frame):
 
 
     def _add_tag(self):
+        """
+        Opens new tag dialog
+        """
+
         dialog = tag_dialog.TagDialog(self.tags_tab)
         if dialog.accepted:
             new_tag = lambda: None
@@ -675,6 +843,10 @@ class TkinterApplication(ttk.Frame):
 
 
     def _edit_tag(self):
+        """
+        Opens edit dialog for selected tag
+        """
+
         selected_tag = self._get_selected_tag()
 
         dialog = tag_dialog.TagDialog(self, tag=selected_tag)
@@ -691,6 +863,10 @@ class TkinterApplication(ttk.Frame):
 
 
     def _add_filter(self):
+        """
+        Opens new filter dialog
+        """
+
         dialog = filter_dialog.FilterDialog(self)
         if dialog.accepted:
             new_filter = lambda: None
@@ -730,6 +906,10 @@ class TkinterApplication(ttk.Frame):
 
 
     def _edit_filter(self):
+        """
+        Opens edit dialog for selected filter
+        """
+
         selected_filter = self._get_selected_filter()
 
         dialog = filter_dialog.FilterDialog(self, fast_filter = selected_filter)
@@ -773,6 +953,10 @@ class TkinterApplication(ttk.Frame):
 
 
     def delete_items(self):
+        """
+        Deletes currently selected items
+        """
+
         current_tab_name = self.tabs.tab(self.tabs.select(), "text")
         if current_tab_name == "Notes":
             if self.is_table_view:
@@ -820,6 +1004,10 @@ class TkinterApplication(ttk.Frame):
 
 
     def _get_selected_note(self):
+        """
+        Gets all information about the currently selected note
+        """
+
         if self.is_table_view:
             selected_notes = self.notes_tab_table.get_selected_rows()
             if len(selected_notes) != 1:
@@ -834,6 +1022,10 @@ class TkinterApplication(ttk.Frame):
 
 
     def _get_selected_category(self):
+        """
+        Gets all information about the currently selected category
+        """
+
         selected_categories = self.categories_tab_table.get_selected_rows()
         if len(selected_categories) != 1:
             return None
@@ -842,6 +1034,10 @@ class TkinterApplication(ttk.Frame):
 
 
     def _get_selected_tag(self):
+        """
+        Gets all information about the currently selected tag
+        """
+
         selected_tags = self.tags_tab_table.get_selected_rows()
         if len(selected_tags) != 1:
             return None
@@ -850,6 +1046,10 @@ class TkinterApplication(ttk.Frame):
 
 
     def _get_selected_filter(self):
+        """
+        Gets all information about the currently selected filter
+        """
+
         selected_filters = self.filters_tab_table.get_selected_rows()
         if len(selected_filters) != 1:
             return None
@@ -857,6 +1057,12 @@ class TkinterApplication(ttk.Frame):
 
 
     def change_notes_tab_accordion_page(self, event):
+        """
+        Changes the page of the accordion widget
+
+        :param event: Event causing this method
+        """
+
         self.grid_page = self.notes_tab_accordion_pagination.current_page
         self.update_notes_tab_accordion()
         selected_rows_count = self.count_selected_notes()
@@ -865,6 +1071,10 @@ class TkinterApplication(ttk.Frame):
 
 
     def update_notes_tab_accordion(self):
+        """
+        Updated the displayed notes in the accordion widget
+        """
+
         self.grid_notes = [note for note in self.use_cases.get_filtered_notes_paged(self.current_note_filter, page=self.grid_page, size=10)]
         self.notes_tab_accordion.replace_rows(self.grid_notes)
 
@@ -873,6 +1083,10 @@ class TkinterApplication(ttk.Frame):
 
 
     def _filter_items_by_name(self):
+        """
+        Filters table items by their name
+        """
+
         current_tab_name = self.tabs.tab(self.tabs.select(), "text")
         if current_tab_name == "Notes":
             self.current_note_filter = self.create_default_filter()
@@ -903,6 +1117,12 @@ class TkinterApplication(ttk.Frame):
 
 
     def create_default_filter(self):
+        """
+        Creates object with default filter values
+
+        :return: Object with default filter values
+        """
+
         filters = lambda: None
         filters.note_name = ""
         filters.note_min_priority = 0
@@ -919,13 +1139,21 @@ class TkinterApplication(ttk.Frame):
 
 
 def run_application():
+    """
+    Runs the application with the Tkinter gui
+
+    :return: Gui number of the next library
+    """
+
     use_cases = UseCases.UseCases()
 
     root = tkinter.Tk()
     root.title("TkinterApplication")
     
+    # Connect the stylesheet to the application
     style = custom_ttk_style.CustomTtkStyle()
     
+    # Create and customize the main layout
     app = TkinterApplication(root, use_cases, style="window.TFrame")
     app.master.minsize(1280, 640)
     app.master.maxsize(1280, 640)

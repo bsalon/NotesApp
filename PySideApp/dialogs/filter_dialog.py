@@ -7,6 +7,10 @@ from PySideApp.dialogs import reg_exp_validator
 
 class FilterDialog(QtWidgets.QDialog):
     def __init__(self, *args, **kwargs):
+        """
+        Initializes filter dialog with all its widgets
+        """
+
         super(FilterDialog, self).__init__(*args, **kwargs)
         self.setWindowTitle("Fast filter dialog")
         self.setAttribute(QtCore.Qt.WA_DeleteOnClose)
@@ -14,11 +18,12 @@ class FilterDialog(QtWidgets.QDialog):
         dialog_layout = QtWidgets.QVBoxLayout()
         form_layout = QtWidgets.QFormLayout()
         
-        # Filter
+        # Filter name
         self.filter_name_lineedit = QtWidgets.QLineEdit()
         filter_name_label = QtWidgets.QLabel("Filter name:", objectName="black_label")
         form_layout.addRow(filter_name_label, self.filter_name_lineedit)
 
+        # Filter order
         self.filter_order_spinbox = QtWidgets.QSpinBox(minimum=-1, maximum=1000, value=-1)
         filter_order_label = QtWidgets.QLabel("Filter order:", objectName="black_label")
         form_layout.addRow(filter_order_label, self.filter_order_spinbox)
@@ -106,7 +111,13 @@ class FilterDialog(QtWidgets.QDialog):
         dialog_layout.setSizeConstraint(QtWidgets.QLayout.SetFixedSize)
 
 
-    def fill_dialog(self, fast_filter): 
+    def fill_dialog(self, fast_filter):
+        """
+        Fills dialog widgets with filter values
+
+        :param fast_filter: Filter object
+        """
+
         self.filter_name_lineedit.setText(fast_filter.name)
         self.filter_order_spinbox.setValue(fast_filter.order)
         self.note_name_lineedit.setText(fast_filter.note_name)
@@ -122,6 +133,10 @@ class FilterDialog(QtWidgets.QDialog):
 
 
     def ok_callback(self):
+        """
+        Fills data_dict property with field values and closes the dialog
+        """
+
         if not self._validate():
             return
         self.data_dict = {
@@ -143,14 +158,30 @@ class FilterDialog(QtWidgets.QDialog):
 
 
     def cancel_callback(self):
+        """
+        Closes the dialog
+        """
+
         self.close()
 
 
     def _validate(self):
+        """
+        Validates name field
+        """
+
         return self._validate_field(self.filter_name_lineedit)
 
 
     def _validate_field(self, field):
+        """
+        Validates field value by testing if its empty
+
+        :param field: Field to be validated
+
+        :return: True if field value is not empty False otherwise
+        """
+
         if field.text() == "" or field.text().isspace():
             field.setStyleSheet("background: #ff7f7f")
             return False

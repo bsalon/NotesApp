@@ -9,21 +9,31 @@ import datetime
 
 class CategoryDialog(tkinter.simpledialog.Dialog):
     def __init__(self, master, category=None, *args, **kwargs):
+        """
+        Initializes category dialog
+        """
+
         self.accepted = False
         self.category = category
         super(CategoryDialog, self).__init__(master, title="Category dialog", *args, **kwargs)
 
 
     def body(self, frame):
+        """
+        Puts all dialog widgets into the dialog frame
+
+        :param frame: Dialog frame
+        """
+
         frame.configure(bg="#d7eb5a")
 
-        # Name
+        # Category name
         name_label = tkinter.Label(frame, text="Name:", bg="#d7eb5a", fg="black")
         name_label.grid(row=0, column=0, sticky="news")
         self.name_entry = tkinter.Entry(frame, width=25)
         self.name_entry.grid(row=0, column=1, columnspan=2, pady=(5, 5))
 
-        # Description
+        # Category description
         description_label = tkinter.Label(frame, text="Description:", bg="#d7eb5a", fg="black")
         description_label.grid(row=3, column=0, pady=(5, 20), sticky="news")
         self.description_entry = tkinter.Entry(frame, width=25)
@@ -38,6 +48,10 @@ class CategoryDialog(tkinter.simpledialog.Dialog):
 
 
     def save_pressed(self):
+        """
+        Fills data_dict property with field values and closes the dialog
+        """
+
         if not self._validate():
             return
         self.accepted = True
@@ -49,10 +63,22 @@ class CategoryDialog(tkinter.simpledialog.Dialog):
 
 
     def _validate(self):
+        """
+        Validates name field
+        """
+
         return self._validate_field(self.name_entry)
 
 
     def _validate_field(self, field):
+        """
+        Validates field value by testing if its empty
+
+        :param field: Field to be validated
+
+        :return: True if field value is not empty False otherwise
+        """
+
         if field.get() == "" or field.get().isspace():
             field.config({"background": "#ff7f7f"})
             return False
@@ -61,11 +87,19 @@ class CategoryDialog(tkinter.simpledialog.Dialog):
 
 
     def cancel_pressed(self):
+        """
+        Closes the dialog
+        """
+
         self.accepted = False
         self.destroy()
 
 
     def buttonbox(self):
+        """
+        Creates buttons for dialog
+        """
+
         self.configure(bg="#d7eb5a")
         self.ok_button = tkinter.Button(self, text='Save', width=5, command=self.save_pressed)
         self.ok_button.pack(side="top")
@@ -76,6 +110,10 @@ class CategoryDialog(tkinter.simpledialog.Dialog):
 
 
     def fill_dialog(self):
+        """
+        Fills dialog fields with category values
+        """
+
         category = self.category
         self.name_entry.insert(0, category.name)
         self.description_entry.insert(0, category.description)

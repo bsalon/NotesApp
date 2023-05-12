@@ -2,6 +2,10 @@ from PySide6 import QtWidgets, QtCore
 
 
 class ClickableQLabel(QtWidgets.QLabel):
+    """
+    Label with ability to be clicked
+    """
+
     clicked = QtCore.Signal()
 
     def __init__(self, *args, **kwargs):

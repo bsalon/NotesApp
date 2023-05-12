@@ -9,17 +9,22 @@ import math
 
 class FilterDialog(popup.Popup):
     def __init__(self, **kwargs):
+        """
+        Initializes filter dialog with all its widgets
+        """
+
         super(FilterDialog, self).__init__(**kwargs)
         self.title = "Fast filter dialog"
         layout = boxlayout.BoxLayout(orientation="vertical")
 
-        # Filter
+        # Filter name
         filter_name_label = label.Label(text="Name:", color="black", size_hint=(1/2, 1))
         self.filter_name_input = textinput.TextInput(size_hint=(1/2, 1), multiline=False)
         filter_name_layout = boxlayout.BoxLayout(orientation="horizontal")
         filter_name_layout.add_widget(filter_name_label)
         filter_name_layout.add_widget(self.filter_name_input)
         
+        # Filter order
         filter_order_label = label.Label(text="Order:", color="black", size_hint=(1/2, 1))
         self.filter_order_input = textinput.TextInput(size_hint=(1/2, 1), multiline=False, input_filter="int")
         filter_order_layout = boxlayout.BoxLayout(orientation="horizontal")
@@ -78,26 +83,28 @@ class FilterDialog(popup.Popup):
         note_priority_layout.add_widget(note_priority_divider_label)
         note_priority_layout.add_widget(self.note_max_priority_input)
 
-        # Category
+        # Category name
         category_name_label = label.Label(text="Category name contains:", color="black", size_hint=(1/2, 1))
         self.category_name_input = textinput.TextInput(size_hint=(1/2, 1), multiline=False)
         category_name_layout = boxlayout.BoxLayout(orientation="horizontal")
         category_name_layout.add_widget(category_name_label)
         category_name_layout.add_widget(self.category_name_input)
         
+        # Category description
         category_description_label = label.Label(text="Category description contains:", color="black", size_hint=(1/2, 1))
         self.category_description_input = textinput.TextInput(size_hint=(1/2, 1), multiline=False)
         category_description_layout = boxlayout.BoxLayout(orientation="horizontal")
         category_description_layout.add_widget(category_description_label)
         category_description_layout.add_widget(self.category_description_input)
 
-        # Tag
+        # Tag name
         tag_name_label = label.Label(text="Tag name contains:", color="black", size_hint=(1/2, 1))
         self.tag_name_input = textinput.TextInput(size_hint=(1/2, 1), multiline=False)
         tag_name_layout = boxlayout.BoxLayout(orientation="horizontal")
         tag_name_layout.add_widget(tag_name_label)
         tag_name_layout.add_widget(self.tag_name_input)
         
+        # Tag description
         tag_description_label = label.Label(text="Tag description contains:", color="black", size_hint=(1/2, 1))
         self.tag_description_input = textinput.TextInput(size_hint=(1/2, 1), multiline=False)
         tag_description_layout = boxlayout.BoxLayout(orientation="horizontal")
@@ -129,6 +136,12 @@ class FilterDialog(popup.Popup):
 
 
     def fill_dialog(self, fast_filter):
+        """
+        Fills dialog widgets with filter values
+
+        :param fast_filter: Filter object
+        """
+
         self.filter_name_input.text = fast_filter.name
         self.filter_order_input.text = str(fast_filter.order)
         self.note_name_input.text = fast_filter.note_name
@@ -146,10 +159,22 @@ class FilterDialog(popup.Popup):
 
 
     def _create_str_date(self, datepicker):
+        """
+        Creates string representation of date
+
+        :param datepicker: Date source
+        """
+
         return f"{datepicker.day:02d}-{datepicker.month:02d}-{datepicker.year:04d}"
 
 
     def _show_date_to_picker(self, instance):
+        """
+        Shows datepicker with set date
+
+        :param instance: Instance causing this method
+        """
+
         previous_date = datetime.datetime.strptime(self.date_to_button.text, "%d-%m-%Y").date()
         date_picker = pickers.MDDatePicker(
             year=previous_date.year,
@@ -161,12 +186,26 @@ class FilterDialog(popup.Popup):
 
 
     def _set_date_to_button(self, instance, time, date_range):
+        """
+        Sets date to a date to button text
+
+        :param instance: Instance causing this method
+        :param time: DatePicker time
+        :param date_range: DatePicker date_range
+        """
+
         # instance has wrong day and time has wrong year so we have to combine them
         instance.day = time.day
         self.date_to_button.text = self._create_str_date(instance)
 
 
     def _show_date_from_picker(self, instance):
+        """
+        Shows DatePicker from date dialog
+
+        :param instance: Instance causing this method
+        """
+
         previous_date = datetime.datetime.strptime(self.date_from_button.text, "%d-%m-%Y").date()
         date_picker = pickers.MDDatePicker(
             year=previous_date.year,
@@ -178,12 +217,26 @@ class FilterDialog(popup.Popup):
 
 
     def _set_date_from_button(self, instance, time, date_range):
+        """
+        Sets date to a date from button text
+
+        :param instance: Instance causing this method
+        :param time: DatePicker time
+        :param date_range: DatePicker date_range
+        """
+
         # instance has wrong day and time has wrong year so we have to combine them
         instance.day = time.day
         self.date_from_button.text = self._create_str_date(instance)
 
 
     def _show_time_from_picker(self, instance):
+        """
+        Shows TimePicker from time dialog
+
+        :param instance: Instance causing this method
+        """
+
         previous_time = datetime.datetime.strptime(self.time_from_button.text, "%H:%M").time()
         time_picker = pickers.MDTimePicker()
         time_picker.set_time(previous_time)
@@ -192,10 +245,23 @@ class FilterDialog(popup.Popup):
 
 
     def _set_time_from_button(self, instance, time):
+        """
+        Sets time to a time from button text
+
+        :param instance: Instance causing this method
+        :param time: DatePicker time
+        """
+
         self.time_from_button.text = time.strftime("%H:%M")
 
 
     def _show_time_to_picker(self, instance):
+        """
+        Shows TimePicker to time dialog
+
+        :param instance: Instance causing this method
+        """
+
         previous_time = datetime.datetime.strptime(self.time_to_button.text, "%H:%M").time()
         time_picker = pickers.MDTimePicker()
         time_picker.set_time(previous_time)
@@ -204,10 +270,23 @@ class FilterDialog(popup.Popup):
 
 
     def _set_time_to_button(self, instance, time):
+        """
+        Sets time to a time to button text
+
+        :param instance: Instance causing this method
+        :param time: DatePicker time
+        """
+
         self.time_to_button.text = time.strftime("%H:%M")
 
 
     def _save(self, instance):
+        """
+        Saves dialog data into data_dict and closes the dialog
+
+        :param instance: Instance causing this method
+        """
+
         if not self._validate():
             return
         self.accepted = True
@@ -229,11 +308,21 @@ class FilterDialog(popup.Popup):
 
 
     def _close(self, instance):
+        """
+        Closes the dialog
+
+        :param instance: Instance causing this method
+        """
+
         self.accepted = False
         self.dismiss()
 
 
     def _validate(self):
+        """
+        Validates name field
+        """
+
         valid = True
         valid &= self._validate_field(self.filter_name_input)
         valid &= self._validate_field(self.filter_order_input)
@@ -241,6 +330,14 @@ class FilterDialog(popup.Popup):
 
     
     def _validate_field(self, field):
+        """
+        Validates field value by testing if its empty
+
+        :param field: Field to be validated
+
+        :return: True if field value is not empty False otherwise
+        """
+
         if field.text == "" or field.text.isspace():
             field.background_color = (1, 0.5, 0.5, 1)
             return False
@@ -250,6 +347,12 @@ class FilterDialog(popup.Popup):
 
 
     def _get_min_priority(self):
+        """
+        Gets value of minimal priority field
+
+        :return: Value of minimal priority field
+        """
+
         if self.note_min_priority_input.text == "" or self.note_min_priority_input.text == "-":
             return 0
         num = int(self.note_min_priority_input.text)
@@ -261,6 +364,12 @@ class FilterDialog(popup.Popup):
 
 
     def _get_max_priority(self):
+        """
+        Gets value of maximal priority field
+
+        :return: Value of maximal priority field
+        """
+
         if self.note_max_priority_input.text == "" or self.note_max_priority_input.text == "-":
             return 100
         num = int(self.note_max_priority_input.text)
@@ -272,6 +381,12 @@ class FilterDialog(popup.Popup):
 
 
     def _get_order(self):
+        """
+        Gets value of filter order field
+
+        :return: Value of filter order field
+        """
+
         if self.filter_order_input.text[0] == "-":
             return -1
         num = int(self.filter_order_input.text)

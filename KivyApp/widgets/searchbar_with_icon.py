@@ -5,6 +5,10 @@ import pathlib
 
 
 class SearchBarWithIcon(boxlayout.BoxLayout):
+    """
+    Search field with magnify icon to filter items by name
+    """
+
     def __init__(self, *args, **kwargs):
         super(SearchBarWithIcon, self).__init__(orientation="horizontal", *args, **kwargs)
 

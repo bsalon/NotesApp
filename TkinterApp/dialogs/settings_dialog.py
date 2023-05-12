@@ -9,13 +9,24 @@ import datetime
 
 class SettingsDialog(tkinter.simpledialog.Dialog):
     def __init__(self, master, *args, **kwargs):
+        """
+        Initializes settings dialog
+        """
+
         self.accepted = False
         super(SettingsDialog, self).__init__(master, title="Select GUI library", *args, **kwargs)
 
 
     def body(self, frame):
+        """
+        Puts all dialog widgets into the dialog frame
+
+        :param frame: Dialog frame
+        """
+
         frame.configure(bg="#d7eb5a")
 
+        # Info warning label
         info_label = tkinter.Label(frame, text="Saving with different than current library will restart the application", bg="#d7eb5a", fg="red")
         info_label.grid(row=0, column=0, sticky="news", pady=(0, 20))
 
@@ -40,6 +51,10 @@ class SettingsDialog(tkinter.simpledialog.Dialog):
 
 
     def save_pressed(self):
+        """
+        Fills data_dict property with field values and closes the dialog
+        """
+
         self.accepted = True
         self.data_dict = {
             "library" : self.gui_library.get()
@@ -48,10 +63,18 @@ class SettingsDialog(tkinter.simpledialog.Dialog):
 
 
     def cancel_pressed(self):
+        """
+        Closes the dialog
+        """
+
         self.destroy()
 
 
     def buttonbox(self):
+        """
+        Creates buttons for dialog
+        """
+
         self.configure(bg="#d7eb5a")
         self.ok_button = tkinter.Button(self, text='Save', width=5, command=self.save_pressed)
         self.ok_button.pack(side="top")

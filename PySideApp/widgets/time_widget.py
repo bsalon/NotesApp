@@ -6,6 +6,10 @@ from PySide6 import QtCore, QtWidgets, QtGui
 
 
 class TimeWidget(QtWidgets.QWidget):
+    """
+    Current time with seconds precision
+    """
+
     def __init__(self, *args, **kwargs):
         super(TimeWidget, self).__init__(*args, **kwargs)
 

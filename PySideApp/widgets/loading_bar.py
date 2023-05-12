@@ -6,6 +6,10 @@ from PySide6 import QtCore, QtWidgets, QtGui
 
 
 class LoadingBarWidget(QtWidgets.QWidget):
+    """
+    Infinite loading bar
+    """
+
     def __init__(self, barObjectName, *args, **kwargs):
         super(LoadingBarWidget, self).__init__(*args, **kwargs)
         layout = QtWidgets.QVBoxLayout(self)

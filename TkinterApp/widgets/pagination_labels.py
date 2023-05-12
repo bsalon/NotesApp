@@ -5,6 +5,12 @@ from tkinter import ttk
 
 
 class PaginationLabels(tkinter.Frame):
+    """
+    Pagination for the accordion
+
+    Methods are used to change the current page
+    """
+
     def __init__(self, master, page_size, items_count, *args, **kwargs):
         super(PaginationLabels, self).__init__(master, *args, **kwargs)
         self.page_size = page_size
