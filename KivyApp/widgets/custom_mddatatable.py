@@ -1,6 +1,6 @@
 from kivymd.uix import datatables
 
-
+# Comparison construct
 class CustomMDDataTable(datatables.MDDataTable):
     """
     Table used in the tabs to display records

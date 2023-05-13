@@ -218,6 +218,7 @@ class TkinterApplication(ttk.Frame):
         self.todays_notes_header.grid(row=0, column=0, padx=(12, 12), pady=(12, 12))
 
         # List of todays notes
+        # Comparison construct
         self.todays_notes_list_frame = scrollable_frame.ScrollableFrame(self.todays_notes_layout)
         self.todays_notes_list_frame.grid(row=1, column=0, sticky="news")
         self.todays_notes_list_frame.interior.columnconfigure(0, weight=1)

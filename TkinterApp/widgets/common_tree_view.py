@@ -1,7 +1,7 @@
 import tkinter
 from tkinter import ttk
 
-
+# Comparison construct
 class CommonTreeView(ttk.Treeview):
     """
     Table used in the tabs to display records

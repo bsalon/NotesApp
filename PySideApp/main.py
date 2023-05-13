@@ -245,6 +245,7 @@ class MainWindow(QtWidgets.QWidget):
         self.todays_notes_layout.addWidget(self.todays_notes_header)
 
         # List of todays notes
+        # Comparison construct
         self.todays_notes_list = QtWidgets.QListWidget(objectName="todays_notes_list")
         for note in self.today_notes:
             item = QtWidgets.QListWidgetItem(self.todays_notes_list)

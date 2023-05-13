@@ -2,7 +2,7 @@ import sys
 
 from PySide6 import QtWidgets, QtCore, QtGui
 
-
+# Comparison construct
 class CommonTableView(QtWidgets.QTableView):
     """
     Table used in the tabs to display records

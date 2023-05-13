@@ -26,6 +26,7 @@ Builder.load_string('''
 
 
 # https://stackoverflow.com/questions/45830039/kivy-python-multiple-widgets-in-recycleview-row
+# Comparison construct
 
 class TodaysNotesRow(RecycleDataViewBehavior, GridLayout):
     """

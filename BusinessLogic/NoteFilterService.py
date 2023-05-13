@@ -4,15 +4,36 @@ from Models.NoteFilter import NoteFilterModel
 
 
 class NoteFilterService(BaseService):
+    """
+    Filter operations
+    """
+
     def __init__(self):
         super().__init__(NoteFilterModel)
 
 
     def find_by_order(self, order):
+        """
+        Finds all NoteFilter instances with specific order
+
+        :param order: NoteFilter order
+
+        :return: All NoteFilter instances with specific order
+        """
+
         return NoteFilterModel.select().where(NoteFilterModel.order == order)
 
 
     def update_filter(self, note_filter, updated_filter):
+        """
+        Updates NoteFilter with new NoteFilter values
+
+        :param note_filter: Old NoteFilter
+        :param updated_filter: New NoteFilter values
+
+        :return: Return value of the query
+        """
+
         return NoteFilterModel \
             .update(name = updated_filter.name, \
                 note_name = updated_filter.note_name, \
@@ -31,6 +52,14 @@ class NoteFilterService(BaseService):
 
 
     def remove_order(self, order):
+        """
+        Deletes all NoteFilter instances with specific order
+
+        :param order: NoteFilter order
+
+        :return: Return value of the query
+        """
+
         return NoteFilterModel \
             .update(order = -1) \
             .where(NoteFilterModel.order == order) \

@@ -221,6 +221,7 @@ class KivyApplicationLayout(boxlayout.BoxLayout):
         self.todays_notes_layout.add_widget(self.todays_notes_header)
 
         # List of todays notes
+        # Comparison construct
         self.todays_notes_recycleview = todays_notes_recycleview.TodaysNotesRecycleview(self.today_notes)
         self.todays_notes_layout.add_widget(self.todays_notes_recycleview)
 

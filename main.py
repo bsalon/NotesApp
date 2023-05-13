@@ -9,6 +9,12 @@ from Database import create_test_data
 
 
 def create_app_parser():
+    """
+    Creates argument parser
+
+    :return: Argument parser
+    """
+
     parser = argparse.ArgumentParser(description="Run notes application using specified library.")
     parser.add_argument("--create-data",
                         default=False, action="store_true",
@@ -21,6 +27,12 @@ def create_app_parser():
 
 
 def run_application(library):
+    """
+    Runs the application using specified gui library
+
+    :return: New gui library number
+    """
+
     if library == "PySide":
         return PySideAppMain.run_application()
     elif library == "Tkinter":
@@ -36,6 +48,14 @@ def run_application(library):
 
 
 def library_from_number(gui_number):
+    """
+    Gets gui library name from gui library number
+
+    :param gui_number: Gui library number
+
+    :return: Gui library name
+    """
+
     if gui_number == 0:
         return "PySide"
     elif gui_number == 1:
